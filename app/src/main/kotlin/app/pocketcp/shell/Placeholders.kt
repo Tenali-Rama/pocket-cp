@@ -42,12 +42,50 @@ class PlaceholderEntry(
 
 /** The default top-level destinations, until their features replace them. */
 object Placeholders {
-    val home = placeholder("home", R.string.nav_home, Icons.Filled.Home, order = 0, R.string.placeholder_home)
-    val contests = placeholder("contests", R.string.nav_contests, Icons.Filled.DateRange, order = 10, R.string.placeholder_contests)
+    val home =
+        placeholder(
+            route = "home",
+            label = R.string.nav_home,
+            icon = Icons.Filled.Home,
+            order = 0,
+            message = R.string.placeholder_home,
+        )
+
+    val contests =
+        placeholder(
+            route = "contests",
+            label = R.string.nav_contests,
+            icon = Icons.Filled.DateRange,
+            order = 10,
+            message = R.string.placeholder_contests,
+        )
+
     val problemset =
-        placeholder("problemset", R.string.nav_problemset, Icons.AutoMirrored.Filled.List, order = 20, R.string.placeholder_problemset)
-    val profile = placeholder("profile", R.string.nav_profile, Icons.Filled.Person, order = 30, R.string.placeholder_profile)
-    val settings = placeholder("settings", R.string.nav_settings, Icons.Filled.Settings, order = 40, R.string.placeholder_settings)
+        placeholder(
+            route = "problemset",
+            label = R.string.nav_problemset,
+            icon = Icons.AutoMirrored.Filled.List,
+            order = 20,
+            message = R.string.placeholder_problemset,
+        )
+
+    val profile =
+        placeholder(
+            route = "profile",
+            label = R.string.nav_profile,
+            icon = Icons.Filled.Person,
+            order = 30,
+            message = R.string.placeholder_profile,
+        )
+
+    val settings =
+        placeholder(
+            route = "settings",
+            label = R.string.nav_settings,
+            icon = Icons.Filled.Settings,
+            order = 40,
+            message = R.string.placeholder_settings,
+        )
 
     private fun placeholder(
         route: String,

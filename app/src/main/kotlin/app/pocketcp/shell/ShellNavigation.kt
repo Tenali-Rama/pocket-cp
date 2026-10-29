@@ -35,10 +35,10 @@ internal const val RAIL_TAG = "shell_rail"
 /** The rail's items column, inside its inset padding. */
 internal const val RAIL_ITEMS_TAG = "shell_rail_items"
 
-/** No insets: the shell pads the bar and rail itself, so their tags measure the padding (`ShellInsetsTest`). */
+/** No insets: the shell pads the bar and rail itself, so the tags measure that padding (`ShellInsetsTest`). */
 private val NoInsets = WindowInsets(0, 0, 0, 0)
 
-/** Phone chrome: a hairline, then the items; [insets] (bottom + horizontal system bars) padded inside the bar colour. */
+/** Phone chrome: a hairline, then the items; [insets] (bottom + horizontal bars) padded inside the bar colour. */
 @Composable
 internal fun ShellBottomBar(
     destinations: List<TopLevelDestination>,
@@ -54,7 +54,11 @@ internal fun ShellBottomBar(
             .windowInsetsPadding(insets),
     ) {
         HorizontalDivider(color = colors.outline)
-        NavigationBar(modifier = Modifier.testTag(BOTTOM_BAR_ITEMS_TAG), containerColor = colors.surface, windowInsets = NoInsets) {
+        NavigationBar(
+            modifier = Modifier.testTag(BOTTOM_BAR_ITEMS_TAG),
+            containerColor = colors.surface,
+            windowInsets = NoInsets,
+        ) {
             destinations.forEach { destination ->
                 val label = stringResource(destination.label)
                 NavigationBarItem(
@@ -69,7 +73,7 @@ internal fun ShellBottomBar(
     }
 }
 
-/** Large-window chrome: the items, then a hairline; [insets] (start + vertical system bars) padded inside the rail colour. */
+/** Large-window chrome: the items, then a hairline; [insets] (start + vertical bars) padded inside the rail. */
 @Composable
 internal fun ShellRail(
     destinations: List<TopLevelDestination>,
@@ -85,7 +89,11 @@ internal fun ShellRail(
             .background(colors.surface)
             .windowInsetsPadding(insets),
     ) {
-        NavigationRail(modifier = Modifier.testTag(RAIL_ITEMS_TAG), containerColor = colors.surface, windowInsets = NoInsets) {
+        NavigationRail(
+            modifier = Modifier.testTag(RAIL_ITEMS_TAG),
+            containerColor = colors.surface,
+            windowInsets = NoInsets,
+        ) {
             destinations.forEach { destination ->
                 val label = stringResource(destination.label)
                 NavigationRailItem(

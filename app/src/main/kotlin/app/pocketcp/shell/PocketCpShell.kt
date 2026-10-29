@@ -70,7 +70,12 @@ fun PocketCpShell(
             }
         NavigationType.Rail ->
             Row(modifier) {
-                ShellRail(destinations, selectedRoute, onSelect, windowInsets.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical))
+                ShellRail(
+                    destinations,
+                    selectedRoute,
+                    onSelect,
+                    windowInsets.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical),
+                )
                 navHost(
                     Modifier
                         .weight(1f)

@@ -19,7 +19,8 @@ class ShellThemeTest {
 
     @Test
     fun systemUnspecified_isDark() {
-        assertEquals(ThemeMode.Dark, themeModeOf(Configuration.UI_MODE_TYPE_NORMAL or Configuration.UI_MODE_NIGHT_UNDEFINED))
+        val undefined = Configuration.UI_MODE_TYPE_NORMAL or Configuration.UI_MODE_NIGHT_UNDEFINED
+        assertEquals(ThemeMode.Dark, themeModeOf(undefined))
         assertEquals(ThemeMode.Dark, themeModeOf(Configuration.UI_MODE_TYPE_UNDEFINED))
     }
 }

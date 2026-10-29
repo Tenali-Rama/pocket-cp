@@ -22,7 +22,10 @@ internal const val ROOT_TAG = "shell_root"
 
 /** Light only when the system says night mode is off; dark when it is on or unknown (dark-first, spec §5). */
 fun themeModeOf(uiMode: Int): ThemeMode =
-    if (uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_NO) ThemeMode.Light else ThemeMode.Dark
+    when (uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+        Configuration.UI_MODE_NIGHT_NO -> ThemeMode.Light
+        else -> ThemeMode.Dark
+    }
 
 /**
  * The whole app UI: theme from the system night mode, the live window layout and the [PocketCpShell].
