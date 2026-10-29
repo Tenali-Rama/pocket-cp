@@ -9,8 +9,10 @@ import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -116,6 +118,7 @@ class ComponentA11yTest {
         return inputModeManager
     }
 
+    @OptIn(ExperimentalTestApi::class)
     private fun SemanticsNodeInteraction.pressEnterWhenFocused() {
         requestFocus()
         assertIsFocused()
