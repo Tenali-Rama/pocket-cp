@@ -31,5 +31,9 @@ check "main up to date"     "git pull --ff-only"                        git pull
 check "board valid"         "fix task frontmatter (board.sh --check)"   scripts/factory/board.sh --check
 warn  "kaggle overflow"     "optional: CI overflow disabled (set KAGGLE_USER, run bootstrap)" \
   bash -c "[ -n '$KAGGLE_USER' ] && '$KAGGLE_BIN' kernels list --mine --page-size 1"
+exp=$(gh api -i "repos/$GH_REPO" 2>/dev/null | sed -n 's/^github-authentication-token-expiration: //Ip' | tr -d '\r')
+if [ -n "$exp" ] && [ "$(date -d "$exp" +%s)" -lt "$(date -d '+3 days' +%s)" ]; then
+  echo "WARN token expires $exp — owner: put a new token in a file and run: ! scripts/factory/rotate-token.sh <file>"
+fi
 mkdir -p .factory
 exit $fail
