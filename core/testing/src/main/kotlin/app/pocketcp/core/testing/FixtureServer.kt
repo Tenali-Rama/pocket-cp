@@ -47,7 +47,7 @@ class FixtureServer : HttpTransport {
         private const val HTML = "text/html; charset=utf-8"
 
         /** The key a request is matched on: its path and, if any, `?` and its decoded query. */
-        private fun HttpUrl.pathAndQuery(): String = encodedPath + (query?.let { "?$it" } ?: "")
+        private fun HttpUrl.pathAndQuery(): String = encodedPath + query?.let { "?$it" }.orEmpty()
 
         private fun contentType(fixture: String): String = if (fixture.endsWith(".json")) JSON else HTML
     }

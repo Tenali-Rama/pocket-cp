@@ -8,10 +8,11 @@ object Fixtures {
 
     /** The `testdata/` directory, found by walking up from the working directory (tests run in the module dir). */
     val root: File by lazy {
-        generateSequence(File(System.getProperty("user.dir")).absoluteFile) { it.parentFile }
+        val workingDir = File(System.getProperty("user.dir").orEmpty()).absoluteFile
+        generateSequence(workingDir) { it.parentFile }
             .map { File(it, DIR) }
             .firstOrNull { it.isDirectory }
-            ?: error("No $DIR/ directory above ${System.getProperty("user.dir")}")
+            ?: error("No $DIR/ directory above $workingDir")
     }
 
     /** The UTF-8 text of `testdata/<path>`, e.g. `text("codeforces/api/user.info.json")`. */

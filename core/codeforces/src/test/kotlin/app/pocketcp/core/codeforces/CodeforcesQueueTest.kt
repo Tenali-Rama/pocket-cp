@@ -2,12 +2,14 @@ package app.pocketcp.core.codeforces
 
 import app.pocketcp.core.network.HttpTransport
 import app.pocketcp.core.testing.FixtureServer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CodeforcesQueueTest {
     @Test
     fun `three different calls start 2 s apart because they share the request queue`() =
