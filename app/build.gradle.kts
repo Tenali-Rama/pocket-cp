@@ -4,14 +4,46 @@ plugins {
     alias(libs.plugins.pocketcp.hilt)
 }
 
+// The only place the app version lives. app/CLAUDE.md says when it changes.
+val appVersionName = "0.0.0"
+val appVersionCode = 1
+
+// release.yml passes -Pkeystore=<path> plus the env vars below. Without it the release APK is unsigned.
+val releaseKeystore = providers.gradleProperty("keystore").orNull?.let { file(it) }
+
 android {
     namespace = "app.pocketcp"
 
     defaultConfig {
         applicationId = "app.pocketcp"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
     }
+
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = providers.environmentVariable("KEYSTORE_PASSWORD").orNull
+                keyAlias = providers.environmentVariable("KEY_ALIAS").orNull
+                keyPassword = providers.environmentVariable("KEY_PASSWORD").orNull
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
+        }
+    }
+}
+
+// CI also builds the (unsigned) release APK, so R8 and resource-shrinking problems fail the PR.
+tasks.named("ciCheck") {
+    dependsOn("assembleRelease")
 }
 
 dependencies {
