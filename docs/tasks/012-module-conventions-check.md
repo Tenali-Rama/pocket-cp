@@ -2,7 +2,7 @@
 id: 012
 title: Static check for module docs and feature isolation
 milestone: M0
-status: todo
+status: done
 deps: []
 touches: [scripts/factory/check-modules.sh, scripts/factory/test-check-modules.sh, scripts/verify.sh]
 spec: ["4. Platform & Architecture"]
@@ -21,4 +21,7 @@ spec: ["4. Platform & Architecture"]
 - Gradle-side dependency rules.
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Any module added to `settings.gradle.kts` needs `CLAUDE.md` + `API.md` in the same PR, or `verify.sh` fails (`modules` step).
+- `build-logic/` counts as one module once the directory exists; its `convention/` sub-project needs no docs of its own.
+- Feature isolation is matched textually on `:feature:<x>` and `projects.feature.<x>` in `feature/*/build.gradle.kts` (line comments ignored); Gradle-side rules are still out of scope.
+- `check-modules.sh [root]` takes an optional root dir, which the fixture test uses.

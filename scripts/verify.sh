@@ -25,6 +25,8 @@ step() {
 step tasks scripts/factory/board.sh --check
 step board-test scripts/factory/test-board.sh
 step size scripts/factory/check-size.sh
+step modules scripts/factory/check-modules.sh
+step modules-test scripts/factory/test-check-modules.sh
 
 if [ -n "$(git ls-files '*.kt' '*.kts')" ]; then
   if command -v ktlint >/dev/null; then
