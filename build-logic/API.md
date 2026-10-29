@@ -17,7 +17,6 @@ Apply them by alias from `gradle/libs.versions.toml`, e.g. `alias(libs.plugins.p
 Each module that applies `android.application`, `android.library` or `jvm.library` gets a `ciCheck` task:
 - Android: `ktlintCheck`, `detektMain`, `lintDebug`, `testDebugUnitTest`, `assembleDebug`.
 - JVM: `ktlintCheck`, `detektMain`, `lint`, `test`, `assemble`.
-
 - Compose modules also: `verifyRoborazziDebug` (fails on a pixel diff or a missing golden).
 
 `./gradlew ciCheck` (run by `scripts/verify.sh --full`) runs it in every module. A module adds extra gates with
