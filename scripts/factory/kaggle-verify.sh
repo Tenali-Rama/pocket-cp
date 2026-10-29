@@ -43,7 +43,8 @@ PY
 "$KAGGLE_BIN" kernels push -p "$work" >/dev/null
 for _ in $(seq 1 120); do
   sleep 30
-  st=$("$KAGGLE_BIN" kernels status "$KAGGLE_USER/$slug" 2>/dev/null || true)
+  # Kaggle prints e.g. KernelWorkerStatus.COMPLETE, so compare in lower case.
+  st=$("$KAGGLE_BIN" kernels status "$KAGGLE_USER/$slug" 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)
   case $st in *complete*|*error*|*cancel*) break ;; esac
 done
 "$KAGGLE_BIN" kernels output "$KAGGLE_USER/$slug" -p "$out" >/dev/null 2>&1 || true
