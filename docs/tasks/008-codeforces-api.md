@@ -27,8 +27,8 @@ A typed Codeforces API client on top of the request queue, and a shared harness 
 - JSON via kotlinx.serialization (default — owner may change).
 
 ## Notes for next
-- Retrofit goes through the queue via `QueueCallFactory` (Retrofit `callFactory`, ADR 0004). New API methods: add a `suspend fun` to `CodeforcesService` and a wrapper in `CodeforcesApi`; never give Retrofit an `OkHttpClient`.
+- Retrofit goes through the queue via `QueueCallFactory` (Retrofit `callFactory`, ADR 0007). New API methods: add a `suspend fun` to `CodeforcesService` and a wrapper in `CodeforcesApi`; never give Retrofit an `OkHttpClient`.
 - Real Codeforces sends `FAILED` with HTTP 400; that path is mapped from the error body (`Api` / `RateLimited`, no retry). A 2xx "Call limit exceeded" is retried by the queue via `CallLimitClassifier`. If Codeforces sends the call limit with 503, the queue reports `Unavailable` (core/network owns that).
 - DTOs keep API field names and string enums (`type`, `phase`); M1 maps them to the judge-agnostic domain. `UserDto` leaves out `city` on purpose (it's the unknown-field check in the test).
 - Tests: `testImplementation(project(":core:testing"))`, then `FixtureServer().map(path, fixture, code)` + `withApi(...)` (core/codeforces tests) on virtual time. `error.call-limit.json` is hand-written (see `testdata/README.md`).
-- Added `alias(libs.plugins.kotlin.serialization) apply false` to the root `build.gradle.kts` (plugin-on-classpath rule) and ADR 0004; both outside `touches`.
+- Added `alias(libs.plugins.kotlin.serialization) apply false` to the root `build.gradle.kts` (plugin-on-classpath rule) and ADR 0007; both outside `touches`.

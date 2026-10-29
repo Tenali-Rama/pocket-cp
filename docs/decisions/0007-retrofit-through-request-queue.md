@@ -1,4 +1,4 @@
-# 0004 — Retrofit runs through the request queue
+# 0007 — Retrofit runs through the request queue
 
 - **Status**: accepted
 - **Context**: Task 008 wants a Retrofit service, but every call must go through the 007 `RequestQueue` (spacing, dedup, backoff), and `core/network/` must not change for Codeforces.
