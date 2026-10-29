@@ -2,7 +2,7 @@
 id: 011
 title: Release APK build with R8 and optional signing
 milestone: M0
-status: todo
+status: done
 deps: [001]
 touches: [app/build.gradle.kts, app/proguard-rules.pro, app/CLAUDE.md, docs/decisions/]
 spec: ["17. Play Store Compliance", "1. Product"]
@@ -22,4 +22,8 @@ The app's release build produces a minified APK, signed when `release.yml` passe
 - Play upload, App Bundle, Baseline Profiles (M1/M14).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Version lives in `appVersionName` / `appVersionCode` at the top of `app/build.gradle.kts`; the last PR of milestone n bumps it to `0.<n>.0` / `<n> + 1` (rule in `app/CLAUDE.md`).
+- The app's `ciCheck` runs `assembleRelease` (R8 + resource shrinking), so a missing keep rule fails the PR. Add rules to `app/proguard-rules.pro` with a reason.
+- Code using reflection (e.g. kotlinx.serialization, Retrofit interfaces) must ship consumer rules or add keep rules here.
+- Release signing exists only with `-Pkeystore=<path>` + env; the signed path is first exercised by a tag push with the `KEYSTORE_B64` secret set.
+- ADR 0004 records signing, versioning and the debug-APK fallback.

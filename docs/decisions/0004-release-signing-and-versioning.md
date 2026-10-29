@@ -1,4 +1,4 @@
-# 0003 — Release signing, versioning and the debug-APK fallback
+# 0004 — Release signing, versioning and the debug-APK fallback
 
 - **Status**: accepted
 - **Context**: Each milestone tag should give the owner an installable APK. The keystore must never live in the repo, and CI must catch R8 breakage before a tag does.
