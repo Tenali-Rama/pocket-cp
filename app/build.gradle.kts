@@ -49,6 +49,9 @@ tasks.named("ciCheck") {
 dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
+    implementation(project(":core:adaptive"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:navigation"))
 
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit)
