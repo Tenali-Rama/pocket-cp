@@ -18,3 +18,4 @@ dependencyResolutionManagement {
 rootProject.name = "PocketCP"
 
 include(":app")
+include(":core:adaptive")
