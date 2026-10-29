@@ -2,7 +2,7 @@
 id: 004
 title: Core design-system components with screenshot tests
 milestone: M0
-status: todo
+status: done
 deps: [003]
 touches: [core/designsystem/src/main/kotlin/app/pocketcp/core/designsystem/component/, core/designsystem/src/main/res/, core/designsystem/src/test/, core/designsystem/build.gradle.kts, gradle/libs.versions.toml, core/designsystem/API.md]
 spec: ["5. Design & Layout", "16. Non-Functional", "2. Product Principles"]
@@ -25,4 +25,8 @@ The shared components early screens need, all built from tokens and covered by s
 - Navigation bar / rail (task 006). Feature-specific widgets.
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Components are in `app.pocketcp.core.designsystem.component`; M3-like ones carry a `Pcp` prefix (`PcpCard`, `PcpTopAppBar`, …) to avoid clashing with Material 3 names. The task-named ones (`RankedHandle`, `EmptyState`, `ErrorState`, `LoadingPlaceholder`) keep their names.
+- The 1.5x shot is `components_font150_phone_dark.png`, not `components_phone_dark_font150`: `captureSingle` always appends `_<device>_<theme>` and core/screenshot's API says to put the variant in the name.
+- `PocketCpThemeWrapper` (dark/light `PocketCpTheme`) is test-internal in `ComponentGallery.kt`. Promote it to core/screenshot or a test-fixtures module if features need it.
+- Keyboard tests must call `LocalInputModeManager.current.requestInputMode(InputMode.Keyboard)` first: clickables aren't focusable in touch mode (see `ComponentA11yTest`).
+- States and RankedHandle have their own shots (`states_*`, `rankedHandle_*`), so the `components` gallery shows only three sample handles.
