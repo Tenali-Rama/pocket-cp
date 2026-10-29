@@ -24,6 +24,6 @@ while IFS= read -r f; do
     changed=$((changed + 1)); [ "${2:-}" = --accept ] && cp "$f" "$rel" || echo "CHANGED $f   (golden: $rel)"
   fi
 done < <(find "$dir/unit" -name '*.png' 2>/dev/null | sort)
-find "$dir"/ui-* -name '*.png' 2>/dev/null | sort | sed 's/^/FLOW    /'
+find "$dir" -path "$dir/ui-*" -name '*.png' | sort | sed 's/^/FLOW    /' # a run may have no ui-* artifacts
 if [ "${2:-}" = --accept ]; then echo "accepted: new=$new changed=$changed — now git add + commit them"
 else echo "run=$run new=$new changed=$changed (look at most 8 per round, tablet + phone first)"; fi
