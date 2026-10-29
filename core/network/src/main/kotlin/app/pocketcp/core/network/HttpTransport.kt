@@ -41,5 +41,8 @@ class OkHttpTransport(
         }
     }
 
-    private fun Response.toNetworkResponse() = NetworkResponse(code = code, headers = headers, body = body?.string().orEmpty())
+    private fun Response.toNetworkResponse(): NetworkResponse {
+        val text = body?.string().orEmpty()
+        return NetworkResponse(code = code, headers = headers, body = text)
+    }
 }

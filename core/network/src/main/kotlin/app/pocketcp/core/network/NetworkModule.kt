@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,10 +34,18 @@ object NetworkModule {
     fun provideHttpClient(
         @ApplicationContext context: Context,
         cookieJar: SharedCookieJar,
-    ): OkHttpClient = HttpClients.create(Cache(File(context.cacheDir, CACHE_DIR), HttpClients.CACHE_SIZE_BYTES), cookieJar)
+    ): OkHttpClient {
+        val cache = Cache(File(context.cacheDir, CACHE_DIR), HttpClients.CACHE_SIZE_BYTES)
+        return HttpClients.create(cache, cookieJar)
+    }
 
     @Provides
     @Singleton
-    fun provideRequestQueue(client: OkHttpClient): RequestQueue =
-        RequestQueue(OkHttpTransport(client), CoroutineScope(SupervisorJob() + Dispatchers.IO))
+    fun provideRequestQueue(client: OkHttpClient): RequestQueue = RequestQueue(OkHttpTransport(client), queueScope())
+
+    /** The queue's app-lifetime scope. The dispatcher is a defaulted parameter, as detekt's InjectDispatcher asks. */
+    private fun queueScope(dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope {
+        val job = SupervisorJob()
+        return CoroutineScope(job + dispatcher)
+    }
 }

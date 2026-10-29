@@ -1,6 +1,9 @@
 package app.pocketcp.core.network
 
-/** Decides whether a 2xx [NetworkResponse] is usable, so a caller can treat a body as an error (e.g. "Call limit exceeded"). */
+/**
+ * Decides whether a 2xx [NetworkResponse] is usable, so a caller can treat a body as an error
+ * (e.g. "Call limit exceeded").
+ */
 fun interface RetryClassifier {
     fun classify(response: NetworkResponse): RetryDecision
 
