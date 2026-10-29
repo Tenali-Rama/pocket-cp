@@ -19,3 +19,4 @@ rootProject.name = "PocketCP"
 
 include(":app")
 include(":core:adaptive")
+include(":core:network")
