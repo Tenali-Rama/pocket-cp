@@ -12,10 +12,10 @@ spec: ["4. Platform & Architecture"]
 `scripts/verify.sh` (local and CI) fails when a Gradle module lacks `CLAUDE.md` or `API.md`, or when a `feature/` module depends on another feature.
 
 ## Acceptance criteria
-- [ ] `scripts/factory/check-modules.sh`: every dir with a `build.gradle.kts` other than the repo root (incl. `build-logic/`) has `CLAUDE.md` and `API.md`; prints `missing API.md: <dir>/` per gap and exits 1.
+- [ ] `scripts/factory/check-modules.sh`: the module set is every project named in an `include(":a:b")` / `include(":a", ":b")` call in root `settings.gradle.kts` (`:a:b` → `a/b/`), plus `build-logic/` if it exists (one included build; its sub-project `build-logic/convention/` is *not* a separate module). Each must have `CLAUDE.md` and `API.md`; prints `missing API.md: <dir>/` per gap and exits 1. No root `settings.gradle.kts` → empty set → pass.
 - [ ] The same script fails with `feature dependency: feature/a -> feature/b` when a `feature/*/build.gradle.kts` references another feature project (`:feature:` or `projects.feature`).
-- [ ] `scripts/factory/test-check-modules.sh` builds temp fixture trees covering the pass, missing-docs and feature→feature cases; `verify.sh` runs both as steps `modules` and `modules-test`.
-- [ ] `scripts/verify.sh` passes on the current repo (no modules yet) and runs no Gradle.
+- [ ] `scripts/factory/test-check-modules.sh` builds temp fixture trees covering: pass; missing docs; feature→feature; no `settings.gradle.kts`; `build-logic/convention/build.gradle.kts` with docs only at `build-logic/` (pass); a multi-argument `include(...)`; `verify.sh` runs both as steps `modules` and `modules-test`.
+- [ ] `scripts/verify.sh` passes on `main` at merge time (with whichever M0 tasks have landed by then) and runs no Gradle.
 
 ## Out of scope
 - Gradle-side dependency rules.

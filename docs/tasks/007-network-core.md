@@ -16,14 +16,17 @@ spec: ["4. Platform & Architecture", "16. Non-Functional"]
   - three queued API calls start at t = 0 s, 2 s, 4 s;
   - two concurrent identical GETs make one upstream call and both callers get the result;
   - cancelling one waiter doesn't cancel the shared call for the other;
-  - HTTP 429/503 retries after 2 s, 4 s, 8 s, then fails with a typed `NetworkError.RateLimited`.
+  - HTTP 429 retries after 2 s, 4 s, 8 s, then fails with a typed `NetworkError.RateLimited`;
+  - HTTP 502/503/504 retries with the same backoff, then fails with `NetworkError.Unavailable` (Codeforces down, kept separate from rate limiting per spec §16);
+  - an `IOException` or timeout fails at once with `NetworkError.Offline`;
+  - a caller-supplied `RetryClassifier` (`(Response) -> RetryDecision`, with `Accept | Retry(finalError) | Fail(error)`) runs on 2xx responses. A test classifier that marks a body as retryable gets the 2/4/8 s backoff and then fails with the error it named. Task 008 uses this for "Call limit exceeded".
 - [ ] `SharedCookieJarTest`: a cookie set by a `codeforces.com` response is sent on the next request to that host and never to another host. Storage sits behind a `CookieStore` interface (in-memory here; M4 backs it with encrypted storage and syncs the WebView).
 - [ ] `HttpClientTest` (MockWebServer): a 304 for a request with `If-None-Match` is served from the OkHttp cache; plain `http://` requests are rejected (HTTPS only).
 - [ ] Hilt `NetworkModule` provides the client, cookie jar and queue as singletons.
 - [ ] `core/network/CLAUDE.md` + `API.md`; ADR on the queue policy.
 
 ## Out of scope
-- Codeforces endpoints and DTOs, fixture harness (task 008). WebView cookie sync and encrypted storage (M4).
+- Codeforces endpoints, DTOs, the Codeforces-specific classifier and the fixture harness (task 008). WebView cookie sync and encrypted storage (M4).
 
 ## Notes
 - The queue throttles `/api/` calls only. HTML page fetches share the cookie jar and deduplication, without the 2 s spacing (default — owner may change).

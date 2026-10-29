@@ -16,9 +16,9 @@ A buildable Gradle project: version catalog, wrapper, `build-logic/` convention 
 - [ ] Convention plugins exist in `build-logic/`: `pocketcp.android.application`, `pocketcp.android.library`, `pocketcp.android.compose`, `pocketcp.android.feature`, `pocketcp.hilt`, `pocketcp.jvm.library`. minSdk 26, current targetSdk, JDK 17.
 - [ ] detekt config has `UnsafeCallOnNullableType` active for main sources (the no-`!!` rule) and is excluded for tests.
 - [ ] Robolectric test `MainActivityTest` launches `MainActivity` (Hilt `@AndroidEntryPoint`, `@HiltAndroidApp` application) and asserts the app name text is shown; passes in CI.
-- [ ] `app-debug.apk` is produced by CI (the `ui` job's `:app:assembleDebug` step succeeds).
+- [ ] The Gradle ktlint plugin is pinned to ktlint engine 1.3.1, the version of the CLI that `.github/workflows/ci.yml` installs; `build-logic/CLAUDE.md` says to bump both in the same PR.
 - [ ] Gradle wrapper committed (`gradle/wrapper/`, `gradlew`, `gradlew.bat`), executable bit set on `gradlew`.
-- [ ] `app/CLAUDE.md`, `app/API.md`, `build-logic/CLAUDE.md`, `build-logic/API.md` exist.
+- [ ] `build-logic/` is an included build (`build-logic/settings.gradle.kts`, plugins in `build-logic/convention/`). Its docs live at the included-build root: `build-logic/CLAUDE.md` + `build-logic/API.md`. `app/CLAUDE.md` + `app/API.md` exist. (Task 012 checks exactly these roots: every `include(...)` in root `settings.gradle.kts`, plus `build-logic/`.)
 - [ ] ADR: module layout (`core/<name>`, `feature/<name>`, features never depend on features) and the convention plugins.
 
 ## Out of scope

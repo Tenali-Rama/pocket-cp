@@ -16,7 +16,9 @@ The app opens into a shell with bottom navigation on phones and a navigation rai
 - [ ] Placeholder entries in `app` for Home, Contests, Problemset, Profile, Settings, each showing `EmptyState` naming the milestone that delivers it. Later features replace a placeholder by deleting one binding line.
 - [ ] Nav items carry test tags `nav_home`, `nav_contests`, `nav_problemset`, `nav_profile`, `nav_settings` and content descriptions.
 - [ ] `ShellStateTest`: selected destination survives `StateRestorationTester` recreation; back from a non-home destination returns to Home; `Tab` + `Enter` on a hardware keyboard switches destination.
-- [ ] Edge-to-edge with correct insets; theme follows system dark/light (dark when unknown).
+- [ ] The Compose root sets `Modifier.semantics { testTagsAsResourceId = true }` so that Maestro (task 010) sees test tags as ids. `ShellStateTest` asserts that the root node has `SemanticsProperties.TestTagsAsResourceId == true`.
+- [ ] Edge-to-edge: `MainActivity` calls `enableEdgeToEdge()`. `ShellInsetsTest` (Robolectric, fake insets of 48 dp bottom and 24 dp start) asserts that on phone the bottom bar's bottom padding equals the navigation-bar inset, and on tablet the rail's start padding equals the system-bar inset.
+- [ ] Theme follows system dark/light, dark when unknown. `ShellThemeTest` covers dark, light and unspecified.
 - [ ] Screenshot `shell_<device>_<theme>` (8): phone shows a bottom bar with 5 items and Home selected; tablet landscape, foldable and desktop show a rail with the same items; content area not stretched into a single narrow column.
 - [ ] `core/navigation/CLAUDE.md` + `API.md`; `app/API.md` updated; ADR on the nav extension point.
 
