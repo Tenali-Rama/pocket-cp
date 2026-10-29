@@ -2,7 +2,7 @@
 id: 007
 title: Network core with rate-limited request queue and shared cookie jar
 milestone: M0
-status: todo
+status: done
 deps: [001]
 touches: [core/network/, settings.gradle.kts+, gradle/libs.versions.toml, docs/decisions/]
 spec: ["4. Platform & Architecture", "16. Non-Functional"]
@@ -32,4 +32,8 @@ spec: ["4. Platform & Architecture", "16. Non-Functional"]
 - The queue throttles `/api/` calls only. HTML page fetches share the cookie jar and deduplication, without the 2 s spacing (default — owner may change).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- 008: call `RequestQueue.execute(request, classifier)`; map Codeforces `FAILED` + "Call limit exceeded" to `RetryDecision.Retry(NetworkError.RateLimited())`, other `FAILED` comments to `Fail(NetworkError.Rejected(comment))`.
+- Statuses other than 429/502/503/504 (e.g. Codeforces 400 FAILED) come back as a `NetworkResponse`; the classifier only runs on 2xx, so 008 parses 400 bodies itself.
+- Dedup key is the GET URL; callers of one URL must use the same classifier. Only `/api/` paths are spaced 2 s.
+- Retrofit is not wired yet: 008 either adds a Retrofit `Call.Factory` over the queue or calls the queue directly; don't create a second `OkHttpClient`.
+- M4: replace `provideCookieStore` with an encrypted `CookieStore` and sync the WebView through the same `SharedCookieJar`.
