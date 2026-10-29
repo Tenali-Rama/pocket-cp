@@ -10,7 +10,7 @@ import org.gradle.kotlin.dsl.withType
 /** The module holding the `captureMatrix` helper; every other Compose module gets it on its test classpath. */
 private const val SCREENSHOT_MODULE = ":core:screenshot"
 
-/** Where a module's goldens live, `<name>_<device>_<theme>.png` (docs/decisions/0003). */
+/** Where a module's goldens live, `<name>_<device>_<theme>.png` (docs/decisions/0005). */
 private const val GOLDEN_DIR = "src/test/screenshots"
 
 /**

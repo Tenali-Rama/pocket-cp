@@ -23,7 +23,7 @@ Each module that applies `android.application`, `android.library` or `jvm.librar
 `tasks.named("ciCheck") { dependsOn("…") }` in its own `build.gradle.kts`.
 
 ## Screenshots (`pocketcp.android.compose`)
-- Applies the Roborazzi plugin with goldens in `<module>/src/test/screenshots/` (ADR 0003).
+- Applies the Roborazzi plugin with goldens in `<module>/src/test/screenshots/` (ADR 0005).
 - Every unit test runs with Robolectric native graphics (`robolectric.graphicsMode=NATIVE`, hardware pixel copy).
 - Adds `testImplementation(project(":core:screenshot"))` (except in that module): see `core/screenshot/API.md`.
 

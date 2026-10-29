@@ -1,7 +1,7 @@
 package app.pocketcp.core.screenshot
 
 /**
- * A window size in the screenshot matrix (QUALITY.md §4, docs/decisions/0003-screenshot-matrix.md).
+ * A window size in the screenshot matrix (QUALITY.md §4, docs/decisions/0005-screenshot-matrix.md).
  * Rendered at density 1, so a golden is [widthDp] × [heightDp] pixels.
  */
 enum class Device(

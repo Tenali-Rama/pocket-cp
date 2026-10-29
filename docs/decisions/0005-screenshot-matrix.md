@@ -1,4 +1,4 @@
-# 0003 — Screenshot matrix, golden naming and CI gate
+# 0005 — Screenshot matrix, golden naming and CI gate
 
 - **Status**: accepted
 - **Context**: QUALITY.md §4 needs every screen rendered on phone, tablet, foldable and desktop in dark and light, compared against committed goldens, and visible to agents through `shots.sh`.
