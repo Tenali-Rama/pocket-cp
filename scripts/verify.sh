@@ -27,6 +27,7 @@ step board-test scripts/factory/test-board.sh
 step size scripts/factory/check-size.sh
 step modules scripts/factory/check-modules.sh
 step modules-test scripts/factory/test-check-modules.sh
+step collect-shots-test scripts/factory/test-ci-collect-shots.sh
 
 if [ -n "$(git ls-files '*.kt' '*.kts')" ]; then
   if command -v ktlint >/dev/null; then
@@ -37,7 +38,8 @@ if [ -n "$(git ls-files '*.kt' '*.kts')" ]; then
 fi
 
 if [ "${1:-}" = --full ] && [ -x gradlew ]; then
-  step gradle ./gradlew ciCheck --stacktrace
+  # --continue: every module's screenshot tests run, so CI collects every rendering (scripts/ci-collect-shots.sh).
+  step gradle ./gradlew ciCheck --continue --stacktrace
 fi
 
 if command -v gitleaks >/dev/null; then

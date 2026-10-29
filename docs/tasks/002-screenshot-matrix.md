@@ -2,7 +2,7 @@
 id: 002
 title: Roborazzi screenshot matrix, golden gate and CI shot collection
 milestone: M0
-status: todo
+status: done
 deps: [001]
 touches: [build-logic/convention/, core/screenshot/, settings.gradle.kts+, gradle/libs.versions.toml, scripts/ci-collect-shots.sh, docs/decisions/]
 spec: ["5. Design & Layout"]
@@ -28,4 +28,8 @@ Every module can write a one-line screenshot test that renders across the QUALIT
 - Goldens are produced only by CI: push, then `shots.sh <pr> --accept` after looking at them.
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Every `pocketcp.android.compose` module already has `core:screenshot` on its test classpath; a screen test is `class XScreenshotTest : ScreenshotTest() { @Test fun loaded() = captureMatrix("x_loaded", themeWrapper) { X() } }`.
+- Task 003: pass the design-system theme as a `ThemeWrapper` (`(dark, content) -> Unit`); AMOLED is `captureSingle("x_amoled", ScreenshotConfig(dark = true), amoledWrapper)`, large font `ScreenshotConfig(fontScale = 1.5f)` with `_font150` in the name.
+- First CI run of a new screen is always red (goldens missing, by design); look at `shots.sh` output, `--accept`, push.
+- `scripts/factory/shots.sh` exits 1 (pipefail on `find .../ui-*` with no ui artifacts), so its summary line is missing and `--accept` reports failure although it copied the files. Fix in a factory chore.
+- Robolectric native graphics are on for every unit test of Compose modules (convention); tests run on SDK 34 via `ScreenshotTest` / `robolectric.properties`.
