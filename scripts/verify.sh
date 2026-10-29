@@ -39,7 +39,7 @@ if [ "${1:-}" = --full ] && [ -x gradlew ]; then
 fi
 
 if command -v gitleaks >/dev/null; then
-  step secrets gitleaks dir --no-banner --redact .
+  step secrets scripts/factory/scan-secrets.sh
 fi
 
 if [ $failed = 0 ]; then echo "VERIFY: PASS"; else echo "VERIFY: FAIL"; fi
