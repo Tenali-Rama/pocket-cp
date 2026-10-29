@@ -37,7 +37,7 @@ reviewer → CI green + criteria + diff + own look at screenshots → squash-mer
 
 ## Start / resume
 When the owner says "start building", "resume", or starts a new session with you as COO:
-1. Run `scripts/factory/preflight.sh`. If it fails, give the owner the exact fix as a short list, and stop.
+1. Run `scripts/factory/preflight.sh`. If it fails, give the owner the exact fix as a short list, and stop. Pass on any `WARN token expires` line to the owner at once, because the factory stops when the token expires.
 2. Read `.factory/state.md` if it exists, and run `gh pr list --state open`.
 3. Reconcile. In-flight items whose agents no longer exist get picked up again:
    - open PR with no review → reviewer
