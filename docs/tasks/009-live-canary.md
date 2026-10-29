@@ -15,7 +15,7 @@ The `liveCanary` task checks our client and parsing assumptions against live Cod
 - [ ] `liveCanary` is defined in `core/codeforces/build.gradle.kts` (so `canary.yml`'s `grep liveCanary --include=*.kts` finds it) and runs tests from a separate `src/canary/` source set.
 - [ ] `ciCheck` and the unit test tasks do not compile or run `src/canary/` (no live calls in CI gates).
 - [ ] Canary checks: live `contest.list`, `problemset.problems` and `user.info?handles=tourist` decode with the 008 DTOs; `https://codeforces.com/problemset/problem/4/A` is fetched and contains a `div.problem-statement` element (Jsoup). All calls go through the request queue.
-- [ ] A failing check names the endpoint or selector that broke within the last 40 lines of output (what `canary.yml` puts in the issue).
+- [ ] A failing check names the endpoint or selector that broke within the last 40 lines of output (what `canary.yml` puts in the issue). A Cloudflare challenge (HTTP 403/503 with a `cf-mitigated` header or a challenge-page body) is reported as `BLOCKED by Cloudflare: <url>`, which is distinct from `SELECTOR BROKEN: <selector> on <url>`. A test in `src/canary/` checks both messages against small inline samples.
 - [ ] Proof in the PR: a `gh workflow run canary --ref <branch>` run that passes (link).
 - [ ] `core/codeforces/CLAUDE.md` explains how to add a canary check.
 

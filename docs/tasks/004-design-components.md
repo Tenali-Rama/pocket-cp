@@ -4,7 +4,7 @@ title: Core design-system components with screenshot tests
 milestone: M0
 status: todo
 deps: [003]
-touches: [core/designsystem/src/main/kotlin/app/pocketcp/core/designsystem/component/, core/designsystem/src/test/, core/designsystem/API.md]
+touches: [core/designsystem/src/main/kotlin/app/pocketcp/core/designsystem/component/, core/designsystem/src/main/res/, core/designsystem/src/test/, core/designsystem/build.gradle.kts, gradle/libs.versions.toml, core/designsystem/API.md]
 spec: ["5. Design & Layout", "16. Non-Functional", "2. Product Principles"]
 ---
 
@@ -18,6 +18,7 @@ The shared components early screens need, all built from tokens and covered by s
 - [ ] Screenshot `rankedHandle_phone_dark` and `rankedHandle_phone_light`: one handle per rank, newbie to LGM.
 - [ ] Screenshot `states_<device>_<theme>` (8): empty, error and loading states side by side on tablet/desktop, stacked on phone.
 - [ ] Screenshot `components_phone_dark_font150`: gallery at 1.5× font scale, no clipped text.
+- [ ] Every built-in UI string (the `ErrorState` retry label, the `LoadingPlaceholder` content description, default icon descriptions) is a string resource in `core/designsystem/src/main/res/values/strings.xml`. Component code has no string literals. Icons come from `androidx.compose.material:material-icons-core` via the catalog (default — owner may change).
 - [ ] `core/designsystem/API.md` lists each component.
 
 ## Out of scope
