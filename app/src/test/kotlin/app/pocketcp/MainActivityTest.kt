@@ -1,9 +1,12 @@
 package app.pocketcp
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -15,11 +18,27 @@ class MainActivityTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Test
-    fun launch_showsAppName() {
-        val appName = composeRule.activity.getString(R.string.app_name)
+    private val navTags = listOf("nav_home", "nav_contests", "nav_problemset", "nav_profile", "nav_settings")
 
-        composeRule.onNodeWithText(appName).assertIsDisplayed()
+    @Test
+    fun launch_showsShellWithEveryPlaceholder_homeSelected() {
+        navTags.forEach { composeRule.onNodeWithTag(it).assertIsDisplayed() }
+        composeRule.onNodeWithTag("nav_home").assertIsSelected()
+        composeRule.onNodeWithTag("nav_settings").assertIsNotSelected()
+    }
+
+    @Test
+    fun hiltContributedEntries_areShownInNavigationOrder() {
+        val lefts =
+            navTags.map {
+                composeRule
+                    .onNodeWithTag(it)
+                    .fetchSemanticsNode()
+                    .boundsInRoot.left
+            }
+
+        assertEquals(lefts.sorted(), lefts)
+        assertEquals(navTags.size, lefts.distinct().size)
     }
 
     @Test
