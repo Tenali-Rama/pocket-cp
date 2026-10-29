@@ -28,7 +28,10 @@ enum class Rank(
         private val rated = entries.filter { it.minRating != null }
 
         /** The rank for [rating]; `null` (no rated contest yet) is [Unrated]. */
-        fun ofRating(rating: Int?): Rank = rating?.let { r -> rated.last { (it.minRating ?: Int.MIN_VALUE) <= r } } ?: Unrated
+        fun ofRating(rating: Int?): Rank {
+            if (rating == null) return Unrated
+            return rated.last { (it.minRating ?: Int.MIN_VALUE) <= rating }
+        }
     }
 }
 
