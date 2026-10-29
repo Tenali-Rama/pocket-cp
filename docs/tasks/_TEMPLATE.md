@@ -13,7 +13,7 @@ One or two sentences: what exists after this task that didn't before.
 
 ## Acceptance criteria
 - [ ] Test `ProblemListViewModelTest` covers filtering and the offline/error path, and passes in CI
-- [ ] Screenshot `problemList_tablet_landscape_dark`: list | detail two-pane; `problemList_phone_dark`: single pane; empty and error states have their own shots
+- [ ] Screenshots (ADR 0005 naming `<name>[_<variant>]_<device>_<dark|light>`, variant before device): `problemList_tablet_dark`: list | detail two-pane; `problemList_phone_dark`: single pane; `problemList_empty_phone_dark` and `problemList_error_phone_dark` for the states
 - [ ] (each criterion is a CI test, a named screenshot with what it must show, or a Maestro flow step)
 
 ## Out of scope
