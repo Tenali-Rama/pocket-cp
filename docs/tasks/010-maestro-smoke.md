@@ -2,7 +2,7 @@
 id: 010
 title: Maestro smoke flow for the app shell
 milestone: M0
-status: todo
+status: in-progress
 deps: [006]
 touches: [.maestro/]
 spec: ["5. Design & Layout"]
