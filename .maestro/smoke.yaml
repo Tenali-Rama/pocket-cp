@@ -1,8 +1,10 @@
 # Smoke test of the app shell: launch, visit every top-level destination, return Home with Back.
 # Selects by test tag only (nav_* are exposed as resource ids), so the same flow drives the
 # bottom bar on phones and the navigation rail on tablets.
-# A placeholder's title repeats its nav label, so `index: 1` asserts a second node with that text:
-# the title, not just the nav item.
+# A placeholder's title repeats its nav label, so each content check is anchored to the content pane:
+# the placeholder message (text found nowhere in the nav) must be visible, and the title must sit
+# above it. On phones the bottom bar is below the content, so `above` excludes the nav item. On
+# tablets the rail item can also be above the message, so the title must also be right of the rail.
 appId: app.pocketcp
 name: Shell smoke
 ---
@@ -12,8 +14,22 @@ name: Shell smoke
     id: nav_home
     selected: true
 - assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
     text: Home
-    index: 1
+    above:
+      text: "Arrives in M2: Browse.*"
+- runFlow:
+    when:
+      visible:
+        id: shell_rail
+    commands:
+      - assertVisible:
+          text: Home
+          above:
+            text: "Arrives in M2: Browse.*"
+          rightOf:
+            id: shell_rail
 - takeScreenshot: smoke_home
 
 - tapOn:
@@ -22,8 +38,22 @@ name: Shell smoke
     id: nav_contests
     selected: true
 - assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
     text: Contests
-    index: 1
+    above:
+      text: "Arrives in M2: Browse.*"
+- runFlow:
+    when:
+      visible:
+        id: shell_rail
+    commands:
+      - assertVisible:
+          text: Contests
+          above:
+            text: "Arrives in M2: Browse.*"
+          rightOf:
+            id: shell_rail
 - takeScreenshot: smoke_contests
 
 - tapOn:
@@ -32,8 +62,22 @@ name: Shell smoke
     id: nav_problemset
     selected: true
 - assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
     text: Problemset
-    index: 1
+    above:
+      text: "Arrives in M2: Browse.*"
+- runFlow:
+    when:
+      visible:
+        id: shell_rail
+    commands:
+      - assertVisible:
+          text: Problemset
+          above:
+            text: "Arrives in M2: Browse.*"
+          rightOf:
+            id: shell_rail
 - takeScreenshot: smoke_problemset
 
 - tapOn:
@@ -42,8 +86,22 @@ name: Shell smoke
     id: nav_profile
     selected: true
 - assertVisible:
+    text: "Arrives in M9: Community.*"
+- assertVisible:
     text: Profile
-    index: 1
+    above:
+      text: "Arrives in M9: Community.*"
+- runFlow:
+    when:
+      visible:
+        id: shell_rail
+    commands:
+      - assertVisible:
+          text: Profile
+          above:
+            text: "Arrives in M9: Community.*"
+          rightOf:
+            id: shell_rail
 - takeScreenshot: smoke_profile
 
 - tapOn:
@@ -52,8 +110,22 @@ name: Shell smoke
     id: nav_settings
     selected: true
 - assertVisible:
+    text: "Arrives in M1: Data base & settings.*"
+- assertVisible:
     text: Settings
-    index: 1
+    above:
+      text: "Arrives in M1: Data base & settings.*"
+- runFlow:
+    when:
+      visible:
+        id: shell_rail
+    commands:
+      - assertVisible:
+          text: Settings
+          above:
+            text: "Arrives in M1: Data base & settings.*"
+          rightOf:
+            id: shell_rail
 - takeScreenshot: smoke_settings
 
 - back
@@ -61,5 +133,8 @@ name: Shell smoke
     id: nav_home
     selected: true
 - assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
     text: Home
-    index: 1
+    above:
+      text: "Arrives in M2: Browse.*"

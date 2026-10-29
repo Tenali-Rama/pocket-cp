@@ -1,0 +1,24 @@
+# TEMPORARY negative control: must FAIL (Home screen shown, Contests title asserted). Removed before merge.
+appId: app.pocketcp
+name: NEG wrong title
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: nav_home
+    selected: true
+- assertVisible:
+    text: Contests
+    above:
+      text: "Arrives in M2: Browse.*"
+- runFlow:
+    when:
+      visible:
+        id: shell_rail
+    commands:
+      - assertVisible:
+          text: Contests
+          above:
+            text: "Arrives in M2: Browse.*"
+          rightOf:
+            id: shell_rail

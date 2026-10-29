@@ -1,0 +1,11 @@
+# TEMPORARY negative control: must FAIL (wrong placeholder message). Removed before merge.
+appId: app.pocketcp
+name: NEG wrong message
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: nav_home
+    selected: true
+- assertVisible:
+    text: "Arrives in M7: Wrong.*"
