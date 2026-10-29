@@ -1,0 +1,42 @@
+package app.pocketcp.core.network
+
+import android.content.Context
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import okhttp3.Cache
+import okhttp3.OkHttpClient
+import java.io.File
+import javax.inject.Singleton
+
+/** One client, one cookie jar and one request queue for the whole app. */
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+    private const val CACHE_DIR = "http"
+
+    @Provides
+    @Singleton
+    fun provideCookieStore(): CookieStore = InMemoryCookieStore()
+
+    @Provides
+    @Singleton
+    fun provideCookieJar(store: CookieStore): SharedCookieJar = SharedCookieJar(store)
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(
+        @ApplicationContext context: Context,
+        cookieJar: SharedCookieJar,
+    ): OkHttpClient = HttpClients.create(Cache(File(context.cacheDir, CACHE_DIR), HttpClients.CACHE_SIZE_BYTES), cookieJar)
+
+    @Provides
+    @Singleton
+    fun provideRequestQueue(client: OkHttpClient): RequestQueue =
+        RequestQueue(OkHttpTransport(client), CoroutineScope(SupervisorJob() + Dispatchers.IO))
+}
