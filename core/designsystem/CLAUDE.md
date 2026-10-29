@@ -8,4 +8,6 @@
 - Token literals sit in `Colors.kt`, `PocketCpTypography.kt` and `Dimensions.kt` (file-level `MagicNumber` suppression); keep them there.
 - Fonts: the UI uses the platform sans-serif (keeps the APK small). The code font is JetBrains Mono, bundled in `src/main/assets/fonts/` with its SIL Open Font License, `OFL.txt`, next to it. The licence must ship with the font: never remove or move it away from the `.ttf` files.
 - `themeTokens` screenshots (`src/test/screenshots/`) show every token; re-accept them when a token changes.
-- Components (buttons, chips, rows) are task 004, not here.
+- Components live in `component/` and are built only from tokens: no literal strings (use `res/values/strings.xml`), no `dp`/colour literals.
+- Icon-only controls take a required non-null `contentDescription`; touch targets stay ≥ `spacing.touchTarget`.
+- A new or changed component appears in the `components` gallery (`src/test/.../component/ComponentGallery.kt`); re-accept its screenshots.

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ErrorState: the button that runs the failed action again. -->
+    <string name="designsystem_retry">Retry</string>
+    <!-- LoadingPlaceholder: read by TalkBack instead of the skeleton rows. -->
+    <string name="designsystem_loading">Loading</string>
+    <!-- PcpTopAppBar: the back arrow. -->
+    <string name="designsystem_navigate_back">Navigate back</string>
+</resources>
