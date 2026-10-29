@@ -1,0 +1,21 @@
+# Overrides on top of detekt's default config (buildUponDefaultConfig = true in build-logic).
+
+potential-bugs:
+  # The no-`!!` rule (CLAUDE.md). Needs type resolution, so ciCheck runs detektMain.
+  UnsafeCallOnNullableType:
+    active: true
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
+      - '**/testFixtures/**'
+      - '**/*Test.kt'
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated:
+      - 'Composable'
+
+complexity:
+  LongParameterList:
+    ignoreAnnotated:
+      - 'Composable'
