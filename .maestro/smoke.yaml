@@ -1,0 +1,99 @@
+# Smoke test of the app shell: launch, visit every top-level destination, return Home with Back.
+# Selects by test tag only (nav_* are exposed as resource ids), so the same flow drives the
+# bottom bar on phones and the navigation rail on tablets.
+# A placeholder's title repeats its nav label, so each content check is anchored to the content pane:
+# the placeholder message (text found nowhere in the nav) must be visible, and the title must be
+# `above` and `rightOf` it. Maestro compares top-left corners, so the phone bottom bar (below the
+# message) and the tablet rail (left of it) never match; the centred title is narrower than its message.
+# `stopApp` first: clearing data of a running app can race with the relaunch and kill it.
+appId: app.pocketcp
+name: Shell smoke
+---
+- stopApp
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: nav_home
+    selected: true
+- assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
+    text: Home
+    above:
+      text: "Arrives in M2: Browse.*"
+    rightOf:
+      text: "Arrives in M2: Browse.*"
+- takeScreenshot: smoke_home
+
+- tapOn:
+    id: nav_contests
+- assertVisible:
+    id: nav_contests
+    selected: true
+- assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
+    text: Contests
+    above:
+      text: "Arrives in M2: Browse.*"
+    rightOf:
+      text: "Arrives in M2: Browse.*"
+- takeScreenshot: smoke_contests
+
+- tapOn:
+    id: nav_problemset
+- assertVisible:
+    id: nav_problemset
+    selected: true
+- assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
+    text: Problemset
+    above:
+      text: "Arrives in M2: Browse.*"
+    rightOf:
+      text: "Arrives in M2: Browse.*"
+- takeScreenshot: smoke_problemset
+
+- tapOn:
+    id: nav_profile
+- assertVisible:
+    id: nav_profile
+    selected: true
+- assertVisible:
+    text: "Arrives in M9: Community.*"
+- assertVisible:
+    text: Profile
+    above:
+      text: "Arrives in M9: Community.*"
+    rightOf:
+      text: "Arrives in M9: Community.*"
+- takeScreenshot: smoke_profile
+
+- tapOn:
+    id: nav_settings
+- assertVisible:
+    id: nav_settings
+    selected: true
+- assertVisible:
+    text: "Arrives in M1: Data base & settings.*"
+- assertVisible:
+    text: Settings
+    above:
+      text: "Arrives in M1: Data base & settings.*"
+    rightOf:
+      text: "Arrives in M1: Data base & settings.*"
+- takeScreenshot: smoke_settings
+
+- back
+- assertVisible:
+    id: nav_home
+    selected: true
+- assertVisible:
+    text: "Arrives in M2: Browse.*"
+- assertVisible:
+    text: Home
+    above:
+      text: "Arrives in M2: Browse.*"
+    rightOf:
+      text: "Arrives in M2: Browse.*"
