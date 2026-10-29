@@ -2,7 +2,7 @@
 id: 006
 title: Adaptive app shell with navigation extension point
 milestone: M0
-status: todo
+status: done
 deps: [004, 005]
 touches: [core/navigation/, app/src/main/, app/src/test/, app/build.gradle.kts+, settings.gradle.kts+, gradle/libs.versions.toml, app/API.md, docs/decisions/]
 spec: ["5. Design & Layout", "2. Product Principles"]
@@ -29,4 +29,8 @@ The app opens into a shell with bottom navigation on phones and a navigation rai
 - Top-level destinations Home / Contests / Problemset / Profile / Settings (default — owner may change).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- A feature replaces a placeholder: bind its `FeatureEntry` `@IntoSet` in its own module, keep the route and `order` (Home 0, Contests 10, Problemset 20, Profile 30, Settings 40), and delete its line in `app/.../shell/Placeholders.kt` `PlaceholderModule.placeholders()`.
+- Maestro (010) can select `nav_home` … `nav_settings` as resource ids; the root sets `testTagsAsResourceId`.
+- `PocketCpApp` takes `windowInsets` (default `systemBars`); tests fake insets through it. Bar/rail pad themselves; content gets the remaining sides.
+- Theme is `themeModeOf(uiMode)` from the system; settings persistence (M1) should replace that call with the stored `ThemeMode`.
+- `testTagsAsResourceId` lives in `SemanticsPropertiesAndroid`, not `SemanticsProperties` as the criterion said.
