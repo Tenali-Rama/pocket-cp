@@ -22,6 +22,6 @@ CI's `ui` job runs a Maestro flow on the phone and tablet emulators that launche
 ## Notes for next
 - `.maestro/smoke.yaml` (appId `app.pocketcp`) runs on `ui (phone)` and `ui (tablet)`; `maestro test .maestro/` picks up every flow in the directory.
 - Select by test tag (`id: nav_*`); tab state is checked with `selected: true`, which Compose exposes for nav items.
-- A placeholder title repeats its nav label, so the flow asserts `text: <Label>, index: 1` (a second node besides the nav item). A feature that replaces a placeholder must update its step in the flow.
+- A placeholder title repeats its nav label, so each step asserts the placeholder message (`text: "Arrives in Mx.*"`) and the title `above:` + `rightOf:` that message. Maestro compares top-left corners only, so this excludes the bottom bar (below) and the rail (left), and relies on the centred title being narrower than its message. A feature that replaces a placeholder must update its step.
+- Start each flow with `stopApp` before `launchApp: clearState: true`; clearing a running app raced with the relaunch and killed it in CI.
 - `takeScreenshot: <name>` lands in the `ui-<device>` artifact as `<run>/Shell smoke/takeScreenshot/<name>.png` (Maestro bundles it into `--test-output-dir`).
-- The emulator runs in the system default (light) theme; the flow does not switch to dark.
