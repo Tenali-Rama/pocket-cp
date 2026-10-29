@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 /** Windows at least this wide (Material 3 medium width) show the tokens in two columns. */
 private val TwoColumnMinWidth = 600.dp
 
-private const val CODE_SAMPLE = "if (a != b && i <= n) f = x -> x >= 0 // ==="
+/** Short enough for one line in the narrowest column (foldable, two columns); has `!=`, `<=`, `->`, `>=` ligatures. */
+private const val CODE_SAMPLE = "a != b && i <= n -> x >= 0"
 
 /** The token sheet: palette swatches, rank colours and the type scale of the current [PocketCpTheme]. */
 @Composable
@@ -158,13 +159,14 @@ private fun TypeScale(mode: ThemeMode) {
         TypeSample("Body 16: the quick brown fox", t.body)
         TypeSample("Body small 14: jumps over the lazy dog", t.bodySmall)
         TypeSample("Label 12", t.label)
-        TypeSample("Code, ligatures on", t.label, muted = true)
+        TypeSample("Code 14, ligatures on", t.label, muted = true)
         TypeSample(CODE_SAMPLE, t.code)
-        TypeSample("Code, ligatures off", t.label, muted = true)
+        TypeSample("Code 14, ligatures off", t.label, muted = true)
         PocketCpTheme(mode = mode, codeLigatures = false) {
             TypeSample(CODE_SAMPLE, PocketCpTheme.typography.code)
         }
-        TypeSample("Code small 12: for (int i = 0; i < n; ++i)", t.codeSmall)
+        TypeSample("Code small 12", t.label, muted = true)
+        TypeSample("for (int i = 0; i < n; ++i)", t.codeSmall)
     }
 }
 
