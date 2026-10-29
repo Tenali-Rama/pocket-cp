@@ -1,7 +1,8 @@
-# TEMPORARY negative control: must FAIL (wrong placeholder message). Removed before merge.
+# TEMPORARY negative control: must FAIL at the message step. Removed before merge.
 appId: app.pocketcp
 name: NEG wrong message
 ---
+- stopApp
 - launchApp:
     clearState: true
 - assertVisible:

@@ -2,12 +2,14 @@
 # Selects by test tag only (nav_* are exposed as resource ids), so the same flow drives the
 # bottom bar on phones and the navigation rail on tablets.
 # A placeholder's title repeats its nav label, so each content check is anchored to the content pane:
-# the placeholder message (text found nowhere in the nav) must be visible, and the title must sit
-# above it. On phones the bottom bar is below the content, so `above` excludes the nav item. On
-# tablets the rail item can also be above the message, so the title must also be right of the rail.
+# the placeholder message (text found nowhere in the nav) must be visible, and the title must be
+# `above` and `rightOf` it. Maestro compares top-left corners, so the phone bottom bar (below the
+# message) and the tablet rail (left of it) never match; the centred title is narrower than its message.
+# `stopApp` first: clearing data of a running app can race with the relaunch and kill it.
 appId: app.pocketcp
 name: Shell smoke
 ---
+- stopApp
 - launchApp:
     clearState: true
 - assertVisible:
@@ -19,17 +21,8 @@ name: Shell smoke
     text: Home
     above:
       text: "Arrives in M2: Browse.*"
-- runFlow:
-    when:
-      visible:
-        id: shell_rail
-    commands:
-      - assertVisible:
-          text: Home
-          above:
-            text: "Arrives in M2: Browse.*"
-          rightOf:
-            id: shell_rail
+    rightOf:
+      text: "Arrives in M2: Browse.*"
 - takeScreenshot: smoke_home
 
 - tapOn:
@@ -43,17 +36,8 @@ name: Shell smoke
     text: Contests
     above:
       text: "Arrives in M2: Browse.*"
-- runFlow:
-    when:
-      visible:
-        id: shell_rail
-    commands:
-      - assertVisible:
-          text: Contests
-          above:
-            text: "Arrives in M2: Browse.*"
-          rightOf:
-            id: shell_rail
+    rightOf:
+      text: "Arrives in M2: Browse.*"
 - takeScreenshot: smoke_contests
 
 - tapOn:
@@ -67,17 +51,8 @@ name: Shell smoke
     text: Problemset
     above:
       text: "Arrives in M2: Browse.*"
-- runFlow:
-    when:
-      visible:
-        id: shell_rail
-    commands:
-      - assertVisible:
-          text: Problemset
-          above:
-            text: "Arrives in M2: Browse.*"
-          rightOf:
-            id: shell_rail
+    rightOf:
+      text: "Arrives in M2: Browse.*"
 - takeScreenshot: smoke_problemset
 
 - tapOn:
@@ -91,17 +66,8 @@ name: Shell smoke
     text: Profile
     above:
       text: "Arrives in M9: Community.*"
-- runFlow:
-    when:
-      visible:
-        id: shell_rail
-    commands:
-      - assertVisible:
-          text: Profile
-          above:
-            text: "Arrives in M9: Community.*"
-          rightOf:
-            id: shell_rail
+    rightOf:
+      text: "Arrives in M9: Community.*"
 - takeScreenshot: smoke_profile
 
 - tapOn:
@@ -115,17 +81,8 @@ name: Shell smoke
     text: Settings
     above:
       text: "Arrives in M1: Data base & settings.*"
-- runFlow:
-    when:
-      visible:
-        id: shell_rail
-    commands:
-      - assertVisible:
-          text: Settings
-          above:
-            text: "Arrives in M1: Data base & settings.*"
-          rightOf:
-            id: shell_rail
+    rightOf:
+      text: "Arrives in M1: Data base & settings.*"
 - takeScreenshot: smoke_settings
 
 - back
@@ -137,4 +94,6 @@ name: Shell smoke
 - assertVisible:
     text: Home
     above:
+      text: "Arrives in M2: Browse.*"
+    rightOf:
       text: "Arrives in M2: Browse.*"
