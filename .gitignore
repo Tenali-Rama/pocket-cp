@@ -1,0 +1,13 @@
+.factory/
+.claude/worktrees/
+.claude/settings.local.json
+.gradle/
+build/
+local.properties
+*.jks
+*.keystore
+*.apk
+*.log
+.env
+.idea/
+.kotlin/

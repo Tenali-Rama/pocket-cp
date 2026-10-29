@@ -1,0 +1,110 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - if: hashFiles('gradlew') != ''
+        uses: gradle/actions/setup-gradle@v4
+      - name: Install ktlint
+        run: |
+          curl -fsSLo /usr/local/bin/ktlint https://github.com/pinterest/ktlint/releases/download/1.3.1/ktlint
+          chmod +x /usr/local/bin/ktlint
+      - run: scripts/verify.sh --full
+      # Mirrors the golden repo paths (see scripts/factory/shots.sh); agents look at these.
+      - if: always() && hashFiles('scripts/ci-collect-shots.sh') != ''
+        name: Collect screenshots
+        run: scripts/ci-collect-shots.sh .factory/shots-out
+      - if: always() && hashFiles('gradlew') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: .factory/shots-out/
+          if-no-files-found: ignore
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-logs
+          path: .factory/logs/
+
+  ui:
+    name: ui (${{ matrix.device }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: phone
+            profile: pixel_7
+          - device: tablet
+            profile: pixel_tablet
+    steps:
+      - uses: actions/checkout@v4
+      - id: has
+        run: echo "flows=$([ -x gradlew ] && [ -d .maestro ] && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+      - if: steps.has.outputs.flows == 'yes'
+        uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - if: steps.has.outputs.flows == 'yes'
+        uses: gradle/actions/setup-gradle@v4
+      - if: steps.has.outputs.flows == 'yes'
+        name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - if: steps.has.outputs.flows == 'yes'
+        run: |
+          ./gradlew :app:assembleDebug
+          curl -fsSL https://get.maestro.mobile.dev | bash
+      - if: steps.has.outputs.flows == 'yes'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: ${{ matrix.profile }}
+          disable-animations: true
+          script: |
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            $HOME/.maestro/bin/maestro test .maestro/ --format junit --output build/maestro-report.xml --test-output-dir build/maestro
+      - if: always() && steps.has.outputs.flows == 'yes'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-${{ matrix.device }}
+          path: build/maestro/
+          if-no-files-found: ignore
+
+  policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No AI attribution in commits
+        run: |
+          range=HEAD~1..HEAD
+          [ "${{ github.event_name }}" = pull_request ] && range="origin/${{ github.base_ref }}..HEAD"
+          if git log --format=%B "$range" \
+              | grep -iqE 'co-authored-by:.*(claude|anthropic)|generated with \[?claude'; then
+            echo "::error::Remove AI attribution lines from commit messages"; exit 1
+          fi
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
