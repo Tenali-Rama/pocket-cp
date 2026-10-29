@@ -19,5 +19,6 @@ const val SCREENSHOT_SDK = 34
  */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [SCREENSHOT_SDK])
-@Suppress("UnnecessaryAbstractClass") // A class, not an interface: JUnit and Robolectric inherit annotations only from classes.
+// A class, not an interface: JUnit and Robolectric inherit annotations only from classes.
+@Suppress("UnnecessaryAbstractClass")
 abstract class ScreenshotTest
