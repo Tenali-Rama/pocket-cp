@@ -1,3 +1,4 @@
+import app.pocketcp.buildlogic.configureScreenshots
 import app.pocketcp.buildlogic.libs
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
@@ -6,7 +7,10 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
-/** `pocketcp.android.compose`: Compose compiler, BOM and Material 3 for an app or library module. */
+/**
+ * `pocketcp.android.compose`: Compose compiler, BOM and Material 3 for an app or library module,
+ * plus Roborazzi screenshot tests (see [configureScreenshots]).
+ */
 class AndroidComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -30,6 +34,7 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
                     add("testImplementation", bom)
                     add("testImplementation", libs.findLibrary("androidx-compose-ui-test-junit4").get())
                 }
+                configureScreenshots()
             }
         }
     }
