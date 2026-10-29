@@ -44,24 +44,23 @@ fun captureMatrix(
     val captures =
         Device.entries.flatMap { device ->
             listOf(true, false).map { dark ->
-                { captureSingle(name, device, dark, themeWrapper = themeWrapper, content = content) }
+                { captureSingle(name, ScreenshotConfig(device, dark), themeWrapper, content) }
             }
         }
     runAllCaptures(captures)
 }
 
 /**
- * Captures [content] in one configuration, to `<name>_<device>_<theme>.png`.
- * For extra shots such as AMOLED (pass its [themeWrapper]) or a large [fontScale]; put that in [name].
+ * Captures [content] in one [config], to `<name>_<device>_<theme>.png`.
+ * For extra shots such as AMOLED (pass its [themeWrapper]) or 1.5x font (set `fontScale`); put the variant in [name].
  */
 fun captureSingle(
     name: String,
-    device: Device = Device.Phone,
-    dark: Boolean = true,
-    fontScale: Float = 1f,
+    config: ScreenshotConfig = ScreenshotConfig(),
     themeWrapper: ThemeWrapper = MaterialThemeWrapper,
     content: @Composable () -> Unit,
 ) {
+    val (device, dark, fontScale) = config
     val night = if (dark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
     val options =
         RoborazziComposeOptions {
@@ -72,18 +71,12 @@ fun captureSingle(
             fontScale(fontScale)
         }
     captureRoboImage(
-        file = File(roborazziSystemPropertyOutputDirectory(), screenshotFileName(name, device, dark)),
+        file = File(roborazziSystemPropertyOutputDirectory(), config.fileName(name)),
         roborazziComposeOptions = options,
     ) {
         themeWrapper(dark, content)
     }
 }
-
-internal fun screenshotFileName(
-    name: String,
-    device: Device,
-    dark: Boolean,
-): String = "${name}_${device.id}_${if (dark) "dark" else "light"}.png"
 
 /** Runs every capture; rethrows the first [AssertionError] (a Roborazzi diff) after all ran, the rest suppressed. */
 internal fun runAllCaptures(captures: List<() -> Unit>) {

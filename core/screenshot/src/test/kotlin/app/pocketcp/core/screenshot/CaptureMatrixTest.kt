@@ -8,8 +8,9 @@ import org.junit.Test
 class CaptureMatrixTest {
     @Test
     fun fileName_isNameDeviceTheme() {
-        assertEquals("contests_tablet_dark.png", screenshotFileName("contests", Device.Tablet, dark = true))
-        assertEquals("contests_foldable_light.png", screenshotFileName("contests", Device.Foldable, dark = false))
+        assertEquals("contests_tablet_dark.png", ScreenshotConfig(Device.Tablet, dark = true).fileName("contests"))
+        assertEquals("contests_foldable_light.png", ScreenshotConfig(Device.Foldable, dark = false).fileName("contests"))
+        assertEquals("contests_font150_phone_dark.png", ScreenshotConfig(fontScale = 1.5f).fileName("contests_font150"))
     }
 
     @Test
