@@ -19,6 +19,8 @@ rootProject.name = "PocketCP"
 
 include(":app")
 include(":core:adaptive")
+include(":core:codeforces")
 include(":core:designsystem")
 include(":core:network")
 include(":core:screenshot")
+include(":core:testing")

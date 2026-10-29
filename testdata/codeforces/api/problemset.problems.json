@@ -1,0 +1,69 @@
+{
+  "status": "OK",
+  "result": {
+    "problems": [
+      {
+        "contestId": 2276,
+        "index": "F",
+        "name": "Permutation Coloring Game",
+        "type": "PROGRAMMING",
+        "rating": 2400,
+        "tags": [
+          "brute force",
+          "dp",
+          "dsu",
+          "games",
+          "greedy",
+          "implementation",
+          "math"
+        ]
+      },
+      {
+        "contestId": 2274,
+        "index": "A",
+        "name": "The Projections of Paco",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "rating": 800,
+        "tags": [
+          "dfs and similar",
+          "dp",
+          "hashing",
+          "implementation",
+          "math"
+        ]
+      },
+      {
+        "contestId": 2273,
+        "index": "D",
+        "name": "Aura Battle",
+        "type": "PROGRAMMING",
+        "points": 2000.0,
+        "rating": 2600,
+        "tags": [
+          "brute force",
+          "implementation",
+          "interactive",
+          "math"
+        ]
+      }
+    ],
+    "problemStatistics": [
+      {
+        "contestId": 2276,
+        "index": "F",
+        "solvedCount": 760
+      },
+      {
+        "contestId": 2274,
+        "index": "A",
+        "solvedCount": 7690
+      },
+      {
+        "contestId": 2273,
+        "index": "D",
+        "solvedCount": 270
+      }
+    ]
+  }
+}

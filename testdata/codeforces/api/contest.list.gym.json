@@ -1,0 +1,36 @@
+{
+  "status": "OK",
+  "result": [
+    {
+      "id": 100299,
+      "name": "2013-2014 ACM ICPC Central European Regional Contest (CERC 13)",
+      "type": "ICPC",
+      "phase": "FINISHED",
+      "frozen": false,
+      "durationSeconds": 18000,
+      "startTimeSeconds": 1507293000,
+      "relativeTimeSeconds": 286017018,
+      "preparedBy": "MikeMirzayanov",
+      "websiteUrl": "http://cerc.tcs.uj.edu.pl/",
+      "description": "The competition will be hosted by Theoretical Computer Science Department at Jagiellonian University in Kraków from November 15th to 17th, drawing university students from seven countries (Austria, Croatia, Czech Republic, Hungary, Poland, Slovakia and Slovenia). The best teams will advance to ACM ICPC World Finals, to be held in Ekaterinburg, Russia, in 2014.",
+      "difficulty": 4,
+      "kind": "Official ICPC Contest",
+      "icpcRegion": "Central Europe Region",
+      "country": "Poland",
+      "city": "Krakow",
+      "season": "2013-2014"
+    },
+    {
+      "id": 100001,
+      "name": "2010 Codeforces Beta Round #1 (training)",
+      "type": "ICPC",
+      "phase": "FINISHED",
+      "frozen": false,
+      "durationSeconds": 7200,
+      "description": "This is the only contest for testing Codeforces::Gym. As you participate in any other training, you guarantee that you solve problems without assistance and that you do not send other people's solutions.",
+      "difficulty": 3,
+      "kind": "Training Contest",
+      "season": "2010-2011"
+    }
+  ]
+}
