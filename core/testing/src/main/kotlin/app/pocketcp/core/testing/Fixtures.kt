@@ -6,7 +6,7 @@ import java.io.File
 object Fixtures {
     private const val DIR = "testdata"
 
-    /** The `testdata/` directory, found by walking up from the working directory (Gradle runs tests in the module dir). */
+    /** The `testdata/` directory, found by walking up from the working directory (tests run in the module dir). */
     val root: File by lazy {
         generateSequence(File(System.getProperty("user.dir")).absoluteFile) { it.parentFile }
             .map { File(it, DIR) }

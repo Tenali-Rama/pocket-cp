@@ -36,7 +36,9 @@ class FixtureServerTest {
         runTest {
             val server = FixtureServer().map("/api/user.info?handles=tourist", USER_INFO)
 
-            val error = runCatching { server.execute(get("https://codeforces.com/api/contest.list?gym=true")) }.exceptionOrNull()
+            val request = get("https://codeforces.com/api/contest.list?gym=true")
+
+            val error = runCatching { server.execute(request) }.exceptionOrNull()
 
             assertTrue("got $error", error is AssertionError)
             assertTrue("got $error", error?.message.orEmpty().contains("/api/contest.list?gym=true"))

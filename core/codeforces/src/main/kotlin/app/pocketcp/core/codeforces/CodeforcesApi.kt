@@ -35,7 +35,10 @@ class CodeforcesApi(
     suspend fun contests(gym: Boolean = false): List<ContestDto> = call { service.contestList(gym.takeIf { it }) }
 
     /** `problemset.problems`: problems having all of [tags] (all problems when empty), with their solve counts. */
-    suspend fun problemset(tags: List<String> = emptyList()): ProblemsetDto = call { service.problemsetProblems(tags.joinOrNull()) }
+    suspend fun problemset(tags: List<String> = emptyList()): ProblemsetDto {
+        val joined = tags.joinOrNull()
+        return call { service.problemsetProblems(joined) }
+    }
 
     /** `user.info`: one profile per handle, in the order of [handles]. */
     suspend fun users(handles: List<String>): List<UserDto> {

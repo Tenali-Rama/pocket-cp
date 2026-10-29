@@ -30,8 +30,9 @@ class FixtureServer : HttpTransport {
     override suspend fun execute(request: Request): NetworkResponse {
         received += request
         val path = request.url.pathAndQuery()
-        val route = routes[path] ?: throw AssertionError("No fixture mapped for $path (mapped: ${routes.keys.sorted()})")
-        return NetworkResponse(route.code, headersOf(CONTENT_TYPE, contentType(route.fixture)), Fixtures.text(route.fixture))
+        val route = routes[path] ?: throw AssertionError("No fixture mapped for $path (mapped: ${routes.keys})")
+        val headers = headersOf(CONTENT_TYPE, contentType(route.fixture))
+        return NetworkResponse(route.code, headers, Fixtures.text(route.fixture))
     }
 
     private data class Route(
@@ -42,10 +43,12 @@ class FixtureServer : HttpTransport {
     companion object {
         const val HTTP_OK = 200
         private const val CONTENT_TYPE = "Content-Type"
+        private const val JSON = "application/json"
+        private const val HTML = "text/html; charset=utf-8"
 
         /** The key a request is matched on: its path and, if any, `?` and its decoded query. */
         private fun HttpUrl.pathAndQuery(): String = encodedPath + (query?.let { "?$it" } ?: "")
 
-        private fun contentType(fixture: String): String = if (fixture.endsWith(".json")) "application/json" else "text/html; charset=utf-8"
+        private fun contentType(fixture: String): String = if (fixture.endsWith(".json")) JSON else HTML
     }
 }

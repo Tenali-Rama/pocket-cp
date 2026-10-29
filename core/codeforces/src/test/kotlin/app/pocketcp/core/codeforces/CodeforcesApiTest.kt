@@ -115,12 +115,14 @@ class CodeforcesApiTest {
     @Test
     fun `a FAILED envelope with HTTP 400 becomes an Api error with the comment`() =
         runTest {
-            val server = FixtureServer().map("/api/user.info?handles=no_such_handle_zzzq", ApiFixtures.HANDLE_NOT_FOUND, code = 400)
+            val path = "/api/user.info?handles=no_such_handle_zzzq"
+            val server = FixtureServer().map(path, ApiFixtures.HANDLE_NOT_FOUND, code = 400)
 
             val error = withApi(server) { api -> failureOf { api.users(listOf("no_such_handle_zzzq")) } }
 
             assertTrue("got $error", error is CodeforcesError.Api)
-            assertEquals("handles: User with handle no_such_handle_zzzq not found", (error as CodeforcesError.Api).comment)
+            val comment = (error as CodeforcesError.Api).comment
+            assertEquals("handles: User with handle no_such_handle_zzzq not found", comment)
             assertEquals(1, server.requests.size)
         }
 
