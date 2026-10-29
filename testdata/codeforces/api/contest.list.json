@@ -1,0 +1,35 @@
+{
+  "status": "OK",
+  "result": [
+    {
+      "id": 2278,
+      "name": "Codeforces Round 1131 (Div. 3)",
+      "type": "ICPC",
+      "phase": "BEFORE",
+      "frozen": false,
+      "durationSeconds": 8100,
+      "startTimeSeconds": 1793457300,
+      "relativeTimeSeconds": -147320
+    },
+    {
+      "id": 2272,
+      "name": "Codeforces Round 1130 (Div. 2)",
+      "type": "CF",
+      "phase": "FINISHED",
+      "frozen": false,
+      "durationSeconds": 8100,
+      "startTimeSeconds": 1793025300,
+      "relativeTimeSeconds": 284680
+    },
+    {
+      "id": 2277,
+      "name": "Codeforces Round 1129 (Div. 2)",
+      "type": "CF",
+      "phase": "FINISHED",
+      "frozen": false,
+      "durationSeconds": 8100,
+      "startTimeSeconds": 1792839900,
+      "relativeTimeSeconds": 470080
+    }
+  ]
+}
