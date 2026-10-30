@@ -1,6 +1,7 @@
 package app.pocketcp.core.data
 
 import app.pocketcp.core.model.JudgeError
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -28,7 +29,7 @@ internal interface CachedDataset<T> {
     /** The dataset's `cache_meta` time, or null if never fetched. */
     suspend fun fetchedAtMillis(): Long?
 
-    /** Reads the judge and swaps the cache. Throws only `JudgeError`. */
+    /** Reads the judge and swaps the cache. Throws a `JudgeError` from the judge, or the cache's write error. */
     suspend fun fetch()
 }
 
@@ -84,12 +85,19 @@ internal class CachedResource<T>(
         return clock.millis() - fetchedAt in 0..maxAge.toMillis()
     }
 
+    /** Any failure but cancellation ends as an error state: a refresh must never crash the app's scope. */
+    @Suppress("TooGenericExceptionCaught", "RethrowCaughtException")
     private suspend fun run() {
         try {
             dataset.fetch()
             status.value = Status()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (error: JudgeError) {
             status.value = Status(error = error)
+        } catch (error: Exception) {
+            // E.g. an SQLiteException from the cache write (disk full, corrupt file).
+            status.value = Status(error = JudgeError.Unavailable(error))
         } finally {
             status.update { it.copy(refreshing = false) }
         }

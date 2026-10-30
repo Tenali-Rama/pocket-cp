@@ -1,13 +1,13 @@
 # core/database API
 
-The app's Room database (version 1): cache tables for contests and problems, and `cache_meta` with when each dataset was last fetched.
+The app's Room database (version 2): cache tables for contests and problems, and `cache_meta` with when each dataset was last fetched.
 
 Package `app.pocketcp.core.database`. Hilt: `DatabaseModule` provides `PocketCpDatabase` (singleton, file `pocketcp.db`), `ContestDao`, `ProblemDao` and `CacheMetaDao`.
 
 ## Entities
 | Entity (table) | Key | Fields |
 |----------------|-----|--------|
-| `ContestEntity` (`contests`) | `id: Int` | `name`, `phase: String` (`ContestPhase` name), `startEpochSeconds: Long?`, `durationSeconds: Long`, `isGym` |
+| `ContestEntity` (`contests`) | `id: Int` | `name`, `phase: String` (`ContestPhase` name), `startEpochSeconds: Long?`, `durationSeconds: Long`, `isGym`, `kind: String` (`ContestKind` name; SQL default `'Unknown'`) |
 | `ProblemEntity` (`problems`) | `(contestId: Int, index: String)` | `name`, `rating: Int?`, `tags: List<String>` (JSON array column), `solvedCount: Int?` |
 | `CacheMetaEntity` (`cache_meta`) | `key: String` | `fetchedAtEpochMillis: Long` |
 
@@ -24,3 +24,7 @@ Package `app.pocketcp.core.database`. Hilt: `DatabaseModule` provides `PocketCpD
   - `suspend fun fetchedAt(key: String): Long?`: epoch millis of the last `replaceAll` for that key, or null.
 
 Every `Flow` re-emits after a `replaceAll` of its table.
+
+## Migrations
+`DatabaseModule` registers every migration; there is no destructive fallback.
+- `1 → 2`: adds `contests.kind` (`Unknown` for cached rows) and deletes both contest datasets' `cache_meta` rows, so the next read refetches them. The problemset's row is kept.

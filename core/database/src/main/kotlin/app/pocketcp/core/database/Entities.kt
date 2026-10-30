@@ -1,11 +1,13 @@
 package app.pocketcp.core.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
  * One cached contest. Fields mirror `core/model`'s `Contest`; core/data maps between the two.
- * [phase] is the `ContestPhase` name. [startEpochSeconds] is null when the judge gives no start time.
+ * [phase] is the `ContestPhase` name and [kind] the `ContestKind` name. [startEpochSeconds] is null when the judge
+ * gives no start time. Rows cached before version 2 read `Unknown` as their [kind].
  */
 @Entity(tableName = "contests")
 data class ContestEntity(
@@ -15,6 +17,7 @@ data class ContestEntity(
     val startEpochSeconds: Long?,
     val durationSeconds: Long,
     val isGym: Boolean,
+    @ColumnInfo(defaultValue = "'Unknown'") val kind: String,
 )
 
 /** One cached problemset problem, keyed like `ProblemId(contestId, index)`. */

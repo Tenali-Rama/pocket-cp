@@ -2,7 +2,7 @@
 id: 028
 title: Contest kind and division in the domain and cache; refresh survives Room write errors
 milestone: M2
-status: todo
+status: done
 deps: []
 touches: [core/model/src/main/kotlin/app/pocketcp/core/model/Contest.kt, core/model/src/main/kotlin/app/pocketcp/core/model/JudgeError.kt, core/model/src/test/kotlin/app/pocketcp/core/model/ContestDivisionTest.kt, core/model/API.md, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesMapping.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesJudgeSourceTest.kt, core/database/src/main/kotlin/app/pocketcp/core/database/Entities.kt, core/database/src/main/kotlin/app/pocketcp/core/database/PocketCpDatabase.kt, core/database/src/main/kotlin/app/pocketcp/core/database/DatabaseModule.kt, core/database/src/main/kotlin/app/pocketcp/core/database/Migrations.kt, core/database/src/test/, core/database/schemas/, core/database/build.gradle.kts, core/database/API.md, core/data/src/main/kotlin/app/pocketcp/core/data/Mappers.kt, core/data/src/main/kotlin/app/pocketcp/core/data/CachedResource.kt, core/data/src/test/kotlin/app/pocketcp/core/data/MappersTest.kt, core/data/src/test/kotlin/app/pocketcp/core/data/StaleWhileRevalidateTest.kt, core/data/API.md, gradle/libs.versions.toml]
 spec: ["7.2 Contests", "7.3 Problemset", "4. Platform & Architecture"]
@@ -25,4 +25,8 @@ Contests can be filtered by division and type (spec §7.2, and the problemset's 
 - Filters UI (030, 033). Gym-specific fields (M8).
 
 ## Notes for next
-<!-- builder fills in -->
+- `Contest.division` is a body `val` (computed once per instance from `name`, outside `equals`); `ContestDivision.of(name)` is public for filters that only have a name (e.g. a problem's contest in 033).
+- Division regexes accept `Div. 1 + Div. 2` and `Div. 1 + 2`; Educational/Global win over any stated division (task default).
+- `contests.kind` has SQL default `'Unknown'` (`@ColumnInfo`) but no Kotlin default on `ContestEntity`, so every write states it. Migrations live in `Migrations.kt` (`ALL_MIGRATIONS`); the next schema change appends one there and adds a case to `MigrationTest`.
+- `2.json` was written by hand (the VM can't run Room's KSP); its identityHash was recomputed with Room's algorithm and cross-checked by reproducing `1.json`'s hash. `MigrationTest` opens the migrated file with Room, which verifies that hash.
+- `CachedResource.run()` maps any non-`JudgeError`, non-cancellation failure to `JudgeError.Unavailable(cause)`.

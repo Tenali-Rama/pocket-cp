@@ -4,6 +4,7 @@ import app.pocketcp.core.codeforces.ApiFixtures
 import app.pocketcp.core.codeforces.withApi
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
+import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.JudgeId
 import app.pocketcp.core.model.Problem
@@ -63,9 +64,28 @@ class CodeforcesJudgeSourceTest {
                     start = Instant.parse("2026-10-31T14:35:00Z"),
                     duration = Duration.ofMinutes(135),
                     isGym = false,
+                    kind = ContestKind.Icpc,
                 )
             assertEquals(expected, upcoming)
         }
+
+    @Test
+    fun `contest types map to kinds`() =
+        runTest {
+            val server = FixtureServer().map("/api/contest.list", ApiFixtures.CONTESTS)
+
+            val contests = withSource(server) { it.contests(gym = false) }
+
+            val expected = listOf(2278 to ContestKind.Icpc, 2272 to ContestKind.Cf, 2277 to ContestKind.Cf)
+            assertEquals(expected, contests.map { it.id.value to it.kind })
+        }
+
+    @Test
+    fun `IOI maps to Ioi, and an unknown type to Unknown`() {
+        // The recorded contest.list has no IOI round.
+        assertEquals(ContestKind.Ioi, contestKind("IOI"))
+        assertEquals(ContestKind.Unknown, contestKind("TEAM"))
+    }
 
     @Test
     fun `gym=true marks every contest as a gym and keeps a missing start null`() =

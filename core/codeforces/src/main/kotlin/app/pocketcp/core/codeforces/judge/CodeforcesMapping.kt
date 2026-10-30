@@ -6,6 +6,7 @@ import app.pocketcp.core.codeforces.ProblemsetDto
 import app.pocketcp.core.codeforces.UserDto
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
+import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
@@ -28,7 +29,17 @@ internal fun ContestDto.toContest(isGym: Boolean): Contest =
         start = startTimeSeconds?.let(Instant::ofEpochSecond),
         duration = Duration.ofSeconds(durationSeconds),
         isGym = isGym,
+        kind = contestKind(type),
     )
+
+/** The API's `type` string; a type this app doesn't know yet is [ContestKind.Unknown], never an error. */
+internal fun contestKind(type: String): ContestKind =
+    when (type) {
+        "CF" -> ContestKind.Cf
+        "ICPC" -> ContestKind.Icpc
+        "IOI" -> ContestKind.Ioi
+        else -> ContestKind.Unknown
+    }
 
 /** The API's `phase` string; a phase this app doesn't know yet is [ContestPhase.Unknown], never an error. */
 internal fun contestPhase(phase: String): ContestPhase =

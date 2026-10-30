@@ -15,7 +15,7 @@ sealed class JudgeError(
         cause: Throwable? = null,
     ) : JudgeError("Judge rate limit exceeded", cause)
 
-    /** The judge is down or answered with an unexpected HTTP status. */
+    /** The judge is down or temporarily unreachable (e.g. HTTP 503); other unexpected statuses are `Malformed`. */
     class Unavailable(
         cause: Throwable? = null,
     ) : JudgeError("Judge unavailable", cause)

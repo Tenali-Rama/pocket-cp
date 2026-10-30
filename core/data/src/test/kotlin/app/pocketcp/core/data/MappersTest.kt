@@ -3,6 +3,7 @@ package app.pocketcp.core.data
 import app.pocketcp.core.database.ContestEntity
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
+import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
@@ -22,19 +23,36 @@ class MappersTest {
                 Instant.ofEpochSecond(1_721_000_000L),
                 Duration.ofHours(2),
                 false,
+                ContestKind.Cf,
             )
         val gym = Contest(ContestId(100_001), "Training gym", ContestPhase.Finished, null, Duration.ofHours(5), true)
 
         listOf(round, gym).forEach { assertEquals(it, it.toEntity().toDomain()) }
-        assertEquals(ContestEntity(2000, "Codeforces Round 960", "Running", 1_721_000_000L, 7_200L, false), round.toEntity())
+        assertEquals(
+            ContestEntity(2000, "Codeforces Round 960", "Running", 1_721_000_000L, 7_200L, false, "Cf"),
+            round.toEntity(),
+        )
     }
 
     @Test
     fun `every phase round-trips, and an unknown stored phase reads as Unknown`() {
-        val base = ContestEntity(1, "Round 1", "Finished", null, 7_200L, false)
+        val base = ContestEntity(1, "Round 1", "Finished", null, 7_200L, false, "Cf")
 
         ContestPhase.entries.forEach { phase -> assertEquals(phase, base.copy(phase = phase.name).toDomain().phase) }
         assertEquals(ContestPhase.Unknown, base.copy(phase = "Paused").toDomain().phase)
+    }
+
+    @Test
+    fun `every kind round-trips, and an unknown stored kind reads as Unknown`() {
+        val base = Contest(ContestId(1), "Round 1", ContestPhase.Finished, null, Duration.ofHours(2), false)
+
+        ContestKind.entries.forEach { kind ->
+            val contest = base.copy(kind = kind)
+            assertEquals(kind.name, contest.toEntity().kind)
+            assertEquals(contest, contest.toEntity().toDomain())
+        }
+        val stored = base.toEntity().copy(kind = "Team")
+        assertEquals(ContestKind.Unknown, stored.toDomain().kind)
     }
 
     @Test

@@ -6,6 +6,8 @@ plugins {
 
 android {
     namespace = "app.pocketcp.core.database"
+    // MigrationTestHelper reads each version's committed schema from the test assets.
+    sourceSets.getByName("test").assets.srcDir("$projectDir/schemas")
 }
 
 room {
@@ -25,6 +27,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
+    testImplementation(libs.room.testing)
+    testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.hilt.android.testing)
     kspTest(libs.hilt.compiler)
 }
