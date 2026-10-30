@@ -28,6 +28,7 @@ step size scripts/factory/check-size.sh
 step modules scripts/factory/check-modules.sh
 step modules-test scripts/factory/test-check-modules.sh
 step collect-shots-test scripts/factory/test-ci-collect-shots.sh
+step ui-flows-test scripts/factory/test-ci-ui-flows.sh
 step shots-test scripts/factory/test-shots.sh
 
 if [ -n "$(git ls-files '*.kt' '*.kts')" ]; then
