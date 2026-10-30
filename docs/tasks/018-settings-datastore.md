@@ -2,7 +2,7 @@
 id: 018
 title: Settings store on DataStore in core/datastore
 milestone: M1
-status: todo
+status: done
 deps: [014]
 touches: [core/datastore/, settings.gradle.kts+, gradle/libs.versions.toml, docs/decisions/]
 spec: ["4. Platform & Architecture", "15. Settings"]
@@ -33,4 +33,8 @@ spec: ["4. Platform & Architecture", "15. Settings"]
 - Editor, run, AI, focus, data and account settings (their milestones). Applying the settings (020). The UI (021).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Inject `SettingsRepository` (interface); the DataStore implementation is internal. Tests of consumers should use a fake, not a real store.
+- `app` does not depend on `:core:datastore` yet: 020 adds it when it applies theme/text size/density.
+- An optional module registers with `@Provides @IntoSet fun ...(): OptionalModule` in its own Hilt module; a module is shown when installed and not in `UserSettings.disabledModules`.
+- New settings: add a field with a default, a name in `DataStoreSettingsRepository.Keys`, a setter and a round-trip test (core/datastore/CLAUDE.md). Secrets never go here (ADR 0010).
+- Only one DataStore per file per process: tests use `settingsDataStore(backgroundScope) { tmpFile }`, and the Hilt module test has a single test method.
