@@ -18,12 +18,22 @@ private val NoWrapper: ThemeWrapper = { _, content -> content() }
 /**
  * `shell_<device>_<theme>`: the app root as launched, theme picked from the capture's night mode.
  * `shell_amoled_phone_dark`, `shell_compact_tablet_dark`, `shell_textLargest_phone_dark`: stored appearance settings.
+ * `shell_offline_<device>_<theme>`, `shell_offline_font150_phone_dark`: the offline banner (spec §14).
  */
 class ShellScreenshotTest : ScreenshotTest() {
     private val entries = shellTestEntries
 
     @Test
     fun shell() = captureMatrix("shell", themeWrapper = NoWrapper) { PocketCpApp(entries) }
+
+    @Test
+    fun offline() = captureMatrix("shell_offline", themeWrapper = NoWrapper) { PocketCpApp(entries, online = false) }
+
+    @Test
+    fun offlineLargeFont() =
+        captureSingle("shell_offline_font150", ScreenshotConfig(fontScale = 1.5f), NoWrapper) {
+            PocketCpApp(entries, online = false)
+        }
 
     @Test
     fun amoled() =

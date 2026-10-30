@@ -1,6 +1,7 @@
 package app.pocketcp.shell
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -29,11 +30,13 @@ import app.pocketcp.core.navigation.FeatureEntry
  * The app shell: the [entries]' destinations in a bottom bar (compact width) or a navigation rail (wider),
  * next to a nav host holding every entry's screens. The first entry is the start destination; [entries] must
  * already be in navigation order. [windowInsets] are the system bars the chrome and content keep clear of.
+ * While [offline], an [OfflineBanner] sits at the top of the content, under the status bar and beside the rail.
  */
 @Composable
 fun PocketCpShell(
     entries: List<FeatureEntry>,
     modifier: Modifier = Modifier,
+    offline: Boolean = false,
     windowInsets: WindowInsets = WindowInsets.systemBars,
     navController: NavHostController = rememberNavController(),
 ) {
@@ -52,14 +55,19 @@ fun PocketCpShell(
                 }
             }
         }
+    val content: @Composable ColumnScope.() -> Unit = {
+        if (offline) OfflineBanner()
+        navHost(Modifier.weight(1f).fillMaxWidth())
+    }
     when (LocalWindowLayout.current.navigationType) {
         NavigationType.BottomBar ->
             Column(modifier) {
-                navHost(
+                Column(
                     Modifier
                         .weight(1f)
                         .fillMaxWidth()
                         .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
+                    content = content,
                 )
                 ShellBottomBar(
                     destinations,
@@ -76,11 +84,12 @@ fun PocketCpShell(
                     onSelect,
                     windowInsets.only(WindowInsetsSides.Start + WindowInsetsSides.Vertical),
                 )
-                navHost(
+                Column(
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
                         .windowInsetsPadding(windowInsets.only(WindowInsetsSides.End + WindowInsetsSides.Vertical)),
+                    content = content,
                 )
             }
     }
