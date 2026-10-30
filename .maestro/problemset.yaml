@@ -31,8 +31,9 @@ name: Problemset search and spoiler hiding
     text: ".*dsu.*"
 - tapOn:
     id: problemset_menu
+# The menu is a popup window, outside the root that exposes test tags as resource ids: tap its text.
 - tapOn:
-    id: problemset_hide_tags
+    text: "Hide tags"
 - assertNotVisible:
     text: ".*dsu.*"
 

@@ -8,5 +8,5 @@
 - With ratings hidden the rating orders are not offered and the list falls back to Newest (`ProblemsetOptions.effectiveSort`); the chosen order returns when ratings are shown again.
 - Rows are `core/ui`'s `ProblemRow` with both toggles applied to every row.
 - Layout follows the window width class (`LocalWindowLayout`): compact shows the search field and sort chips above the list; medium and wider show search pane | list.
-- Test tags are Maestro ids, so never rename one: `problemset_search`, `problemset_search_clear`, `problemset_menu`, `problemset_hide_tags`, `problemset_hide_ratings`, `problemset_sort_<lower-case ProblemSort>`, plus `core/ui`'s `problem_<display>`.
+- Test tags are Maestro ids, so never rename one: `problemset_search`, `problemset_search_clear`, `problemset_menu`, `problemset_sort_<lower-case ProblemSort>`, plus `core/ui`'s `problem_<display>`. The menu items `problemset_hide_tags` and `problemset_hide_ratings` sit in a popup window, which does not expose tags as resource ids: Maestro taps their text.
 - The view model is built by `ProblemsetEntry` with `viewModel { }` (ADR 0012); `ProblemsetScreen` stays stateless for screenshots, which show `problemset.problems.json` (`FixtureProblems`).

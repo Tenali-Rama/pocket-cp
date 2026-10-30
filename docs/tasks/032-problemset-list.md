@@ -2,7 +2,7 @@
 id: 032
 title: Problemset feature with search by name or ID, sort and spoiler hiding
 milestone: M2
-status: todo
+status: done
 deps: [025, 026, 027, 029]
 touches: [feature/problemset/, settings.gradle.kts+, app/build.gradle.kts+, .maestro/problemset.yaml]
 spec: ["7.3 Problemset", "2. Product Principles", "3. Performance Budgets"]
@@ -39,4 +39,8 @@ The Problemset tab is a native, cache-first list of the whole Codeforces problem
 - Tag/rating/division filters and random (033). Status badges and solved/unsolved (M4). Opening a problem (M3).
 
 ## Notes for next
-<!-- builder fills in -->
+- The fixture has no contest 1900, so `problemset_search_phone_dark` searches contest `2274`; Maestro searches `2274A` and uses 2276F's `dsu` tag for the spoiler check.
+- With ratings hidden the rating sorts are omitted and the list falls back to Newest (`ProblemsetOptions.effectiveSort`); the saved choice returns when ratings are shown again.
+- The search field reads `ProblemsetViewModel.searchText` (Compose state, set per keystroke), not the async state, so typing never drops characters.
+- 033 adds its tag/rating/division filters to `ProblemsetOptions` and the search pane (`SearchPane`, compact: below the sort chips).
+- A new search or order scrolls the list to the top; rotation keeps the position (`rememberSaveable` of the last query/sort).

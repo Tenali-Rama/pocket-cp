@@ -14,7 +14,7 @@ Package `app.pocketcp.feature.problemset`. The app adds it with `implementation(
 | `ProblemQuery(text)` | `matches(problem)`: trimmed, case-insensitive; `^\d+[A-Za-z]\d*$` or `^\d+$` match by `display` prefix, anything else by name substring. |
 | `ProblemSort` | `Newest` (default), `RatingAscending`, `RatingDescending`, `MostSolved`, `Name`. Unrated problems sort last in both rating orders. |
 
-Test tags (Maestro ids): `problemset_search`, `problemset_search_clear`, `problemset_menu`, `problemset_hide_tags`, `problemset_hide_ratings`,
+Test tags (Maestro ids): `problemset_search`, `problemset_search_clear`, `problemset_menu`, `problemset_hide_tags` and `problemset_hide_ratings` (popup: Compose tests only),
 `problemset_sort_<newest|ratingascending|ratingdescending|mostsolved|name>`, and `core/ui`'s `problem_<display>`.
 
 Screenshots: `problemset_<device>_<theme>`, `problemset_search_phone_dark`, `problemset_hiddenSpoilers_phone_dark`, `problemset_empty_phone_dark`,
