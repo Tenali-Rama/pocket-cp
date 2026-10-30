@@ -11,6 +11,8 @@ android {
 dependencies {
     // `FeatureEntry.register` takes a `NavGraphBuilder`; features add screens with navigation-compose's `composable`.
     api(libs.androidx.navigation.compose)
+    // `FeatureEntry.module` is an `OptionalModule`.
+    api(project(":core:model"))
 
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit)

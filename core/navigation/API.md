@@ -2,7 +2,7 @@
 
 The extension point of the app shell: `TopLevelDestination` and `FeatureEntry`, which features contribute through a Hilt `Set<FeatureEntry>` multibinding.
 
-Package `app.pocketcp.core.navigation`. Add with `implementation(project(":core:navigation"))`; it exposes navigation-compose as `api`.
+Package `app.pocketcp.core.navigation`. Add with `implementation(project(":core:navigation"))`; it exposes navigation-compose and `core:model` as `api`.
 
 ```kotlin
 class ContestsEntry @Inject constructor() : FeatureEntry {
@@ -18,8 +18,9 @@ Then delete the matching placeholder line in the app's `PlaceholderModule`.
 | Symbol | What it is |
 |--------|-----------|
 | `TopLevelDestination(route, label, icon, order)` | One bottom-bar / rail item. `label` is a string resource (text and content description); `testTag` is `nav_<route>`. `@Immutable`. |
-| `FeatureEntry` | `destination` plus `register(graph: NavGraphBuilder)`, which adds the feature's screens (at least `destination.route`). |
+| `FeatureEntry` | `destination` plus `register(graph: NavGraphBuilder)`, which adds the feature's screens (at least `destination.route`). `module: OptionalModule?` defaults to `null` (always shown); an optional module's entry overrides it. |
 | `Iterable<FeatureEntry>.inNavigationOrder()` | Ascending `order`, ties broken by route. The shell's only ordering. |
+| `Iterable<FeatureEntry>.withoutDisabled(disabledModules)` | Drops entries whose `module` is disabled; the shell applies it to `UserSettings.disabledModules`. |
 | `NavigationModule` | Hilt `@Multibinds` declaration of `Set<FeatureEntry>` (valid when empty). |
 
 Orders in use: Home 0, Contests 10, Problemset 20, Profile 30, Settings 40.

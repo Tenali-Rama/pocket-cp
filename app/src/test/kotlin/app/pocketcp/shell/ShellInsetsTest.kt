@@ -7,7 +7,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.pocketcp.core.navigation.inNavigationOrder
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -20,7 +19,7 @@ class ShellInsetsTest {
     @get:Rule
     val rule = createAndroidComposeRule<ComponentActivity>()
 
-    private val entries = PlaceholderModule.placeholders().inNavigationOrder()
+    private val entries = shellTestEntries
     private val fakeInsets = WindowInsets(left = 24.dp, bottom = 48.dp)
 
     @Test

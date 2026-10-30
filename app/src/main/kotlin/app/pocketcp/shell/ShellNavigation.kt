@@ -1,6 +1,7 @@
 package app.pocketcp.shell
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -20,8 +22,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.navigation.TopLevelDestination
+import kotlin.math.floor
+import kotlin.math.max
 
 /** The bottom bar including its inset padding. */
 internal const val BOTTOM_BAR_TAG = "shell_bottom_bar"
@@ -65,7 +70,7 @@ internal fun ShellBottomBar(
                     selected = destination.route == selectedRoute,
                     onClick = { onSelect(destination.route) },
                     icon = { Icon(destination.icon, contentDescription = null) },
-                    label = { Text(label) },
+                    label = { NavLabel(label) },
                     modifier = Modifier.navItem(destination, label),
                 )
             }
@@ -100,12 +105,39 @@ internal fun ShellRail(
                     selected = destination.route == selectedRoute,
                     onClick = { onSelect(destination.route) },
                     icon = { Icon(destination.icon, contentDescription = null) },
-                    label = { Text(label) },
+                    label = { NavLabel(label) },
                     modifier = Modifier.navItem(destination, label),
                 )
             }
         }
         VerticalDivider(color = colors.outline)
+    }
+}
+
+/** The smallest a nav label shrinks to, as a fraction of the theme's label size. */
+private const val MIN_LABEL_SCALE = 0.7f
+
+/** Shrink factors are floored to this many steps per 1.0, so the shrunk label is safely inside its item. */
+private const val LABEL_SCALE_STEPS = 20
+
+/**
+ * A nav item's label: the theme's label style when it fits on one line, otherwise shrunk (down to
+ * [MIN_LABEL_SCALE]) rather than wrapped or clipped, as happens with a large text size.
+ */
+@Composable
+private fun NavLabel(text: String) {
+    val style = LocalTextStyle.current
+    val measurer = rememberTextMeasurer()
+    BoxWithConstraints {
+        val width = measurer.measure(text, style, maxLines = 1, softWrap = false).size.width
+        val fitted =
+            if (!constraints.hasBoundedWidth || width <= constraints.maxWidth) {
+                style
+            } else {
+                val ratio = floor(constraints.maxWidth.toFloat() / width * LABEL_SCALE_STEPS) / LABEL_SCALE_STEPS
+                style.copy(fontSize = style.fontSize * max(MIN_LABEL_SCALE, ratio))
+            }
+        Text(text, style = fitted, maxLines = 1)
     }
 }
 

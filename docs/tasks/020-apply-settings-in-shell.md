@@ -2,7 +2,7 @@
 id: 020
 title: Shell applies appearance settings and hides disabled modules
 milestone: M1
-status: todo
+status: done
 deps: [018, 019]
 touches: [app/src/main/kotlin/app/pocketcp/MainActivity.kt, app/src/main/kotlin/app/pocketcp/shell/PocketCpApp.kt, app/src/main/kotlin/app/pocketcp/shell/AppearanceMapping.kt, app/src/test/kotlin/app/pocketcp/shell/, app/src/test/screenshots/, app/build.gradle.kts+, app/API.md, core/navigation/src/main/kotlin/app/pocketcp/core/navigation/FeatureEntry.kt, core/navigation/src/test/, core/navigation/build.gradle.kts, core/navigation/API.md]
 spec: ["15. Settings", "5. Design & Layout"]
@@ -33,4 +33,8 @@ The app reads `SettingsRepository` and applies it live: theme, text sizes, ligat
 - The Settings UI (021). The offline banner (023). `PocketCpShell.kt` (023 edits it).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- `MainActivity` passes `SettingsRepository.settings` to `PocketCpApp(entries, Flow<UserSettings>)`; nothing is drawn until the first emission. Tests needing real DataStore (e.g. `MainActivityTest`) must `waitUntil` the shell appears.
+- An optional module's entry overrides `FeatureEntry.module`; the shell filters with `withoutDisabled(disabledModules)` before `PocketCpShell`, so the NavHost doesn't register it either.
+- Toggling a module changes the entries list, which rebuilds the NavHost graph and may reset the back stack to Home. 021 (Settings) should check that toggling from the Settings tab keeps the user there.
+- `shellTestEntries` use the production `PlaceholderEntry` class and the `nav_*` / `placeholder_*` strings: a feature replacing a placeholder must keep those strings (or move the test entries to its own) so shell goldens stay unchanged.
+- Text-size scales (0.9 / 1.0 / 1.15 / 1.3) live in `AppearanceMapping.kt` (`TextSizePreference.scale`); the Settings UI should reuse them.

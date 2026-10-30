@@ -53,6 +53,7 @@ dependencies {
     // The JudgeSource binding; DataWiringTest checks it reaches the core/data repositories.
     implementation(project(":core:codeforces"))
     implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
 

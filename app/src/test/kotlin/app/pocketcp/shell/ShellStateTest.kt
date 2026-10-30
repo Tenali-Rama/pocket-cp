@@ -21,7 +21,6 @@ import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.pocketcp.core.navigation.inNavigationOrder
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
@@ -33,7 +32,7 @@ class ShellStateTest {
     @get:Rule
     val rule = createAndroidComposeRule<ComponentActivity>()
 
-    private val entries = PlaceholderModule.placeholders().inNavigationOrder()
+    private val entries = shellTestEntries
 
     @Test
     fun selectedDestination_survivesStateRestoration() {
