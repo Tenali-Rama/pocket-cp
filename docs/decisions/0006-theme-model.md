@@ -8,4 +8,5 @@
   - Rank colours keep the Codeforces hues; each theme has its own shade where the original fails 4.5:1 on that theme's surfaces (e.g. Expert blue is lightened on dark, Master orange darkened on light). Unrated uses the plain text colour.
   - `ContrastTest` enforces ≥ 4.5:1 for every text pair and every rank colour on `background`, `surface`, `surfaceRaised`.
   - UI font: platform sans-serif. Code font: bundled JetBrains Mono (OFL), ligatures toggled with `font-feature-settings`.
+  - Density and text size are theme inputs, not separate tokens: `UiDensity.Compact` only trims row/card vertical spacing tokens (touch targets stay 48 dp); `textScale` / `codeTextScale` multiply the UI and code type scales, on top of the system font scale.
 - **Consequences**: New colours must pass `ContrastTest` in all three themes. Never use exact Codeforces hex values directly: they fail AA on dark. A user font setting (M1) only swaps families in `PocketCpTypography.kt`.
