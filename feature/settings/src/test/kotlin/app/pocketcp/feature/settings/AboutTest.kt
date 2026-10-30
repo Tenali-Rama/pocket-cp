@@ -10,6 +10,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -17,6 +18,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.pocketcp.core.adaptive.WindowWidthClass
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -49,6 +51,27 @@ class AboutTest {
     }
 
     @Test
+    fun missingVersionName_readsAsVersionUnknown() {
+        shadowOf(context.packageManager).getInternalMutablePackageInfo(context.packageName).versionName = null
+
+        assertNull(context.installedAppInfo().versionName)
+        showAbout()
+        rule.onNodeWithTag("settings_about_version").assertTextEquals("Version unknown")
+    }
+
+    @Test
+    fun aboutPage_beforeTheAppInfoIsRead_showsTheDisclaimerWithoutAVersion() {
+        rule.setContent {
+            Themed(WindowWidthClass.Compact) {
+                AboutSettings(app = null)
+            }
+        }
+
+        rule.onNodeWithTag("settings_about_version").assertDoesNotExist()
+        rule.onNodeWithTag("settings_about_disclaimer").assertIsDisplayed()
+    }
+
+    @Test
     fun disclaimer_isPresentAndReadableByTalkBack() {
         val disclaimer = context.getString(R.string.settings_about_disclaimer)
         showAbout()
@@ -69,5 +92,13 @@ class AboutTest {
             }
         }
         rule.onNodeWithTag("settings_category_about").performClick()
+        // The app info is read off the main thread; wait for it to land.
+        rule.waitUntil(timeoutMillis = APP_INFO_TIMEOUT_MS) {
+            rule.onAllNodesWithTag("settings_about_version").fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private companion object {
+        const val APP_INFO_TIMEOUT_MS = 5_000L
     }
 }

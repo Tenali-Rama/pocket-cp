@@ -7,5 +7,5 @@
 - Test tags are Maestro ids, so never rename one: `settings_category_<category>`, `settings_<group>_<key>` for choices (e.g. `settings_theme_light`), `settings_code_ligatures`, `settings_module_<OptionalModule.key>`, `settings_about_<name|version|disclaimer|licence>`.
 - Layout follows the window width class: compact shows the category list or one page (with a back arrow and `BackHandler`); medium and wider show list | page. Read it from `LocalWindowLayout`.
 - Features lists only installed modules (`Set<OptionalModule>`); the category is hidden when none is installed. Every `OptionalModule` needs a title and a one-line description in `SettingsPages.kt`.
-- About is always the last category. Its name and version come from the package manager (`installedAppInfo()`, read in `SettingsRoute`); never hard-code them.
+- About is always the last category. Its name and version come from the package manager (`installedAppInfo()`, read off the main thread in `SettingsRoute`; About omits them while `null`); never hard-code them.
 - The view model is built by `SettingsEntry` with `viewModel { }` (ADR 0012); `SettingsScreen` stays stateless for screenshots.

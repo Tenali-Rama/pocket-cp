@@ -12,7 +12,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,20 +27,29 @@ import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.designsystem.component.LoadingPlaceholder
 import app.pocketcp.core.designsystem.component.PcpListItem
 import app.pocketcp.core.designsystem.component.PcpTopAppBar
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Share of the width the category list takes next to the detail pane (list 2 : detail 3). */
 private const val LIST_PANE_WEIGHT = 2f
 private const val DETAIL_PANE_WEIGHT = 3f
 
-/** [SettingsScreen] with the open category kept across rotation and process death, and the installed app's info. */
+/**
+ * [SettingsScreen] with the open category kept across rotation and process death, and the installed app's info,
+ * read from the package manager on [ioDispatcher] (it is a binder call, so never on the main thread).
+ */
 @Composable
 internal fun SettingsRoute(
     state: SettingsUiState?,
     actions: SettingsActions,
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     var selected by rememberSaveable { mutableStateOf<SettingsCategory?>(null) }
     val context = LocalContext.current
-    val app = remember(context) { context.installedAppInfo() }
+    val app by produceState<AppInfo?>(initialValue = null, context, ioDispatcher) {
+        value = withContext(ioDispatcher) { context.installedAppInfo() }
+    }
     SettingsScreen(state = state, actions = actions, app = app, selected = selected, onSelect = { selected = it })
 }
 
@@ -48,13 +57,13 @@ internal fun SettingsRoute(
  * Settings: a category list and the [selected] category's page. Compact width shows one at a time (the page has a
  * back arrow and handles Back); wider windows show list | page, with Appearance when nothing is [selected].
  * A [selected] category that is no longer offered counts as none. `null` [state] is the first read: a skeleton.
- * [app] is what the About page names.
+ * [app] is what the About page names; `null` until it has been read.
  */
 @Composable
 internal fun SettingsScreen(
     state: SettingsUiState?,
     actions: SettingsActions,
-    app: AppInfo,
+    app: AppInfo?,
     selected: SettingsCategory?,
     onSelect: (SettingsCategory?) -> Unit,
     modifier: Modifier = Modifier,
@@ -132,7 +141,7 @@ private fun CategoryPage(
     category: SettingsCategory,
     state: SettingsUiState,
     actions: SettingsActions,
-    app: AppInfo,
+    app: AppInfo?,
     onNavigateBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {

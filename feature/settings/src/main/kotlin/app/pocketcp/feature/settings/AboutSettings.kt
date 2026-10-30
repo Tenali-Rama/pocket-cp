@@ -15,10 +15,13 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import app.pocketcp.core.designsystem.PocketCpTheme
 
-/** The app's name and version, the unofficial-client disclaimer (spec §17) and the licence. */
+/**
+ * The app's name and version, the unofficial-client disclaimer (spec §17) and the licence. The name and version are
+ * left out while [app] is `null` (still being read from the package manager).
+ */
 @Composable
 internal fun AboutSettings(
-    app: AppInfo,
+    app: AppInfo?,
     modifier: Modifier = Modifier,
 ) {
     val spacing = PocketCpTheme.spacing
@@ -31,21 +34,8 @@ internal fun AboutSettings(
             .padding(horizontal = spacing.lg, vertical = spacing.lg),
         verticalArrangement = Arrangement.spacedBy(spacing.lg),
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(spacing.xs)) {
-            Text(
-                text = app.name,
-                style = typography.title,
-                color = colors.onBackground,
-                modifier = Modifier.testTag("settings_about_name").semantics { heading() },
-            )
-            Text(
-                text =
-                    app.versionName?.let { stringResource(R.string.settings_about_version, it) }
-                        ?: stringResource(R.string.settings_about_version_unknown),
-                style = typography.bodySmall,
-                color = colors.onSurfaceMuted,
-                modifier = Modifier.testTag("settings_about_version"),
-            )
+        if (app != null) {
+            AppHeader(app)
         }
         Text(
             text = stringResource(R.string.settings_about_disclaimer),
@@ -58,6 +48,29 @@ internal fun AboutSettings(
             style = typography.bodySmall,
             color = colors.onSurfaceMuted,
             modifier = Modifier.testTag("settings_about_licence"),
+        )
+    }
+}
+
+/** The app's name as a heading over its version ("Version unknown" when the package has no `versionName`). */
+@Composable
+private fun AppHeader(app: AppInfo) {
+    val typography = PocketCpTheme.typography
+    val colors = PocketCpTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(PocketCpTheme.spacing.xs)) {
+        Text(
+            text = app.name,
+            style = typography.title,
+            color = colors.onBackground,
+            modifier = Modifier.testTag("settings_about_name").semantics { heading() },
+        )
+        Text(
+            text =
+                app.versionName?.let { stringResource(R.string.settings_about_version, it) }
+                    ?: stringResource(R.string.settings_about_version_unknown),
+            style = typography.bodySmall,
+            color = colors.onSurfaceMuted,
+            modifier = Modifier.testTag("settings_about_version"),
         )
     }
 }
