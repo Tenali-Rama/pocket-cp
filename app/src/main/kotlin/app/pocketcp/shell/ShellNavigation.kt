@@ -1,6 +1,8 @@
 package app.pocketcp.shell
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,7 +14,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.Text
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -65,7 +68,7 @@ internal fun ShellBottomBar(
                     selected = destination.route == selectedRoute,
                     onClick = { onSelect(destination.route) },
                     icon = { Icon(destination.icon, contentDescription = null) },
-                    label = { Text(label) },
+                    label = { NavLabel(label) },
                     modifier = Modifier.navItem(destination, label),
                 )
             }
@@ -100,7 +103,7 @@ internal fun ShellRail(
                     selected = destination.route == selectedRoute,
                     onClick = { onSelect(destination.route) },
                     icon = { Icon(destination.icon, contentDescription = null) },
-                    label = { Text(label) },
+                    label = { NavLabel(label) },
                     modifier = Modifier.navItem(destination, label),
                 )
             }
