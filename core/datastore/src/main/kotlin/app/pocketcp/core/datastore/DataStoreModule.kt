@@ -24,8 +24,9 @@ import javax.inject.Singleton
 /**
  * The settings repository, and the `Set<OptionalModule>` of installed modules: each optional module
  * contributes itself with `@IntoSet`, and Settings lists the set (empty in M1).
+ *
+ * An abstract class, not an interface, so it can hold both the abstract `@Multibinds` and a companion of `@Provides`.
  */
-// An abstract class, not an interface: it holds both the abstract `@Multibinds` and a companion of `@Provides`.
 @Suppress("UnnecessaryAbstractClass")
 @Module
 @InstallIn(SingletonComponent::class)
