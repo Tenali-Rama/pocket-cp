@@ -1,7 +1,10 @@
 package app.pocketcp.core.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
@@ -70,7 +73,8 @@ class RowsA11yTest {
 
     private fun assertRowsAtLeastTouchTargetTall(density: UiDensity) {
         setContent(density) {
-            Column {
+            // Scrollable, so rows below the small Robolectric window are measured at their natural height.
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 SampleContests.forEach { ContestRow(it, TestNow, onClick = {}) }
                 SampleProblems.forEach {
                     ProblemRow(it, hideTags = true, hideRating = true, highlighted = false, onClick = {})
