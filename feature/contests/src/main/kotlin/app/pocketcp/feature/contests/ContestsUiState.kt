@@ -133,11 +133,10 @@ internal fun nextPhaseChange(
  * says otherwise (system testing runs past the end).
  */
 internal fun Contest.asOf(now: Instant): Contest {
-    val start = start ?: return this
-    val end = end() ?: return this
+    val start = start
     return when {
-        phase != ContestPhase.Upcoming || now.isBefore(start) -> this
-        now.isBefore(end) -> copy(phase = ContestPhase.Running)
+        start == null || phase != ContestPhase.Upcoming || now.isBefore(start) -> this
+        now.isBefore(start.plus(duration)) -> copy(phase = ContestPhase.Running)
         else -> copy(phase = ContestPhase.Finished)
     }
 }
