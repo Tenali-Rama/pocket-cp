@@ -30,6 +30,6 @@ Settings gets an About category: the app name and version, a clear statement tha
 
 ## Notes for next
 - About is `SettingsCategory.About`, always last; a new category goes before it in `SettingsUiState.categories`.
-- Name and version come from `Context.installedAppInfo()` (package label + `versionName`), read once in `SettingsRoute`; `SettingsScreen` takes it as `app: AppInfo` so screenshots pass a fixed one.
+- Name and version come from `Context.installedAppInfo()` (package label + `versionName`), read on `Dispatchers.IO` via `produceState` in `SettingsRoute`; `SettingsScreen` takes `app: AppInfo?` (null until read, About then omits name and version) so screenshots pass a fixed one.
 - Disclaimer wording is `settings_about_disclaimer` (default text from the task); the Maestro flow asserts the same text, so change both together.
 - M14's dependency licences and privacy policy belong on the About page (append below the licence line).
