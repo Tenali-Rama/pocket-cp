@@ -23,7 +23,7 @@ The `liveCanary` task checks our client and parsing assumptions against live Cod
 - The statement parser itself (M3).
 
 ## Notes for next
-- `src/canary/` is the `testCanary` source set of a `canary` build type; the variant is enabled only when `liveCanary` is on the command line (`gradle.startParameter`), so no CI gate compiles it and the IDE doesn't index it.
+- `src/canary/` is the `testLive` source set of a `live` build type (not `canary`: that build type's main source set would claim `src/canary/`); the variant is enabled only when `liveCanary` is on the command line (`gradle.startParameter`), so no CI gate compiles it and the IDE doesn't index it.
 - Only package `app.pocketcp.core.codeforces.canary` runs under `liveCanary`; add checks there with `LiveCodeforces.endpoint(...)` / `.page(url, selector)` (one shared `RequestQueue`).
 - `LiveCodeforces` records each path's last raw response under the queue, because the queue turns a 503 into `NetworkError.Unavailable` and drops the headers needed to spot a Cloudflare challenge.
-- M3 parser canaries can live here (Jsoup is a `testCanaryImplementation` dependency) or copy the build-type pattern in their own module; canary.yml finds any `liveCanary` in a `.kts`.
+- M3 parser canaries can live here (Jsoup is a `testLiveImplementation` dependency) or copy the build-type pattern in their own module; canary.yml finds any `liveCanary` in a `.kts`.

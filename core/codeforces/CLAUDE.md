@@ -9,7 +9,7 @@
 - Tests: `FixtureServer` + recorded fixtures in `testdata/codeforces/api/` (see `testdata/README.md`), a real `RequestQueue`, and virtual time (`withApi` in the tests). No live network.
 
 ## Live canary
-- `./gradlew liveCanary` (nightly in `canary.yml`, which files an issue with the last 40 lines on failure) runs `src/canary/` against live Codeforces. It is the unit test source set of a `canary` build type whose variant exists only when `liveCanary` is on the command line, so `ciCheck` and the unit tests never compile it. The IDE doesn't see it either.
+- `./gradlew liveCanary` (nightly in `canary.yml`, which files an issue with the last 40 lines on failure) runs `src/canary/` against live Codeforces. It is the unit test source set (`testLive`) of a `live` build type whose variant exists only when `liveCanary` is on the command line, so `ciCheck` and the unit tests never compile it. The IDE doesn't see it either.
 - Add a check as a `@Test` in `src/canary/kotlin/.../canary/` (package `app.pocketcp.core.codeforces.canary`, the only one `liveCanary` runs). Use the shared `LiveCodeforces` so every call goes through one `RequestQueue`:
   - API: `live.endpoint("<method>") { it.<call>() }`, then assert with a `CanaryReport.endpointBroken(...)` message.
   - HTML: `live.page(url, "<css selector>")`, which fails with `SELECTOR BROKEN: <selector> on <url>`.
