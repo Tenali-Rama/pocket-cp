@@ -1,6 +1,7 @@
 # Smoke test of the app shell: launch, visit every top-level destination, return Home with Back.
 # Selects by test tag only (nav_* are exposed as resource ids), so the same flow drives the
 # bottom bar on phones and the navigation rail on tablets.
+# Settings is a real feature: its Appearance category must be visible.
 # A placeholder's title repeats its nav label, so each content check is anchored to the content pane:
 # the placeholder message (text found nowhere in the nav) must be visible, and the title must be
 # `above` and `rightOf` it. Maestro compares top-left corners, so the phone bottom bar (below the
@@ -76,13 +77,7 @@ name: Shell smoke
     id: nav_settings
     selected: true
 - assertVisible:
-    text: "Arrives in M1: Data base & settings.*"
-- assertVisible:
-    text: Settings
-    above:
-      text: "Arrives in M1: Data base & settings.*"
-    rightOf:
-      text: "Arrives in M1: Data base & settings.*"
+    id: settings_category_appearance
 - takeScreenshot: smoke_settings
 
 - back
