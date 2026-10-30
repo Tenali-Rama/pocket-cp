@@ -17,6 +17,7 @@ Codeforces is the first `JudgeSource`. `CodeforcesJudgeSource` wraps `Codeforces
   - start and duration are converted from seconds
   - `gym=true` sets `isGym`
 - [ ] `problemset` joins `problemStatistics` to the problems as `solvedCount`. A problem without a rating or statistics maps to `null`, never to 0.
+- [ ] A problem whose `contestId` is absent is dropped, not mapped (default — owner may change). `CodeforcesJudgeSourceTest` uses a fixture with one such problem and asserts the result has one problem fewer than the fixture and none of them has that problem's name.
 - [ ] `users`: an unrated user has `rating` and `maxRating` `null`.
 - [ ] Error mapping test, one case per `CodeforcesError`:
   - `Offline` → `Offline`

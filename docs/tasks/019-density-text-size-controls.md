@@ -29,7 +29,8 @@ spec: ["15. Settings", "5. Design & Layout", "16. Non-Functional"]
 - [ ] ADR 0006 gains a line on density and text scale. `core/designsystem/API.md` lists the new parameters and controls.
 
 ## Out of scope
-- Reading settings (020). Editor font choice (M5).
+- Reading settings (020).
+- App and editor font *face* choice: deferred to M5, together with the editor fonts (default — owner may change). M1 covers sizes and ligatures only.
 
 ## Notes for next
 <!-- builder fills in: ≤ 5 bullets that a later task needs to know -->

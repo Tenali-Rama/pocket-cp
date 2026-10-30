@@ -29,6 +29,7 @@ spec: ["2. Product Principles", "4. Platform & Architecture", "14. Offline"]
 - [ ] `core/data/CLAUDE.md` and `API.md`.
 
 ## Out of scope
+- The `INTERNET` permission: 023 declares it in `core/network`'s manifest. Nothing in M1 reaches the network from the UI.
 - UI that consumes the repositories (M2). User/profile caching (M9). List prefetch (M2).
 
 ## Notes for next

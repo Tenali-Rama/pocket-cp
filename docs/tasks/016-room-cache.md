@@ -14,7 +14,7 @@ spec: ["4. Platform & Architecture", "14. Offline"]
 ## Acceptance criteria
 - [ ] Entities:
   - `ContestEntity`: id, name, phase, startEpochSeconds, durationSeconds, isGym
-  - `ProblemEntity`: (contestId, index) key, name, rating, tags, solvedCount
+  - `ProblemEntity`: composite primary key `(contestId: Int, index: String)`, both non-null (014 makes `ProblemId.contestId` non-null), name, rating, tags, solvedCount
   - `CacheMetaEntity(key, fetchedAtEpochMillis)`
 
   Field names mirror task 014's domain types. Mapping to the domain happens in 017, so this module doesn't depend on `core/model`.
