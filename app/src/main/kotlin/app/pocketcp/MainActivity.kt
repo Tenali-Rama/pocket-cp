@@ -11,12 +11,13 @@ import app.pocketcp.core.navigation.FeatureEntry
 import app.pocketcp.core.navigation.inNavigationOrder
 import app.pocketcp.core.network.NetworkMonitor
 import app.pocketcp.shell.PocketCpApp
+import app.pocketcp.shell.withoutReplacedPlaceholders
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 /**
- * The single activity: edge-to-edge, hosting the app shell with every contributed [FeatureEntry],
- * live on the user's settings and the network state.
+ * The single activity: edge-to-edge, hosting the app shell with every contributed [FeatureEntry] (a feature's
+ * entry replacing the placeholder bound for its route), live on the user's settings and the network state.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -32,7 +33,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        val entries = featureEntries.inNavigationOrder()
+        val entries = featureEntries.withoutReplacedPlaceholders().inNavigationOrder()
         val isOnline = networkMonitor.isOnline
         setContent { PocketCpApp(entries, settingsRepository.settings, isOnline, onDarkTheme = ::matchSystemBars) }
     }

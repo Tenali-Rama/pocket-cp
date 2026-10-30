@@ -1,6 +1,7 @@
 package app.pocketcp.shell
 
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.Text
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
@@ -20,7 +21,14 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.pocketcp.core.adaptive.ProvideWindowLayout
+import app.pocketcp.core.designsystem.PocketCpTheme
+import app.pocketcp.core.navigation.FeatureEntry
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
@@ -96,5 +104,51 @@ class ShellStateTest {
         rule
             .onNodeWithTag(ROOT_TAG)
             .assert(SemanticsMatcher.expectValue(SemanticsPropertiesAndroid.TestTagsAsResourceId, true))
+    }
+
+    @Test
+    fun contentPane_isTaggedWithTheStartDestination() {
+        rule.setContent { PocketCpApp(entries) }
+
+        rule.onNodeWithTag("screen_home").assertExists()
+    }
+
+    @Test
+    fun contentPane_isTaggedWithTheSelectedDestination() {
+        rule.setContent { PocketCpApp(entries) }
+
+        rule.onNodeWithTag("nav_contests").performClick()
+
+        rule.onNodeWithTag("screen_contests").assertExists()
+        rule.onNodeWithTag("screen_home").assertDoesNotExist()
+    }
+
+    @Test
+    fun contentPane_keepsItsDestinationTag_onANestedRoute() {
+        val contests = entries.single { it.destination.route == "contests" }
+        val withDetail =
+            entries.map { entry ->
+                if (entry !== contests) {
+                    entry
+                } else {
+                    object : FeatureEntry by contests {
+                        override fun register(graph: NavGraphBuilder) {
+                            contests.register(graph)
+                            graph.composable("contests/detail") { Text("detail") }
+                        }
+                    }
+                }
+            }
+        lateinit var navController: NavHostController
+        rule.setContent {
+            navController = rememberNavController()
+            PocketCpTheme { ProvideWindowLayout { PocketCpShell(withDetail, navController = navController) } }
+        }
+        rule.onNodeWithTag("nav_contests").performClick()
+
+        rule.runOnUiThread { navController.navigate("contests/detail") }
+
+        rule.onNodeWithTag("screen_contests").assertExists()
+        rule.onNodeWithTag("nav_contests").assertIsSelected()
     }
 }

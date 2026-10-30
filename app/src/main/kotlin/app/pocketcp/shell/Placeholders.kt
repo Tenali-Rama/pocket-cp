@@ -86,7 +86,19 @@ object Placeholders {
     ) = PlaceholderEntry(TopLevelDestination(route, label, icon, order), message)
 }
 
-/** Binds the placeholders. A feature that delivers one of these destinations deletes its line here. */
+/**
+ * The entries without each [PlaceholderEntry] whose route another, real entry also binds: a feature replaces its
+ * placeholder just by binding a [FeatureEntry] with the same route.
+ */
+fun Iterable<FeatureEntry>.withoutReplacedPlaceholders(): List<FeatureEntry> {
+    val realRoutes = filterNot { it is PlaceholderEntry }.mapTo(HashSet()) { it.destination.route }
+    return filterNot { it is PlaceholderEntry && it.destination.route in realRoutes }
+}
+
+/**
+ * Binds the placeholders. A feature that delivers one of these destinations binds an entry with the same route,
+ * which drops the placeholder ([withoutReplacedPlaceholders]); it never edits this module.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object PlaceholderModule {
