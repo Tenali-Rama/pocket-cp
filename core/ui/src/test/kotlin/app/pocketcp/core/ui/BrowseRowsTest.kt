@@ -38,15 +38,15 @@ class BrowseRowsTest {
     fun contestRowsShowTheirTimeAndPhaseLabel() {
         setContent { SampleContests.forEach { ContestRow(it, TestNow, onClick = {}) } }
 
-        assertEquals(listOf(upcoming.name, "Starts in 2d 03:04:05", "Upcoming"), texts(contestTag(upcoming)))
-        assertEquals(listOf(running.name, "Ends in 01:15:00", "Running"), texts(contestTag(running)))
+        assertEquals(listOf(upcoming.name, "Upcoming", "Starts in 2d 03:04:05"), texts(contestTag(upcoming)))
+        assertEquals(listOf(running.name, "Running", "Ends in 01:15:00"), texts(contestTag(running)))
         assertEquals(listOf(unknown.name, "Unknown"), texts(contestTag(unknown)))
-        assertEquals(listOf(notAnnounced.name, "Start time not announced", "Upcoming"), texts(contestTag(notAnnounced)))
+        assertEquals(listOf(notAnnounced.name, "Upcoming", "Start time not announced"), texts(contestTag(notAnnounced)))
         val finishedTexts = texts(contestTag(finished))
         assertEquals(3, finishedTexts.size)
-        assertTrue(finishedTexts[1], finishedTexts[1].startsWith("Oct 24, 2026"))
-        assertTrue(finishedTexts[1], finishedTexts[1].endsWith(" · 02:15"))
-        assertEquals("Finished", finishedTexts[2])
+        assertEquals("Finished", finishedTexts[1])
+        assertTrue(finishedTexts[2], finishedTexts[2].startsWith("Oct 24, 2026"))
+        assertTrue(finishedTexts[2], finishedTexts[2].endsWith(" · 02:15"))
     }
 
     @Test
@@ -56,7 +56,7 @@ class BrowseRowsTest {
             ContestRow(finished, TestNow, onClick = {})
         }
 
-        assertTrue(texts(contestTag(finished))[1].startsWith("Oct 25, 2026"))
+        assertTrue(texts(contestTag(finished))[2].startsWith("Oct 25, 2026"))
     }
 
     @Test
