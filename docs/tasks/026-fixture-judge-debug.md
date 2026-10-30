@@ -2,7 +2,7 @@
 id: 026
 title: Debug builds serve Codeforces fixtures so Maestro flows have stable data
 milestone: M2
-status: todo
+status: done
 deps: [024]
 touches: [core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/CodeforcesModule.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesModuleTest.kt, core/codeforces/API.md, core/testing/, app/src/debug/, app/src/live/, app/src/testDebug/, app/build.gradle.kts, app/src/test/kotlin/app/pocketcp/data/DataWiringTest.kt, app/CLAUDE.md, app/API.md, docs/decisions/, testdata/README.md]
 spec: ["16. Non-Functional", "4. Platform & Architecture"]
@@ -37,4 +37,8 @@ The M2 Maestro flows need real-looking contests and problems, and must not make 
 - Editing `.github/workflows/*`. Recording new fixtures from the live site (the canary task 009 owns live access).
 
 ## Notes for next
-<!-- builder fills in -->
+- Option (a): `FixtureJudgeSource` lives in `app/src/debug/kotlin/app/pocketcp/judge/` (ADR 0015); no new module edge.
+- Its `CodeforcesApi` uses base URL `https://fixtures.invalid/` (not under `/api/`), so the queue doesn't space local reads 2 s apart.
+- The recording moment comes from `contest.list.json` (one extra local read, then cached); gyms use the same shift.
+- `app/build.gradle.kts` fails configuration if a build type is neither debug, release nor a Baseline Profile type; a new one must pick a binding there.
+- `DebugJudgeWiringTest` (testDebug) checks the debug graph binds `FixtureJudgeSource`; `DataWiringTest` stays variant-neutral.

@@ -5,6 +5,14 @@ The application module: `PocketCpApplication` (`@HiltAndroidApp`) and the single
 - Package / namespace / applicationId: `app.pocketcp`.
 - Nothing depends on `app`; it depends on `core/*` and `feature/*` modules.
 
+## Judge binding (`app.pocketcp.judge`, ADR 0015)
+| Symbol | What it is |
+|--------|-----------|
+| `LiveJudgeSourceModule` (`src/live/`) | Binds `JudgeSource` to `CodeforcesJudgeSource` on the app's `CodeforcesApi` (singleton). `release`, `benchmarkRelease`, `nonMinifiedRelease`. |
+| `FixtureJudgeSourceModule` (`src/debug/`) | Binds `JudgeSource` to a `FixtureJudgeSource` over the debug assets (singleton). |
+| `FixtureJudgeSource(assets: FixtureAssets, clock, scope, dispatcher)` (debug) | The real `CodeforcesJudgeSource` mapping over `AssetTransport` (`<method>.json`, `<method>.gym.json` for `gym=true`; missing file → HTTP 404 → `JudgeError.Malformed`). Contest starts move by `now - (startTimeSeconds + relativeTimeSeconds)` of `contest.list.json`; phases stay as recorded. Judge id `codeforces`. |
+| `FixtureAssets` (debug) | `fun read(name): String`, throwing `FileNotFoundException` when missing. |
+
 ## Shell (`app.pocketcp.shell`)
 | Symbol | What it is |
 |--------|-----------|
