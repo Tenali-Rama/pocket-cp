@@ -2,7 +2,7 @@
 id: 027
 title: core/ui with contest and problem rows, ticking countdowns and the refresh-error banner
 milestone: M2
-status: todo
+status: done
 deps: []
 touches: [core/ui/, settings.gradle.kts+, gradle/libs.versions.toml]
 spec: ["7.1 Home", "7.2 Contests", "7.3 Problemset", "5. Design & Layout"]
@@ -35,4 +35,8 @@ Home, Contests and Problemset share their domain-aware UI pieces through a new `
 - Solve-status badges (need the account, M4). Navigation to a problem (M3).
 
 ## Notes for next
-<!-- builder fills in -->
+- Lists call `rememberNow()` once and pass `now` to every `ContestRow`; screenshot galleries pass a fixed `now`, because a ticking loop never lets a capture settle.
+- Dates format in `LocalClock.current.zone`; tests pin time and zone with `TestClock` (src/test `BrowseRowsGallery.kt`).
+- `ContestRow` has its own layout (not `PcpListItem`): names wrap fully and the phase label sits beside the time. `PcpListItem` caps headlines at 2 lines, which cut contest names at 1.5x text.
+- `start == null` shows "Start time not announced" for every phase except `Unknown`, which shows no time (default, owner may change).
+- Extra shot `browseRows_font150Problems_phone_dark`: at 1.5x the full gallery pushes the problem rows below a phone screen.

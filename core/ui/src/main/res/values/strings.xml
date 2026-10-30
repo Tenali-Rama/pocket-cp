@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ContestRow: time until an upcoming contest starts; %1$s is a countdown like "2d 03:04:05". -->
+    <string name="ui_contest_starts_in">Starts in %1$s</string>
+    <!-- ContestRow: time until a running contest ends; %1$s is a countdown like "03:04:05". -->
+    <string name="ui_contest_ends_in">Ends in %1$s</string>
+    <!-- ContestRow: a finished contest; %1$s is its start date and time, %2$s its length like "02:15". -->
+    <string name="ui_contest_finished_time">%1$s · %2$s</string>
+    <!-- ContestRow: the judge has published no start time. -->
+    <string name="ui_contest_start_unknown">Start time not announced</string>
+    <!-- ContestRow phase labels. -->
+    <string name="ui_contest_phase_upcoming">Upcoming</string>
+    <string name="ui_contest_phase_running">Running</string>
+    <string name="ui_contest_phase_finished">Finished</string>
+    <string name="ui_contest_phase_unknown">Unknown</string>
+    <!-- ProblemRow: how many users solved the problem; %1$s is the formatted count. -->
+    <string name="ui_problem_solved_count">%1$s solved</string>
+    <!-- RefreshErrorBanner: one message per refresh failure. -->
+    <string name="ui_refresh_error_offline">Couldn\'t refresh: you\'re offline.</string>
+    <string name="ui_refresh_error_rate_limited">Couldn\'t refresh: too many requests. Try again in a moment.</string>
+    <string name="ui_refresh_error_unavailable">Couldn\'t refresh: the server isn\'t responding.</string>
+    <string name="ui_refresh_error_malformed">Couldn\'t refresh: the server sent an unexpected response.</string>
+    <!-- RefreshErrorBanner: the button that refreshes again. -->
+    <string name="ui_retry">Retry</string>
+</resources>
