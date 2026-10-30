@@ -1,11 +1,8 @@
 # Smoke test of the app shell: launch, visit every top-level destination, return Home with Back.
-# Selects by test tag only (nav_* are exposed as resource ids), so the same flow drives the
-# bottom bar on phones and the navigation rail on tablets.
+# Selects by test tag only (nav_* and the content pane's screen_* are exposed as resource ids), so the same
+# flow drives the bottom bar on phones and the navigation rail on tablets, and a feature replacing a
+# placeholder never edits it: the shell tags its content pane `screen_<route>` of the selected destination.
 # Settings is a real feature: its Appearance category must be visible.
-# A placeholder's title repeats its nav label, so each content check is anchored to the content pane:
-# the placeholder message (text found nowhere in the nav) must be visible, and the title must be
-# `above` and `rightOf` it. Maestro compares top-left corners, so the phone bottom bar (below the
-# message) and the tablet rail (left of it) never match; the centred title is narrower than its message.
 # `stopApp` first: clearing data of a running app can race with the relaunch and kill it. On CI,
 # scripts/ci-ui-flows.sh also stops the app and waits for the system to drop its task before each flow (ADR 0014).
 appId: app.pocketcp
@@ -18,13 +15,7 @@ name: Shell smoke
     id: nav_home
     selected: true
 - assertVisible:
-    text: "Arrives in M2: Browse.*"
-- assertVisible:
-    text: Home
-    above:
-      text: "Arrives in M2: Browse.*"
-    rightOf:
-      text: "Arrives in M2: Browse.*"
+    id: screen_home
 - takeScreenshot: smoke_home
 
 - tapOn:
@@ -33,13 +24,7 @@ name: Shell smoke
     id: nav_contests
     selected: true
 - assertVisible:
-    text: "Arrives in M2: Browse.*"
-- assertVisible:
-    text: Contests
-    above:
-      text: "Arrives in M2: Browse.*"
-    rightOf:
-      text: "Arrives in M2: Browse.*"
+    id: screen_contests
 - takeScreenshot: smoke_contests
 
 - tapOn:
@@ -48,13 +33,7 @@ name: Shell smoke
     id: nav_problemset
     selected: true
 - assertVisible:
-    text: "Arrives in M2: Browse.*"
-- assertVisible:
-    text: Problemset
-    above:
-      text: "Arrives in M2: Browse.*"
-    rightOf:
-      text: "Arrives in M2: Browse.*"
+    id: screen_problemset
 - takeScreenshot: smoke_problemset
 
 - tapOn:
@@ -63,13 +42,7 @@ name: Shell smoke
     id: nav_profile
     selected: true
 - assertVisible:
-    text: "Arrives in M9: Community.*"
-- assertVisible:
-    text: Profile
-    above:
-      text: "Arrives in M9: Community.*"
-    rightOf:
-      text: "Arrives in M9: Community.*"
+    id: screen_profile
 - takeScreenshot: smoke_profile
 
 - tapOn:
@@ -77,6 +50,8 @@ name: Shell smoke
 - assertVisible:
     id: nav_settings
     selected: true
+- assertVisible:
+    id: screen_settings
 - assertVisible:
     id: settings_category_appearance
 - takeScreenshot: smoke_settings
@@ -86,10 +61,4 @@ name: Shell smoke
     id: nav_home
     selected: true
 - assertVisible:
-    text: "Arrives in M2: Browse.*"
-- assertVisible:
-    text: Home
-    above:
-      text: "Arrives in M2: Browse.*"
-    rightOf:
-      text: "Arrives in M2: Browse.*"
+    id: screen_home

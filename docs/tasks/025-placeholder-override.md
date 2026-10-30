@@ -2,7 +2,7 @@
 id: 025
 title: Feature entries replace placeholders by route, and the shell tags its content pane
 milestone: M2
-status: todo
+status: done
 deps: []
 touches: [app/src/main/kotlin/app/pocketcp/MainActivity.kt, app/src/main/kotlin/app/pocketcp/shell/Placeholders.kt, app/src/main/kotlin/app/pocketcp/shell/PocketCpShell.kt, app/src/test/kotlin/app/pocketcp/shell/PlaceholderOverrideTest.kt, app/src/test/kotlin/app/pocketcp/shell/ShellStateTest.kt, .maestro/smoke.yaml, app/API.md, core/navigation/API.md, docs/decisions/0008-nav-extension-point.md]
 spec: ["4. Platform & Architecture", "5. Design & Layout"]
@@ -23,4 +23,7 @@ Home, Contests and Problemset (026–035) can land in parallel without editing t
 - Any feature screen. Deleting placeholders that are still in use (Profile stays one until M4/M9).
 
 ## Notes for next
-<!-- builder fills in -->
+- A feature replaces its placeholder by binding a `FeatureEntry` with the same route; never edit `Placeholders.kt`.
+- The content pane is tagged `screen_<route>`; Maestro flows check that plus `nav_<route>` selected, never screen text.
+- Nested screens: register them in a nested graph routed `destination.route` or as `<route>/...`, so the nav item stays selected and the tag holds.
+- Whoever replaces the last placeholder (Profile, M4/M9) deletes `PlaceholderEntry`, `Placeholders`, `PlaceholderModule` and `withoutReplacedPlaceholders()`.

@@ -13,7 +13,7 @@ class ContestsEntry @Inject constructor() : FeatureEntry {
 @Module @InstallIn(SingletonComponent::class)
 interface ContestsModule { @Binds @IntoSet fun entry(e: ContestsEntry): FeatureEntry }
 ```
-Then delete the matching placeholder line in the app's `PlaceholderModule`.
+Binding the same route as one of the app's placeholders replaces it (`withoutReplacedPlaceholders()`): never edit `PlaceholderModule`. The feature replacing the last placeholder deletes `PlaceholderEntry` and its helpers. Nested screens go in a nested graph routed `destination.route` or under `<route>/...`, so the item stays selected and the content pane keeps tag `screen_<route>`.
 
 | Symbol | What it is |
 |--------|-----------|
