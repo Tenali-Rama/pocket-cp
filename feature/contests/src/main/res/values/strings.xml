@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nav item text and content description, and the screen title (same as the placeholder it replaces). -->
+    <string name="contests_label">Contests</string>
+    <string name="contests_refresh">Refresh contests</string>
+
+    <!-- Section headers. -->
+    <string name="contests_section_running">Running</string>
+    <string name="contests_section_upcoming">Upcoming</string>
+    <string name="contests_section_past">Past</string>
+
+    <!-- Filter groups and chips. Division names follow Codeforces' own. -->
+    <string name="contests_filter_division">Division</string>
+    <string name="contests_filter_type">Type</string>
+    <string name="contests_division_div1">Div. 1</string>
+    <string name="contests_division_div2">Div. 2</string>
+    <string name="contests_division_div3">Div. 3</string>
+    <string name="contests_division_div4">Div. 4</string>
+    <string name="contests_division_div1and2">Div. 1 + 2</string>
+    <string name="contests_division_educational">Educational</string>
+    <string name="contests_division_global">Global</string>
+    <string name="contests_division_other">Other</string>
+    <string name="contests_kind_cf">CF</string>
+    <string name="contests_kind_icpc">ICPC</string>
+    <string name="contests_kind_ioi">IOI</string>
+
+    <!-- Empty states. -->
+    <string name="contests_empty_title">No contests</string>
+    <string name="contests_empty_filtered_title">No contests match these filters</string>
+    <string name="contests_empty_filtered_message">Select other divisions or types, or clear the filters.</string>
+    <string name="contests_clear_filters">Clear filters</string>
+
+    <!-- Full error state: no cached contests and the refresh failed. -->
+    <string name="contests_error_offline">You\'re offline. Contests appear here once you\'re back online.</string>
+    <string name="contests_error_rate_limited">Codeforces is limiting requests. Try again in a moment.</string>
+    <string name="contests_error_unavailable">Codeforces is unavailable right now. Try again later.</string>
+    <string name="contests_error_malformed">Codeforces sent a response the app can\'t read.</string>
+</resources>
