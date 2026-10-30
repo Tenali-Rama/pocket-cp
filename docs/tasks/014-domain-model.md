@@ -2,7 +2,7 @@
 id: 014
 title: Judge-agnostic domain model and JudgeSource in core/model
 milestone: M1
-status: todo
+status: done
 deps: []
 touches: [core/model/, settings.gradle.kts+, gradle/libs.versions.toml, docs/decisions/]
 spec: ["4. Platform & Architecture", "15. Settings"]
@@ -32,4 +32,8 @@ A pure Kotlin/JVM module, `core/model`, holds the judge-agnostic domain that the
 - The Codeforces mapping (015) and any persistence.
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- `core/model` is the first `pocketcp.jvm.library` module; depend on it with `implementation(project(":core:model"))` (or `api` when its types are in your public API).
+- `ProblemId.display` is the `4A` form; `toString()` stays the data-class default.
+- `JudgeError` cases take an optional `cause`; 015 should pass the `CodeforcesError` as cause. `Rejected(message)` carries the API comment shown to the user.
+- `Contest.start` is nullable (some gyms have no start time); `duration` is not.
+- `OptionalModule` keys are persisted in settings (DataStore): never rename one.
