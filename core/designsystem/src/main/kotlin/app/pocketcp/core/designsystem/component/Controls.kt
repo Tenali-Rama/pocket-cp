@@ -4,9 +4,11 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import app.pocketcp.core.designsystem.PocketCpTheme
 
 /**
  * A settings row with a [title], optional [supporting] line and a switch at the end. The whole row is one
@@ -22,6 +24,10 @@ fun PcpSwitchRow(
     supporting: String? = null,
     enabled: Boolean = true,
 ) {
+    val colors = PocketCpTheme.colors
+    // An enabled "off" switch keeps a visible outline: Material's default `outline` is too faint on dark surfaces.
+    val switchColors =
+        SwitchDefaults.colors(uncheckedThumbColor = colors.onSurfaceMuted, uncheckedBorderColor = colors.onSurfaceMuted)
     PcpRow(
         headline = title,
         supporting = supporting,
@@ -33,7 +39,7 @@ fun PcpSwitchRow(
                 role = Role.Switch,
                 onValueChange = onCheckedChange,
             ),
-        trailing = { Switch(checked = checked, onCheckedChange = null, enabled = enabled) },
+        trailing = { Switch(checked = checked, onCheckedChange = null, enabled = enabled, colors = switchColors) },
     )
 }
 
