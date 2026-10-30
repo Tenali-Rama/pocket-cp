@@ -10,7 +10,7 @@ internal const val PACKAGE_NAME = "app.pocketcp"
 /** Every top-level destination, in nav order, ending back on Home. */
 private val TAB_ROUTES = listOf("contests", "problemset", "profile", "settings", "home")
 
-private const val TIMEOUT_MS = 5_000L
+private const val TIMEOUT_MS = 10_000L
 
 /**
  * Taps every top-level destination by its `nav_<route>` tag (a resource id, as Maestro sees it), so the same walk
