@@ -1,6 +1,7 @@
 package app.pocketcp.core.network
 
 import android.content.Context
+import android.net.ConnectivityManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +16,7 @@ import okhttp3.OkHttpClient
 import java.io.File
 import javax.inject.Singleton
 
-/** One client, one cookie jar and one request queue for the whole app. */
+/** One client, one cookie jar, one request queue and one network monitor for the whole app. */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -42,6 +43,12 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRequestQueue(client: OkHttpClient): RequestQueue = RequestQueue(OkHttpTransport(client), queueScope())
+
+    @Provides
+    @Singleton
+    fun provideNetworkMonitor(
+        @ApplicationContext context: Context,
+    ): NetworkMonitor = ConnectivityNetworkMonitor(context.getSystemService(ConnectivityManager::class.java))
 
     /** The queue's app-lifetime scope. The dispatcher is a defaulted parameter, as detekt's InjectDispatcher asks. */
     private fun queueScope(dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope {

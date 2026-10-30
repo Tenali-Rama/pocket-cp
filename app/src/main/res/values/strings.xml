@@ -13,4 +13,7 @@
     <string name="placeholder_contests">Arrives in M2: Browse.</string>
     <string name="placeholder_problemset">Arrives in M2: Browse.</string>
     <string name="placeholder_profile">Arrives in M9: Community.</string>
+
+    <!-- Shell banner while the device has no validated internet connection (spec §14). -->
+    <string name="shell_offline">Offline · showing saved data</string>
 </resources>

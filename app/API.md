@@ -8,10 +8,10 @@ The application module: `PocketCpApplication` (`@HiltAndroidApp`) and the single
 ## Shell (`app.pocketcp.shell`)
 | Symbol | What it is |
 |--------|-----------|
-| `MainActivity` | Edge-to-edge; injects `Set<FeatureEntry>` (sorted with `inNavigationOrder()`) and `SettingsRepository`, and shows `PocketCpApp` on `settings`. Matches the system-bar icons to the resolved theme. |
-| `PocketCpApp(entries, settings: Flow<UserSettings>, windowInsets, onDarkTheme)` | Live root: draws nothing until the first emission (no wrong-theme frame), then recomposes on each change. |
-| `PocketCpApp(entries, settings: UserSettings = UserSettings(), windowInsets = systemBars, onDarkTheme = {})` | The Compose root: `PocketCpTheme` from the settings (theme, text sizes, ligatures, density), `ProvideWindowLayout`, `testTagsAsResourceId = true` (tag `shell_root`), and the shell with the entries `withoutDisabled(disabledModules)`. |
-| `PocketCpShell(entries, modifier, windowInsets, navController)` | Bottom bar (compact width) or navigation rail (wider) next to a `NavHost` of every entry; the first entry is the start destination. Bar/rail pad themselves by the system-bar insets. |
+| `MainActivity` | Edge-to-edge; injects `Set<FeatureEntry>` (sorted with `inNavigationOrder()`), `SettingsRepository` and `NetworkMonitor`, and shows `PocketCpApp` on `settings` and `isOnline`. Matches the system-bar icons to the resolved theme. |
+| `PocketCpApp(entries, settings: Flow<UserSettings>, isOnline: Flow<Boolean> = always true, windowInsets, onDarkTheme)` | Live root: draws nothing until the first settings emission (no wrong-theme frame), then recomposes on each change. Online until `isOnline` first emits. |
+| `PocketCpApp(entries, settings: UserSettings = UserSettings(), online = true, windowInsets = systemBars, onDarkTheme = {})` | The Compose root: `PocketCpTheme` from the settings (theme, text sizes, ligatures, density), `ProvideWindowLayout`, `testTagsAsResourceId = true` (tag `shell_root`), and the shell with the entries `withoutDisabled(disabledModules)`. |
+| `PocketCpShell(entries, modifier, offline = false, windowInsets, navController)` | Bottom bar (compact width) or navigation rail (wider) next to a `NavHost` of every entry; the first entry is the start destination. Bar/rail pad themselves by the system-bar insets. While `offline`, `OfflineBanner` (tag `offline_banner`, polite live region, "Offline · showing saved data") tops the content pane: under the status bar, never over the bar or rail. |
 | `themeModeOf(uiMode)` | `Light` only for `UI_MODE_NIGHT_NO`; `Dark` for night or undefined. |
 | `themeModeOf(theme, uiMode)` | `System` → `themeModeOf(uiMode)`; `Dark` / `Light` / `Amoled` force their mode. |
 | `TextSizePreference.scale` | `Small` 0.9, `Default` 1.0, `Large` 1.15, `Largest` 1.3: `textScale` / `codeTextScale`, on top of the system font scale. |
@@ -21,4 +21,4 @@ The application module: `PocketCpApplication` (`@HiltAndroidApp`) and the single
 Nav items carry test tags `nav_home`, `nav_contests`, `nav_problemset`, `nav_profile`, `nav_settings` and their label as content description.
 Switching tab pops to Home with saved state, so Back from any tab returns to Home, then leaves the app.
 Shell tests use the test-only `shellTestEntries` (`src/test/.../ShellTestEntries.kt`), never `PlaceholderModule`, so replacing a placeholder leaves them and their goldens alone.
-Screenshots: `shell_<device>_<theme>`, `shell_amoled_phone_dark`, `shell_compact_tablet_dark`, `shell_textLargest_phone_dark`.
+Screenshots: `shell_<device>_<theme>`, `shell_amoled_phone_dark`, `shell_compact_tablet_dark`, `shell_textLargest_phone_dark`, `shell_offline_<device>_<theme>`, `shell_offline_font150_phone_dark`.

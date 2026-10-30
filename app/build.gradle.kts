@@ -56,6 +56,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
+    implementation(project(":core:network"))
     implementation(project(":feature:settings"))
 
     testImplementation(libs.androidx.test.ext.junit)

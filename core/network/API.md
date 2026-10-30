@@ -2,7 +2,8 @@
 
 The single OkHttp client (HTTP/2, gzip, HTTP cache, HTTPS only), the shared cookie jar and the rate-limited `RequestQueue` every network call goes through.
 
-Package `app.pocketcp.core.network`. Hilt: `NetworkModule` (singletons) provides `OkHttpClient`, `SharedCookieJar`, `CookieStore` and `RequestQueue`.
+Package `app.pocketcp.core.network`. Hilt: `NetworkModule` (singletons) provides `OkHttpClient`, `SharedCookieJar`, `CookieStore`, `RequestQueue` and `NetworkMonitor`.
+The module manifest requests `INTERNET` and `ACCESS_NETWORK_STATE`; they merge into the app.
 
 ## `RequestQueue`
 `suspend fun execute(request: Request, classifier: RetryClassifier = RetryClassifier.AcceptAll): NetworkResponse`
@@ -20,6 +21,11 @@ Package `app.pocketcp.core.network`. Hilt: `NetworkModule` (singletons) provides
 | 2xx or 4xx (not 429), classifier says `Fail(error)` | no | `error` |
 
 A 2xx or 4xx the classifier `Accept`s, and any other status, is returned unchanged as a `NetworkResponse` for the caller to interpret.
+
+## `NetworkMonitor`
+`val isOnline: Flow<Boolean>`: `true` while the default network has `INTERNET` and `VALIDATED`. Cold; each collector
+registers its own default-network callback (`ConnectivityNetworkMonitor(connectivityManager)`), emits the current
+state first, then distinct changes only. A late `onLost` of a previous default network is ignored.
 
 ## Types
 - `NetworkResponse(code, headers, body: String)`: fully read, shareable between deduplicated callers.
