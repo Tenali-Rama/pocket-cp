@@ -22,6 +22,7 @@ private const val STOP_TIMEOUT_MS = 5_000L
 enum class SettingsCategory {
     Appearance,
     Features,
+    About,
 }
 
 /** What the Settings screen shows: the stored [settings] and the [installedModules] in declaration order. */
@@ -30,12 +31,12 @@ data class SettingsUiState(
     val settings: UserSettings,
     val installedModules: List<OptionalModule>,
 ) {
-    /** Appearance always; Features only when an optional module is installed. */
+    /** Appearance first and About last, always; Features between them only when an optional module is installed. */
     val categories: List<SettingsCategory> =
         if (installedModules.isEmpty()) {
-            listOf(SettingsCategory.Appearance)
+            listOf(SettingsCategory.Appearance, SettingsCategory.About)
         } else {
-            listOf(SettingsCategory.Appearance, SettingsCategory.Features)
+            listOf(SettingsCategory.Appearance, SettingsCategory.Features, SettingsCategory.About)
         }
 }
 

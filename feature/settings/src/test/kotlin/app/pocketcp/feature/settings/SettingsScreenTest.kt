@@ -119,7 +119,7 @@ class SettingsScreenTest {
 }
 
 @Composable
-private fun Themed(
+internal fun Themed(
     width: WindowWidthClass,
     content: @Composable () -> Unit,
 ) {

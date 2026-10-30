@@ -2,6 +2,7 @@
 # Selects by test tag (resource id). On a phone the category list opens the Appearance page; on a tablet
 # Appearance is already shown beside the list, and tapping its category keeps it open.
 # A radio row's selection is exposed to accessibility as `checked`.
+# Then Settings -> About shows the unofficial-client disclaimer (spec §17).
 appId: app.pocketcp
 name: Settings persist
 ---
@@ -32,3 +33,15 @@ name: Settings persist
 - assertVisible:
     id: settings_theme_system
     checked: false
+
+- launchApp:
+    stopApp: true
+    clearState: false
+- tapOn:
+    id: nav_settings
+- tapOn:
+    id: settings_category_about
+- assertVisible:
+    id: settings_about_disclaimer
+    text: "PocketCP is an unofficial client. It is not affiliated with, endorsed by or connected to Codeforces."
+- takeScreenshot: settings_about

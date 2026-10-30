@@ -8,6 +8,8 @@
     <string name="settings_category_appearance_supporting">Theme, text size, density</string>
     <string name="settings_category_features">Features</string>
     <string name="settings_category_features_supporting">Turn optional modules on or off</string>
+    <string name="settings_category_about">About</string>
+    <string name="settings_category_about_supporting">Version, licence, disclaimer</string>
 
     <!-- Appearance. -->
     <string name="settings_theme">Theme</string>
@@ -44,4 +46,10 @@
     <string name="settings_module_other_judges_calendar_supporting">Contests from other judges in the calendar</string>
     <string name="settings_module_focus_mode_auto_start">Focus mode auto-start</string>
     <string name="settings_module_focus_mode_auto_start_supporting">Start focus mode when a contest starts</string>
+
+    <!-- About (spec §17): the app's name comes from the package; the disclaimer wording is the owner's to change. -->
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_version_unknown">Version unknown</string>
+    <string name="settings_about_disclaimer">PocketCP is an unofficial client. It is not affiliated with, endorsed by or connected to Codeforces.</string>
+    <string name="settings_about_licence">Licensed under GPL-3.0</string>
 </resources>
