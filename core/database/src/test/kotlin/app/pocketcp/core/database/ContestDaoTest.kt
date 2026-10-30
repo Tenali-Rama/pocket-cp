@@ -31,7 +31,7 @@ class ContestDaoTest {
     @Test
     fun `flow re-emits after replaceAll, newest start first`() =
         runTest {
-            dao.contests(gym = false).test {
+            dao.contests(gym = false).test(timeout = FLOW_TIMEOUT) {
                 assertEquals(emptyList<ContestEntity>(), awaitItem())
 
                 dao.replaceAll(gym = false, contests = listOf(old, upcoming, recent), fetchedAtEpochMillis = 1L)

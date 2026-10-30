@@ -13,7 +13,7 @@ abstract class ProblemDao {
     @Query("SELECT * FROM problems ORDER BY contestId DESC, `index` ASC")
     abstract fun problems(): Flow<List<ProblemEntity>>
 
-    /** Replaces the whole problemset with [problems] and records [fetchedAtEpochMillis] under [CacheKeys.PROBLEMSET]. */
+    /** Replaces the problemset with [problems] and records [fetchedAtEpochMillis] under [CacheKeys.PROBLEMSET]. */
     @Transaction
     open suspend fun replaceAll(
         problems: List<ProblemEntity>,

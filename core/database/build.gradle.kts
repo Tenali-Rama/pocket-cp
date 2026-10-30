@@ -31,7 +31,7 @@ dependencies {
 
 // TEMPORARY (removed before review): prints the generated schema so it can be committed.
 val dumpSchema by tasks.registering {
-    dependsOn("assembleDebug", "testDebugUnitTest")
+    dependsOn("assembleDebug")
     doLast {
         val found = projectDir.walkTopDown().filter { it.name == "1.json" && "PocketCpDatabase" in it.path }.toList()
         throw GradleException(found.joinToString("\n") { "SCHEMA_FILE ${it.path}\n" + it.readText() })

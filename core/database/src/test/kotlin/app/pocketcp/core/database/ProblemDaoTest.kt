@@ -30,7 +30,7 @@ class ProblemDaoTest {
     @Test
     fun `flow re-emits after replaceAll, newest contest first then by index`() =
         runTest {
-            dao.problems().test {
+            dao.problems().test(timeout = FLOW_TIMEOUT) {
                 assertEquals(emptyList<ProblemEntity>(), awaitItem())
 
                 dao.replaceAll(listOf(watermelon, newB, newA), fetchedAtEpochMillis = 1L)

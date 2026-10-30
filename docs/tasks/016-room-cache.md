@@ -2,7 +2,7 @@
 id: 016
 title: Room cache database for contests and problems in core/database
 milestone: M1
-status: todo
+status: done
 deps: []
 touches: [core/database/, settings.gradle.kts+, build.gradle.kts+, gradle/libs.versions.toml]
 spec: ["4. Platform & Architecture", "14. Offline"]
@@ -35,4 +35,8 @@ spec: ["4. Platform & Architecture", "14. Offline"]
 - Users, code files, notes and snippets tables (later milestones). Cache size limits and wipe (M13).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- `ContestDao.replaceAll(gym, contests, fetchedAtEpochMillis)` swaps one dataset (regular or gym) and writes `CacheKeys.contests(gym)`; `ProblemDao.replaceAll` writes `CacheKeys.PROBLEMSET`. Read freshness with `CacheMetaDao.fetchedAt(key)`.
+- `ContestEntity.phase` is the `ContestPhase` enum `name`; `startEpochSeconds` is nullable to match `Contest.start: Instant?`. 017 maps both ways.
+- Tags are a JSON-array column (`TagsConverter`, kotlinx-serialization); the empty list is stored as `[]`, never null.
+- Tests build an in-memory DB with `inMemoryDatabase()` (test source set of this module); 017 needs its own copy or `Room.inMemoryDatabaseBuilder`.
+- Turbine (`libs.turbine`) and Room (`libs.room.*`, plugin `libs.plugins.room`) are now in the catalog.
