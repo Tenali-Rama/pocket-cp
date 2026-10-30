@@ -2,7 +2,7 @@
 id: 024
 title: Baseline Profile, Macrobenchmark and perf budget gate
 milestone: M1
-status: todo
+status: done
 deps: []
 touches: [benchmark/, app/build.gradle.kts, app/src/main/baseline-prof.txt, app/CLAUDE.md, settings.gradle.kts+, build.gradle.kts+, gradle/libs.versions.toml, config/perf-budgets.json, scripts/perf-budget-check.sh, scripts/test-perf-budget-check.sh, testdata/perf/, scripts/verify.sh, .github/workflows/ci.yml, docs/decisions/]
 spec: ["3. Performance Budgets"]
@@ -34,4 +34,8 @@ Risk: pushing `.github/workflows/ci.yml` needs a token with the `workflow` scope
 - List and statement scroll benchmarks (with the lists, M2/M3). Editor latency (M5). Meeting the 1 s / 300 ms targets on hardware (M14).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- A new budgeted screen: add a test in `benchmark/`, a line in `metrics` in `scripts/perf-budget-check.sh`, a budget (first green `perf` run + 25 %) and fixture values in `testdata/perf/`.
+- `walkTabs()` (`benchmark/Shell.kt`) taps `nav_<route>` ids; a new top-level tab goes into `TAB_ROUTES`. Restart with `killProcess()` in `setupBlock`, not `startupMode = COLD`, which kills the app after `setupBlock`.
+- Refresh `app/src/main/baseline-prof.txt` from the `perf` job's `baseline-profile` artifact after big startup or shell changes; `checkBaselineProfile` fails if the app's rules disappear.
+- Budgets come from run 41107065675 + 25 %. Startup varied 10-25 % between CI runs, so re-run an isolated `OVER` before investigating.
+- Frame p90 on the CI emulator is about 120-160 ms (software rendering): it guards regressions only and is not comparable with the 16 ms target (ADR 0013).

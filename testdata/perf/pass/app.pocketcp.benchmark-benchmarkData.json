@@ -1,0 +1,110 @@
+{
+  "context": {
+    "build": {
+      "brand": "google",
+      "device": "emu64xa",
+      "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:14/UE1A.230829.036/10077035:userdebug/dev-keys",
+      "model": "sdk_gphone64_x86_64",
+      "version": {
+        "sdk": 34
+      }
+    },
+    "cpuCoreCount": 4,
+    "cpuLocked": false,
+    "cpuMaxFreqHz": -1,
+    "memTotalBytes": 2061111296,
+    "sustainedPerformanceModeEnabled": false,
+    "artMainlineVersion": -1,
+    "osCodenameAbbreviated": "U",
+    "compilationMode": "BaselineProfile"
+  },
+  "benchmarks": [
+    {
+      "name": "startupCold",
+      "params": {},
+      "className": "app.pocketcp.benchmark.StartupBenchmark",
+      "totalRunTimeNs": 61234567890,
+      "metrics": {
+        "memoryHeapSizeMaxKb": {
+          "minimum": 7012.0,
+          "maximum": 7340.0,
+          "median": 7156.0,
+          "runs": [7012.0, 7156.0, 7340.0]
+        },
+        "memoryRssAnonMaxKb": {
+          "minimum": 51200.0,
+          "maximum": 53248.0,
+          "median": 52224.0,
+          "runs": [51200.0, 52224.0, 53248.0]
+        },
+        "timeToInitialDisplayMs": {
+          "minimum": 702.123,
+          "maximum": 811.456,
+          "median": 745.678,
+          "runs": [702.123, 745.678, 811.456]
+        }
+      },
+      "sampledMetrics": {},
+      "warmupIterations": 0,
+      "repeatIterations": 3,
+      "thermalThrottleSleepSeconds": 0
+    },
+    {
+      "name": "startupWarm",
+      "params": {},
+      "className": "app.pocketcp.benchmark.StartupBenchmark",
+      "totalRunTimeNs": 31234567890,
+      "metrics": {
+        "memoryRssAnonMaxKb": {
+          "minimum": 54272.0,
+          "maximum": 56320.0,
+          "median": 55296.0,
+          "runs": [54272.0, 55296.0, 56320.0]
+        },
+        "timeToInitialDisplayMs": {
+          "minimum": 160.5,
+          "maximum": 190.25,
+          "median": 171.04,
+          "runs": [160.5, 171.04, 190.25]
+        }
+      },
+      "sampledMetrics": {},
+      "warmupIterations": 0,
+      "repeatIterations": 3,
+      "thermalThrottleSleepSeconds": 0
+    },
+    {
+      "name": "tabWalk",
+      "params": {},
+      "className": "app.pocketcp.benchmark.ShellJankBenchmark",
+      "totalRunTimeNs": 41234567890,
+      "metrics": {
+        "frameCount": {
+          "minimum": 120.0,
+          "maximum": 131.0,
+          "median": 125.0,
+          "runs": [120.0, 125.0, 131.0]
+        }
+      },
+      "sampledMetrics": {
+        "frameDurationCpuMs": {
+          "P50": 6.1,
+          "P90": 11.84,
+          "P95": 14.2,
+          "P99": 22.7,
+          "runs": [[5.9, 6.1, 11.84], [6.0, 14.2, 22.7]]
+        },
+        "frameOverrunMs": {
+          "P50": -8.2,
+          "P90": -2.1,
+          "P95": 1.3,
+          "P99": 9.8,
+          "runs": [[-8.2, -2.1], [1.3, 9.8]]
+        }
+      },
+      "warmupIterations": 0,
+      "repeatIterations": 3,
+      "thermalThrottleSleepSeconds": 0
+    }
+  ]
+}
