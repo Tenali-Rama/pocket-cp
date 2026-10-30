@@ -15,8 +15,12 @@ These rules come from repeated review findings, and the COO maintains them throu
 
   A missing hub entry makes parallel dispatch unsafe. It was polykov's most common review note.
 - Put a new feature in its own module (`feature/<name>/`) with its own tests. Shared hubs get only append-only registration lines (a `touches` entry with a trailing `+`).
-- Rebase onto `origin/main` right before you mark the PR ready, and pick your ADR number at that moment. Picking it earlier caused duplicate ADR numbers.
+- Rebase onto `origin/main` right before you mark the PR ready. ADR numbers: take the next one that is free on main and not claimed by an open PR, and renumber at every rebase if it has been taken (collisions on #9, #11, #12, #26).
+- Waiting on CI and no run appears for your head commit? Check `gh pr view <n> --json mergeable`. `CONFLICTING` means GitHub starts no `pull_request` runs: rebase on `origin/main` now instead of waiting (#10, #12, #27 each lost 40+ minutes).
 - Never run Gradle, tests or an emulator on the VM. Push and let CI run them. Locally, run only the narrow static check you're fixing.
+- Local ktlint misses detekt rules that CI enforces: 120-character line limit, `LongParameterList`, `InjectDispatcher`. Keep lines ≤ 120 characters and check those rules before pushing (seen on 007, 015, 017, 018).
+- Download CI logs by run id into a fresh, empty directory. Never read logs other runs left in a shared scratchpad; stale logs caused a misdiagnosis.
+- Screenshot names follow ADR 0005: `<name>[_<variant>]_<device>_<dark|light>`, even when a task's criteria word it differently.
 - Never share a Gradle `build/` dir between worktrees. Sharing the dependency cache (`~/.gradle/caches`) is fine.
 
 ## Rebase
