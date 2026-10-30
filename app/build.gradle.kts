@@ -56,11 +56,13 @@ androidComponents {
     }
 }
 
-// The release APK must ship a compiled Baseline Profile; the committed app/src/main/baseline-prof.txt feeds it.
+// The release APK must ship a compiled Baseline Profile, and the merged profile behind it must hold the app's own
+// rules, i.e. the committed app/src/main/baseline-prof.txt (library profiles alone also yield a baseline.prof).
 val checkBaselineProfile by tasks.registering {
-    description = "Fails when the release APK has no assets/dexopt/baseline.prof."
+    description = "Fails when the release APK has no assets/dexopt/baseline.prof or its profile lacks the app's rules."
     dependsOn("assembleRelease")
     val apkDir = layout.buildDirectory.dir("outputs/apk/release")
+    val mergedDir = layout.buildDirectory.dir("intermediates/merged_art_profile/release")
     doLast {
         val dir = apkDir.get().asFile
         val apks = dir.listFiles().orEmpty().filter { it.extension == "apk" }
@@ -71,6 +73,16 @@ val checkBaselineProfile by tasks.registering {
                     "${apk.name} has no assets/dexopt/baseline.prof: is the Baseline Profile set up?"
                 }
             }
+        }
+        val merged =
+            mergedDir
+                .get()
+                .asFile
+                .walk()
+                .filter { it.isFile && it.extension == "txt" }
+                .toList()
+        check(merged.any { file -> file.useLines { lines -> lines.any { "Lapp/pocketcp/" in it } } }) {
+            "No app.pocketcp rules in the merged release profile $merged: is app/src/main/baseline-prof.txt there?"
         }
     }
 }
