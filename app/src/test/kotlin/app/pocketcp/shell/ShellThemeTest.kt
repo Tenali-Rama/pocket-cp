@@ -7,11 +7,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.pocketcp.core.datastore.DensityPreference
 import app.pocketcp.core.datastore.TextSizePreference
 import app.pocketcp.core.datastore.ThemePreference
 import app.pocketcp.core.datastore.UserSettings
+import app.pocketcp.core.designsystem.PocketCpSpacing
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.designsystem.ThemeMode
+import app.pocketcp.core.designsystem.UiDensity
 import app.pocketcp.core.navigation.FeatureEntry
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,6 +91,26 @@ class ShellThemeTest {
     }
 
     @Test
+    fun compactDensity_isTheShellsSpacing() {
+        val probe = SpacingProbe()
+        val settings = MutableStateFlow(UserSettings(density = DensityPreference.Compact))
+        rule.setContent { PocketCpApp(listOf(probe), settings) }
+
+        rule.runOnIdle { assertEquals(PocketCpSpacing.of(UiDensity.Compact), probe.spacing) }
+    }
+
+    @Test
+    fun comfortableDensity_isTheShellsSpacing_afterCompact() {
+        val probe = SpacingProbe()
+        val settings = MutableStateFlow(UserSettings(density = DensityPreference.Compact))
+        rule.setContent { PocketCpApp(listOf(probe), settings) }
+
+        settings.value = UserSettings(density = DensityPreference.Comfortable)
+
+        rule.runOnIdle { assertEquals(PocketCpSpacing.of(UiDensity.Comfortable), probe.spacing) }
+    }
+
+    @Test
     fun storeChange_recomposesTheShell_withoutRecreatingTheActivity() {
         val probe = CodeStyleProbe()
         val store = MutableStateFlow(UserSettings(codeLigatures = true))
@@ -121,6 +144,17 @@ class ShellThemeTest {
 
         override fun register(graph: NavGraphBuilder) {
             graph.composable(destination.route) { fontFeatures = PocketCpTheme.typography.code.fontFeatureSettings }
+        }
+    }
+
+    /** A single destination whose screen records the spacing tokens as the shell themes it. */
+    private class SpacingProbe : FeatureEntry {
+        var spacing: PocketCpSpacing? = null
+
+        override val destination = shellTestEntries.first().destination
+
+        override fun register(graph: NavGraphBuilder) {
+            graph.composable(destination.route) { spacing = PocketCpTheme.spacing }
         }
     }
 }
