@@ -163,6 +163,9 @@ private val SettingsCategory.supporting: Int
             SettingsCategory.About -> R.string.settings_category_about_supporting
         }
 
-/** `settings_category_appearance`, `settings_category_features`, `settings_category_about`: Maestro and tests select categories by these. */
+/**
+ * `settings_category_appearance`, `settings_category_features`, `settings_category_about`: Maestro and tests select
+ * categories by these.
+ */
 internal val SettingsCategory.testTag: String
     get() = "settings_category_${name.lowercase()}"
