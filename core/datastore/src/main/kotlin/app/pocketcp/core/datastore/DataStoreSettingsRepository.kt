@@ -80,15 +80,6 @@ internal class DataStoreSettingsRepository(
         )
     }
 
-    /** The entry of [default]'s enum stored under [key], or [default] when unset or unknown. */
-    private inline fun <reified E> Preferences.stored(
-        key: Preferences.Key<String>,
-        default: E,
-    ): E where E : Enum<E>, E : StoredPreference {
-        val stored = this[key] ?: return default
-        return enumValues<E>().firstOrNull { it.key == stored } ?: default
-    }
-
     /** Preference names are persisted: never rename one. */
     private object Keys {
         val THEME = stringPreferencesKey("theme")
@@ -100,14 +91,21 @@ internal class DataStoreSettingsRepository(
         val HIDE_PROBLEM_TAGS = booleanPreferencesKey("hide_problem_tags")
         val HIDE_PROBLEM_RATINGS = booleanPreferencesKey("hide_problem_ratings")
     }
+}
 
-    private companion object {
-        const val RETRY_BASE_MS = 100L
-        const val RETRY_MAX_MS = 5_000L
-        const val RETRY_MAX_SHIFT = 6
+private const val RETRY_BASE_MS = 100L
+private const val RETRY_MAX_MS = 5_000L
+private const val RETRY_MAX_SHIFT = 6
 
-        /** 100 ms, 200 ms, 400 ms, … capped at [RETRY_MAX_MS]. */
-        fun retryDelayMs(attempt: Long): Long =
-            (RETRY_BASE_MS shl attempt.coerceAtMost(RETRY_MAX_SHIFT.toLong()).toInt()).coerceAtMost(RETRY_MAX_MS)
-    }
+/** The delay before re-reading after the [attempt]th failure: 100 ms, 200 ms, 400 ms, … capped at [RETRY_MAX_MS]. */
+private fun retryDelayMs(attempt: Long): Long =
+    (RETRY_BASE_MS shl attempt.coerceAtMost(RETRY_MAX_SHIFT.toLong()).toInt()).coerceAtMost(RETRY_MAX_MS)
+
+/** The entry of [default]'s enum stored under [key], or [default] when unset or unknown. */
+private inline fun <reified E> Preferences.stored(
+    key: Preferences.Key<String>,
+    default: E,
+): E where E : Enum<E>, E : StoredPreference {
+    val stored = this[key] ?: return default
+    return enumValues<E>().firstOrNull { it.key == stored } ?: default
 }
