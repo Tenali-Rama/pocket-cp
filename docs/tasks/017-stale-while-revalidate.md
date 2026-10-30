@@ -36,6 +36,6 @@ spec: ["2. Product Principles", "4. Platform & Architecture", "14. Offline"]
 <!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
 - Features inject `ContestRepository` / `ProblemRepository` (interfaces); fake them in ViewModel tests. The impls are internal.
 - `Cached.data == null` means "never fetched": show the empty state only for a non-null empty list, and a full error state only when `data == null && error != null`.
-- A new cached dataset (e.g. users, M9) implements `CachedDataset`, reuses `CachedResource` and adds its max age to ADR 0010.
+- A new cached dataset (e.g. users, M9) implements `CachedDataset`, reuses `CachedResource` and adds its max age to ADR 0011.
 - Pull-to-refresh calls `refresh(force = true)`; it joins a running refresh instead of starting a second one.
 - `app/src/test/kotlin/app/pocketcp/data/DataWiringTest.kt` is what makes the app's Hilt graph check the `JudgeSource` wiring at compile time.

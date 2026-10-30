@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 import java.time.Clock
 import java.time.Duration
 
-/** The problemset, cache first (ADR 0010). */
+/** The problemset, cache first (ADR 0011). */
 interface ProblemRepository {
     /** The cached problemset, refreshed in the background when older than [MAX_AGE]. */
     fun problemset(): Flow<Cached<List<Problem>>>

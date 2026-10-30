@@ -33,7 +33,7 @@ internal interface CachedDataset<T> {
 }
 
 /**
- * One stale-while-revalidate dataset (ADR 0010) over [dataset]: stale after [maxAge] by [clock].
+ * One stale-while-revalidate dataset (ADR 0011) over [dataset]: stale after [maxAge] by [clock].
  * Refreshes run in [scope], at most one at a time; [dispatcher] maps and combines emissions off the main thread.
  */
 internal class CachedResource<T>(

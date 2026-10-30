@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 import java.time.Clock
 import java.time.Duration
 
-/** Contests and gyms, cache first (ADR 0010). */
+/** Contests and gyms, cache first (ADR 0011). */
 interface ContestRepository {
     /** The cached contests (or gyms), refreshed in the background when older than [MAX_AGE]. */
     fun contests(gym: Boolean): Flow<Cached<List<Contest>>>

@@ -1,4 +1,4 @@
-# 0010 — Stale-while-revalidate repositories; errors never clear data
+# 0011 — Stale-while-revalidate repositories; errors never clear data
 
 - **Status**: accepted
 - **Context**: Spec §2 "Instant" and §14 want cached data shown at once and kept offline, while the Codeforces API allows 1 request / 2 s.

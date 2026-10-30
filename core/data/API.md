@@ -1,6 +1,6 @@
 # core/data API
 
-Cache-first repositories (stale-while-revalidate, ADR 0010) for contests and the problemset, emitting `Cached<T>` from the Room cache and refreshing it through `JudgeSource`.
+Cache-first repositories (stale-while-revalidate, ADR 0011) for contests and the problemset, emitting `Cached<T>` from the Room cache and refreshing it through `JudgeSource`.
 
 Package `app.pocketcp.core.data`. Hilt: `DataModule` provides `ContestRepository` and `ProblemRepository` as singletons, on the app's `JudgeSource` and `core/database` DAOs.
 

@@ -4,7 +4,7 @@ import app.pocketcp.core.model.JudgeError
 import java.time.Instant
 
 /**
- * A cached dataset as the UI sees it (ADR 0010).
+ * A cached dataset as the UI sees it (ADR 0011).
  * - [data] is `null` only when the dataset was never fetched; after a fetch it is the cache, even if empty.
  * - [fetchedAt] is when the cache was last written, or `null` if never.
  * - [refreshing] is true while a background refresh runs.
