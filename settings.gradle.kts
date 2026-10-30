@@ -20,6 +20,7 @@ rootProject.name = "PocketCP"
 include(":app")
 include(":core:adaptive")
 include(":core:codeforces")
+include(":core:database")
 include(":core:designsystem")
 include(":core:model")
 include(":core:navigation")
