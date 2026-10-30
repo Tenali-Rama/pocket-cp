@@ -50,10 +50,15 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(project(":core:adaptive"))
+    // The JudgeSource binding; DataWiringTest checks it reaches the core/data repositories.
+    implementation(project(":core:codeforces"))
+    implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
 
     testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.hilt.android.testing)
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
+    kspTest(libs.hilt.compiler)
 }
