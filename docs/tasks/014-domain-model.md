@@ -36,4 +36,4 @@ A pure Kotlin/JVM module, `core/model`, holds the judge-agnostic domain that the
 - `ProblemId.display` is the `4A` form; `toString()` stays the data-class default.
 - `JudgeError` cases take an optional `cause`; 015 should pass the `CodeforcesError` as cause. `Rejected(message)` carries the API comment shown to the user.
 - `Contest.start` is nullable (some gyms have no start time); `duration` is not.
-- `OptionalModule` keys are persisted by 016-style settings: never rename one.
+- `OptionalModule` keys are persisted in settings (DataStore): never rename one.
