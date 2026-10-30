@@ -153,12 +153,42 @@ class RequestQueueTest {
         }
 
     @Test
-    fun `the classifier only sees 2xx responses and other statuses reach the caller`() =
+    fun `the classifier never sees a 5xx outside the retry set and the caller gets it as it is`() =
         runTest {
-            val upstream = FakeUpstream({ currentTime }) { response(404) }
-            val classifier = RetryClassifier { error("classifier must not run on a 404") }
+            val upstream = FakeUpstream({ currentTime }) { response(500) }
+            val classifier = RetryClassifier { error("classifier must not run on a 500") }
             val result = withQueue(upstream) { queue -> queue.execute(get("$HOST/profile/nobody"), classifier) }
-            assertEquals(404, result.code)
+            assertEquals(500, result.code)
+            assertEquals(1, upstream.starts.size)
+        }
+
+    @Test
+    fun `a 400 the classifier marks retryable backs off 2, 4 and 8 s, then fails with the error it named`() =
+        runTest {
+            val upstream = FakeUpstream({ currentTime }) { response(400, "busy") }
+            val error =
+                withQueue(upstream) { queue -> failureOf { queue.execute(get("$API/contest.list"), BUSY_RETRIES) } }
+            assertEquals("busy", (error as NetworkError.Rejected).reason)
+            assertEquals(RETRY_STARTS, upstream.starts)
+        }
+
+    @Test
+    fun `a retried 400 returns the 2xx response once the server accepts the call`() =
+        runTest {
+            val upstream = FakeUpstream({ currentTime }) { attempt -> if (attempt == 1) response(400, "busy") else ok("done") }
+            val result = withQueue(upstream) { queue -> queue.execute(get("$API/contest.list"), BUSY_RETRIES) }
+            assertEquals(200, result.code)
+            assertEquals("done", result.body)
+            assertEquals(listOf(0L, 2_000L), upstream.starts)
+        }
+
+    @Test
+    fun `with AcceptAll a 400 reaches the caller unchanged after one attempt`() =
+        runTest {
+            val upstream = FakeUpstream({ currentTime }) { response(400, "busy") }
+            val result = withQueue(upstream) { queue -> queue.execute(get("$API/contest.list")) }
+            assertEquals(400, result.code)
+            assertEquals("busy", result.body)
             assertEquals(1, upstream.starts.size)
         }
 
@@ -207,6 +237,10 @@ class RequestQueueTest {
         const val HOST = "https://codeforces.com"
         const val API = "$HOST/api"
         val RETRY_STARTS = listOf(0L, 2_000L, 6_000L, 14_000L)
+
+        /** Retries any "busy" body, whatever its status. */
+        val BUSY_RETRIES =
+            RetryClassifier { if (it.body == "busy") RetryDecision.Retry(NetworkError.Rejected("busy")) else RetryDecision.Accept }
 
         fun get(url: String) = Request.Builder().url(url).build()
 

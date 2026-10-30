@@ -17,7 +17,7 @@ Each method returns the envelope's `result` or throws `CodeforcesError`. Calls r
 | Case | When |
 |------|------|
 | `Api(comment)` | `status: FAILED` (Codeforces sends it with HTTP 400), e.g. handle not found |
-| `RateLimited` | "Call limit exceeded" or HTTP 429, after the queue's retries (2/4/8 s) |
+| `RateLimited` | "Call limit exceeded" (HTTP 200 or 400; its classifier sees both) or HTTP 429, after the queue's retries (2/4/8 s) |
 | `Unavailable(code)` | HTTP 502/503/504 after the queue's retries |
 | `Offline(cause)` | no connection or timeout |
 | `Http(code)` | any other status without a `FAILED` envelope |

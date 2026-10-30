@@ -1,14 +1,14 @@
 package app.pocketcp.core.network
 
 /**
- * Decides whether a 2xx [NetworkResponse] is usable, so a caller can treat a body as an error
- * (e.g. "Call limit exceeded").
+ * Decides whether a 2xx or 4xx (except 429) [NetworkResponse] is usable, so a caller can treat a body as an error
+ * (e.g. "Call limit exceeded", which Codeforces sends with HTTP 400).
  */
 fun interface RetryClassifier {
     fun classify(response: NetworkResponse): RetryDecision
 
     companion object {
-        /** Accepts every 2xx response. The default. */
+        /** Accepts every response it sees, so 2xx and 4xx reach the caller unchanged. The default. */
         val AcceptAll = RetryClassifier { RetryDecision.Accept }
     }
 }

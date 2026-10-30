@@ -6,7 +6,8 @@ import app.pocketcp.core.network.RetryClassifier
 import app.pocketcp.core.network.RetryDecision
 
 /**
- * Makes the [app.pocketcp.core.network.RequestQueue] retry a 2xx "Call limit exceeded" envelope with its backoff.
+ * Makes the [app.pocketcp.core.network.RequestQueue] retry a "Call limit exceeded" envelope with its backoff,
+ * whether it comes with HTTP 200 or, as real Codeforces sends it, HTTP 400.
  * Once retries run out the queue throws [NetworkError.Rejected], which [CodeforcesApi] reports as
  * [CodeforcesError.RateLimited]. Every other body is accepted and left to the envelope decoding.
  */
