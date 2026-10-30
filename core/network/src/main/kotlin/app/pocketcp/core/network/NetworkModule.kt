@@ -48,11 +48,17 @@ object NetworkModule {
     @Singleton
     fun provideNetworkMonitor(
         @ApplicationContext context: Context,
-    ): NetworkMonitor = ConnectivityNetworkMonitor(context.getSystemService(ConnectivityManager::class.java))
+    ): NetworkMonitor {
+        val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
+        return ConnectivityNetworkMonitor(connectivityManager, monitorDispatcher())
+    }
 
     /** The queue's app-lifetime scope. The dispatcher is a defaulted parameter, as detekt's InjectDispatcher asks. */
     private fun queueScope(dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope {
         val job = SupervisorJob()
         return CoroutineScope(job + dispatcher)
     }
+
+    /** Where the monitor's connectivity calls run. A defaulted parameter, as detekt's InjectDispatcher asks. */
+    private fun monitorDispatcher(dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineDispatcher = dispatcher
 }
