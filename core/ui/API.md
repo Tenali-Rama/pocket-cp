@@ -21,4 +21,4 @@ LazyColumn {
 | `RefreshErrorBanner(error: JudgeError, onRetry, modifier)` | For a failed refresh over cached data: one message per `JudgeError` case (`Rejected` shows its own message) and a Retry button. Polite live region. |
 
 Rows are ≥ `spacing.touchTarget` tall and activated by `Enter` (`RowsA11yTest`).
-Screenshots: `browseRows_*`, `browseRows_hiddenSpoilers_phone_dark`, `browseRows_font150_phone_dark`.
+Screenshots: `browseRows_*`, `browseRows_hiddenSpoilers_phone_dark`, `browseRows_font150_phone_dark`, `browseRows_font150Problems_phone_dark` (the problem rows the full gallery pushes off a phone at 1.5×).

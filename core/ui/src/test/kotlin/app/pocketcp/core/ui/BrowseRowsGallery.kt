@@ -102,11 +102,15 @@ internal fun browseThemeWrapper(
         }
     }
 
-/** The refresh banner over every contest row state and three problem rows (the second highlighted). */
+/**
+ * The refresh banner over every contest row state and three problem rows (the second highlighted).
+ * Without [showContests] only the banner and the problem rows, so 1.5× text fits a phone.
+ */
 @Composable
 internal fun BrowseRowsGallery(
     hideTags: Boolean = false,
     hideRating: Boolean = false,
+    showContests: Boolean = true,
 ) {
     val spacing = PocketCpTheme.spacing
     Column(
@@ -115,7 +119,9 @@ internal fun BrowseRowsGallery(
     ) {
         RefreshErrorBanner(JudgeError.Offline(), onRetry = {}, modifier = Modifier.fillMaxWidth())
         BoxWithConstraints {
-            if (maxWidth >= WideMinWidth) {
+            if (!showContests) {
+                ProblemCard(hideTags, hideRating, Modifier.fillMaxWidth())
+            } else if (maxWidth >= WideMinWidth) {
                 Row(horizontalArrangement = Arrangement.spacedBy(spacing.xl)) {
                     ContestCard(Modifier.weight(1f))
                     ProblemCard(hideTags, hideRating, Modifier.weight(1f))
