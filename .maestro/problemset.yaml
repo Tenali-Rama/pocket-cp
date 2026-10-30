@@ -1,0 +1,48 @@
+# Problemset from the debug fixtures (ADR 0015, `testdata/codeforces/api/problemset.problems.json`): searching a
+# problem id leaves its row, and "Hide tags" from the overflow menu persists across a relaunch that keeps the
+# app's data. Selects by test tag; a problem row merges its id, name, tags and counts into one node, so its text is
+# matched as a regex. 2276F is tagged "dsu"; no other fixture problem is.
+appId: app.pocketcp
+name: Problemset search and spoiler hiding
+---
+- stopApp
+- launchApp:
+    clearState: true
+- tapOn:
+    id: nav_problemset
+- assertVisible:
+    id: screen_problemset
+- assertVisible:
+    text: ".*dsu.*"
+
+- tapOn:
+    id: problemset_search
+- inputText: "2274A"
+- hideKeyboard
+- assertVisible:
+    id: problem_2274A
+- assertNotVisible:
+    id: problem_2276F
+- takeScreenshot: problemset_search
+
+- tapOn:
+    id: problemset_search_clear
+- assertVisible:
+    text: ".*dsu.*"
+- tapOn:
+    id: problemset_menu
+# The menu is a popup window, outside the root that exposes test tags as resource ids: tap its text.
+- tapOn:
+    text: "Hide tags"
+- assertNotVisible:
+    text: ".*dsu.*"
+
+- launchApp:
+    stopApp: true
+    clearState: false
+- tapOn:
+    id: nav_problemset
+- assertVisible:
+    id: problem_2276F
+- assertNotVisible:
+    text: ".*dsu.*"
