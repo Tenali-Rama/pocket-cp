@@ -6,16 +6,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,8 +22,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.navigation.TopLevelDestination
+import kotlin.math.floor
+import kotlin.math.max
 
 /** The bottom bar including its inset padding. */
 internal const val BOTTOM_BAR_TAG = "shell_bottom_bar"
@@ -115,19 +117,28 @@ internal fun ShellRail(
 /** The smallest a nav label shrinks to, as a fraction of the theme's label size. */
 private const val MIN_LABEL_SCALE = 0.7f
 
+/** Shrink factors are floored to this many steps per 1.0, so the shrunk label is safely inside its item. */
+private const val LABEL_SCALE_STEPS = 20
+
 /**
- * A nav item's label: one line at the theme's label size, shrunk step by step (down to [MIN_LABEL_SCALE])
- * rather than wrapped or clipped when a large text size makes it wider than its item.
+ * A nav item's label: the theme's label style when it fits on one line, otherwise shrunk (down to
+ * [MIN_LABEL_SCALE]) rather than wrapped or clipped, as happens with a large text size.
  */
 @Composable
 private fun NavLabel(text: String) {
-    val style = LocalTextStyle.current.copy(color = LocalContentColor.current)
-    BasicText(
-        text = text,
-        style = style,
-        maxLines = 1,
-        autoSize = TextAutoSize.StepBased(minFontSize = style.fontSize * MIN_LABEL_SCALE, maxFontSize = style.fontSize),
-    )
+    val style = LocalTextStyle.current
+    val measurer = rememberTextMeasurer()
+    BoxWithConstraints {
+        val width = measurer.measure(text, style, maxLines = 1, softWrap = false).size.width
+        val fitted =
+            if (!constraints.hasBoundedWidth || width <= constraints.maxWidth) {
+                style
+            } else {
+                val ratio = floor(constraints.maxWidth.toFloat() / width * LABEL_SCALE_STEPS) / LABEL_SCALE_STEPS
+                style.copy(fontSize = style.fontSize * max(MIN_LABEL_SCALE, ratio))
+            }
+        Text(text, style = fitted, maxLines = 1)
+    }
 }
 
 /** `nav_<route>` for tests and Maestro, and the label as the item's content description. */
