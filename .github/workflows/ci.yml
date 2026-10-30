@@ -8,9 +8,10 @@ permissions:
   contents: read
   pull-requests: read
 
+# A new push supersedes a PR's run. On main every commit's run completes: cancelling one left main red (ADR 0014).
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.sha || 'latest' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   verify:
@@ -80,9 +81,8 @@ jobs:
           arch: x86_64
           profile: ${{ matrix.profile }}
           disable-animations: true
-          script: |
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
-            $HOME/.maestro/bin/maestro test .maestro/ --format junit --output build/maestro-report.xml --test-output-dir build/maestro
+          # One Maestro run per flow, each from a settled device (ADR 0014).
+          script: scripts/ci-ui-flows.sh app/build/outputs/apk/debug/app-debug.apk .maestro build/maestro
       - if: always() && steps.has.outputs.flows == 'yes'
         uses: actions/upload-artifact@v4
         with:
