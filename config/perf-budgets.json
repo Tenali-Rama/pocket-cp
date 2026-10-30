@@ -1,0 +1,7 @@
+{
+  "release_apk_bytes": 20000000,
+  "startup_cold_median_ms": 10000,
+  "startup_warm_median_ms": 5000,
+  "frame_duration_p90_ms": 100,
+  "memory_max_kb": 1000000
+}

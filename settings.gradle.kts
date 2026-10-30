@@ -18,6 +18,7 @@ dependencyResolutionManagement {
 rootProject.name = "PocketCP"
 
 include(":app")
+include(":benchmark")
 include(":core:adaptive")
 include(":core:codeforces")
 include(":core:data")
