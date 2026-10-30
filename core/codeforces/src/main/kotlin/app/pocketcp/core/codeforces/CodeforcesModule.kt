@@ -1,7 +1,5 @@
 package app.pocketcp.core.codeforces
 
-import app.pocketcp.core.codeforces.judge.CodeforcesJudgeSource
-import app.pocketcp.core.model.JudgeSource
 import app.pocketcp.core.network.RequestQueue
 import dagger.Module
 import dagger.Provides
@@ -13,17 +11,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
-/** One [CodeforcesApi] on the app-wide [RequestQueue], and Codeforces as the app's [JudgeSource]. */
+/**
+ * One [CodeforcesApi] on the app-wide [RequestQueue]. The app binds the `JudgeSource` per build type (ADR 0015):
+ * [app.pocketcp.core.codeforces.judge.CodeforcesJudgeSource] on this API, or recorded responses in debug builds.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object CodeforcesModule {
     @Provides
     @Singleton
     fun provideCodeforcesApi(queue: RequestQueue): CodeforcesApi = CodeforcesApi(queue, callScope())
-
-    @Provides
-    @Singleton
-    fun provideJudgeSource(api: CodeforcesApi): JudgeSource = CodeforcesJudgeSource(api)
 
     /**
      * The app-lifetime scope queued calls run in. Responses are decoded there, so it is off the main thread.

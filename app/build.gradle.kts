@@ -12,6 +12,9 @@ plugins {
 val appVersionName = "0.1.0"
 val appVersionCode = 2
 
+// Where the live JudgeSource binding lives; debug builds bind recorded responses instead (ADR 0015).
+val liveSources = "src/live/kotlin"
+
 // release.yml passes -Pkeystore=<path> plus the env vars below. Without it the release APK is unsigned.
 val releaseKeystore = providers.gradleProperty("keystore").orNull?.let { file(it) }
 
@@ -43,16 +46,31 @@ android {
             signingConfig = signingConfigs.findByName("release")
         }
     }
+
+    // The JudgeSource binding is per build type (ADR 0015): live Codeforces from src/live/kotlin, recorded
+    // responses in debug, which packages testdata/codeforces/api/ as its assets. Release-like types get src/live
+    // below; a new build type adds one of the two explicitly (app/CLAUDE.md).
+    sourceSets {
+        getByName("release").kotlin.srcDir(liveSources)
+        getByName("debug").assets.srcDir(rootProject.file("testdata/codeforces/api"))
+    }
 }
 
 // The baselineprofile plugin derives benchmarkRelease and nonMinifiedRelease from release, which has no signing
 // config without -Pkeystore. The perf CI job installs them on an emulator, so they use the debug key (ADR 0013).
+// They also bind the live JudgeSource like release, so benchmarks measure the real mapping path.
 androidComponents {
     finalizeDsl { android ->
         val debugKey = android.signingConfigs.getByName("debug")
-        android.buildTypes
-            .filter { it.name.startsWith("benchmark") || it.name.startsWith("nonMinified") }
-            .forEach { it.signingConfig = debugKey }
+        val derived = android.buildTypes.filter { it.name.startsWith("benchmark") || it.name.startsWith("nonMinified") }
+        derived.forEach { buildType ->
+            buildType.signingConfig = debugKey
+            val sources = android.sourceSets.maybeCreate(buildType.name)
+            sources.kotlin.srcDir(liveSources)
+        }
+        val bound = derived.map { it.name } + "debug" + "release"
+        val unbound = android.buildTypes.map { it.name } - bound.toSet()
+        check(unbound.isEmpty()) { "Build types $unbound bind no JudgeSource: see app/CLAUDE.md (ADR 0015)." }
     }
 }
 
@@ -88,16 +106,23 @@ val checkBaselineProfile by tasks.registering {
 }
 
 // CI also builds the (unsigned) release APK, so R8 and resource-shrinking problems fail the PR,
-// and checks that it ships the Baseline Profile.
+// and checks that it ships the Baseline Profile. ciCheck's unit tests cover debug only, so it also compiles the
+// release-like build types with their Hilt graph (no R8): a broken live JudgeSource binding fails CI there too.
 tasks.named("ciCheck") {
     dependsOn("assembleRelease", checkBaselineProfile)
+    dependsOn(
+        listOf("Release", "BenchmarkRelease", "NonMinifiedRelease").flatMap {
+            listOf("compile${it}JavaWithJavac", "hiltJavaCompile$it")
+        },
+    )
 }
 
 dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(project(":core:adaptive"))
-    // The JudgeSource binding; DataWiringTest checks it reaches the core/data repositories.
+    // CodeforcesApi and CodeforcesJudgeSource behind the JudgeSource bindings in src/live and src/debug;
+    // DataWiringTest checks the binding reaches the core/data repositories.
     implementation(project(":core:codeforces"))
     implementation(project(":core:data"))
     implementation(project(":core:datastore"))
@@ -114,4 +139,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
     kspTest(libs.hilt.compiler)
+    // FixtureJudgeSourceTest reads testdata/ like the module tests do.
+    testDebugImplementation(project(":core:testing"))
+    testDebugImplementation(libs.kotlinx.coroutines.test)
 }

@@ -2,7 +2,7 @@
 
 Typed client for the public Codeforces API (`contest.list`, `problemset.problems`, `user.info`) on top of the shared `RequestQueue`, with `OK`/`FAILED` envelope handling.
 
-Package `app.pocketcp.core.codeforces`. Hilt: `CodeforcesModule` (singleton) provides `CodeforcesApi` on the app's `RequestQueue`, and binds `JudgeSource` to `CodeforcesJudgeSource`.
+Package `app.pocketcp.core.codeforces`. Hilt: `CodeforcesModule` (singleton) provides `CodeforcesApi` on the app's `RequestQueue`. It binds no `JudgeSource`: `app` binds `CodeforcesJudgeSource` per build type (ADR 0015).
 
 ## `CodeforcesApi(queue, scope, baseUrl = BASE_URL)`
 Each method returns the envelope's `result` or throws `CodeforcesError`. Calls run in `scope` (app lifetime) through `queue`, so they are spaced 2 s apart, deduplicated and backed off.

@@ -2,6 +2,7 @@
 
 Recorded responses that tests serve instead of the network (`core/testing`: `Fixtures`, `FixtureServer`).
 Tests never make live calls; every response a test needs lives here.
+Debug builds also package `codeforces/api/` as their assets and serve it as the app's data (`app`'s `FixtureJudgeSource`, ADR 0015), so the Maestro flows see these files: renaming or removing one changes what they show.
 
 ## Layout
 - `codeforces/api/<method>.json`: an API response, e.g. `contest.list.json`.

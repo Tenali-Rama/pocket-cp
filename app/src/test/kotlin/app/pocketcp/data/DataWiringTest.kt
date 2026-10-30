@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 /**
  * The app's real modules, unreplaced: this only compiles when the production graph reaches the repositories
- * from `JudgeSource` (core/codeforces) and the DAOs (core/database).
+ * from `JudgeSource` (bound per build type in `src/debug` / `src/live`, ADR 0015) and the DAOs (core/database).
  */
 @HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)

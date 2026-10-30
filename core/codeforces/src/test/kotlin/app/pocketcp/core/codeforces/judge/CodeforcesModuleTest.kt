@@ -1,23 +1,25 @@
 package app.pocketcp.core.codeforces.judge
 
+import app.pocketcp.core.codeforces.CodeforcesApi
 import app.pocketcp.core.codeforces.CodeforcesModule
-import app.pocketcp.core.codeforces.withApi
 import app.pocketcp.core.model.JudgeSource
-import app.pocketcp.core.testing.FixtureServer
-import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 import javax.inject.Singleton
 
 class CodeforcesModuleTest {
-    @Test
-    fun `the JudgeSource binding is a singleton CodeforcesJudgeSource`() =
-        runTest {
-            val source = withApi(FixtureServer()) { api -> CodeforcesModule.provideJudgeSource(api) }
+    private val providers = CodeforcesModule::class.java.methods
 
-            assertTrue("got $source", source is CodeforcesJudgeSource)
-            val provider = CodeforcesModule::class.java.methods.single { it.returnType == JudgeSource::class.java }
-            assertNotNull(provider.getAnnotation(Singleton::class.java))
-        }
+    @Test
+    fun `the module provides a singleton CodeforcesApi`() {
+        val provider = providers.single { it.returnType == CodeforcesApi::class.java }
+
+        assertNotNull(provider.getAnnotation(Singleton::class.java))
+    }
+
+    @Test
+    fun `the JudgeSource binding is left to the app's build types`() {
+        assertEquals(emptyList<String>(), providers.filter { it.returnType == JudgeSource::class.java }.map { it.name })
+    }
 }
