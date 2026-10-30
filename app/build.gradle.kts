@@ -9,8 +9,8 @@ plugins {
 }
 
 // The only place the app version lives. app/CLAUDE.md says when it changes.
-val appVersionName = "0.0.0"
-val appVersionCode = 1
+val appVersionName = "0.1.0"
+val appVersionCode = 2
 
 // release.yml passes -Pkeystore=<path> plus the env vars below. Without it the release APK is unsigned.
 val releaseKeystore = providers.gradleProperty("keystore").orNull?.let { file(it) }
