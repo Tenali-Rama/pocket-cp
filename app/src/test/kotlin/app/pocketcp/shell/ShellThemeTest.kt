@@ -51,7 +51,9 @@ class ShellThemeTest {
 
     @Test
     fun amoled_isForced_whateverTheNightMode() {
-        listOf(night, day, undefined).forEach { assertEquals(ThemeMode.Amoled, themeModeOf(ThemePreference.Amoled, it)) }
+        listOf(night, day, undefined).forEach {
+            assertEquals(ThemeMode.Amoled, themeModeOf(ThemePreference.Amoled, it))
+        }
     }
 
     @Test

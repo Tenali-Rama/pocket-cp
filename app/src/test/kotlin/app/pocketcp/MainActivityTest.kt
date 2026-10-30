@@ -25,7 +25,9 @@ class MainActivityTest {
     /** The shell draws its first frame once DataStore has read the settings, off the main thread. */
     @Before
     fun waitForSettings() {
-        composeRule.waitUntil(SETTINGS_TIMEOUT_MS) { composeRule.onAllNodesWithTag("nav_home").fetchSemanticsNodes().isNotEmpty() }
+        composeRule.waitUntil(SETTINGS_TIMEOUT_MS) {
+            composeRule.onAllNodesWithTag("nav_home").fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test

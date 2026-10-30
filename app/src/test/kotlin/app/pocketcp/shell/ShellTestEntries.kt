@@ -17,7 +17,10 @@ import app.pocketcp.core.navigation.inNavigationOrder
  */
 val shellTestEntries: List<FeatureEntry> =
     listOf(
-        PlaceholderEntry(TopLevelDestination("home", R.string.nav_home, Icons.Filled.Home, 0), R.string.placeholder_home),
+        PlaceholderEntry(
+            TopLevelDestination("home", R.string.nav_home, Icons.Filled.Home, 0),
+            R.string.placeholder_home,
+        ),
         PlaceholderEntry(
             TopLevelDestination("contests", R.string.nav_contests, Icons.Filled.DateRange, 10),
             R.string.placeholder_contests,
