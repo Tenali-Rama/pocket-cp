@@ -129,6 +129,7 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
     implementation(project(":core:network"))
+    implementation(project(":feature:contests"))
     implementation(project(":feature:settings"))
     // Installs the Baseline Profile on devices where the store does not.
     implementation(libs.androidx.profileinstaller)

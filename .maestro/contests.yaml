@@ -1,0 +1,25 @@
+# Contests from the debug fixtures (ADR 0015, `testdata/codeforces/api/contest.list.json`): the upcoming
+# Div. 3 round 2278 counts down, and the Div. 2 chip hides it. Selects by test tag; the row's text is matched
+# as a regex, since a contest row merges its name, phase and time into one node.
+appId: app.pocketcp
+name: Contests list and filters
+---
+- stopApp
+- launchApp:
+    clearState: true
+- tapOn:
+    id: nav_contests
+- assertVisible:
+    id: screen_contests
+- assertVisible:
+    id: contest_2278
+- assertVisible:
+    text: ".*Starts in.*"
+
+- tapOn:
+    id: contests_division_div2
+- assertNotVisible:
+    id: contest_2278
+- assertVisible:
+    id: contest_2272
+- takeScreenshot: contests_filtered

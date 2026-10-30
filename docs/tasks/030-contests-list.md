@@ -2,7 +2,7 @@
 id: 030
 title: Contests feature with running, upcoming and past lists and division/type filters
 milestone: M2
-status: todo
+status: done
 deps: [025, 026, 027, 028]
 touches: [feature/contests/, settings.gradle.kts+, app/build.gradle.kts+, .maestro/contests.yaml]
 spec: ["7.2 Contests", "2. Product Principles", "14. Offline"]
@@ -45,4 +45,8 @@ The Contests tab is a native list of running, upcoming and past Codeforces conte
 - Contest detail (031). Register/unregister, standings, virtual (M8). Gym (M8).
 
 ## Notes for next
-<!-- builder fills in -->
+- Wide windows (medium+) are filter pane | list (1 : 2); compact puts two scrolling chip rows above the list. 031 can turn this into list | detail by moving the filters back above the list.
+- Defaults: Running sorts by end (soonest first); a contest in an `Unknown` phase is in no section; an upcoming contest whose cached start has passed is shown as Running (then Finished) via `asOf(now)`, re-sectioned at the exact instant (`nextPhaseChange`), never on a ticker.
+- Pull-to-refresh, the top-bar refresh button (keyboard/desktop) and every Retry call `refresh()`; only that user refresh shows the pull indicator.
+- Rows' `onClick` is a no-op until 031 adds the detail route.
+- Screenshots and `ContestsScreenTest` load `contest.list.json` through the real `CodeforcesJudgeSource` (`FixtureContests`), with now = its recording time, like debug builds.
