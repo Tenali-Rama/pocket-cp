@@ -50,15 +50,21 @@ internal fun pocketCpTypography(
 ): PocketCpTypography {
     val ui = TextStyle(fontFamily = FontFamily.SansSerif)
     val code = TextStyle(fontFamily = codeFamily, fontFeatureSettings = if (codeLigatures) null else NO_LIGATURES)
+
+    fun TextStyle.sized(
+        size: Int,
+        line: Int,
+        scale: Float,
+    ) = copy(fontSize = size.sp * scale, lineHeight = line.sp * scale)
     return PocketCpTypography(
-        display = ui.copy(fontSize = 32.sp * textScale, lineHeight = 40.sp * textScale, fontWeight = FontWeight.Normal),
-        headline = ui.copy(fontSize = 24.sp * textScale, lineHeight = 32.sp * textScale, fontWeight = FontWeight.Normal),
-        title = ui.copy(fontSize = 18.sp * textScale, lineHeight = 24.sp * textScale, fontWeight = FontWeight.Medium),
-        body = ui.copy(fontSize = 16.sp * textScale, lineHeight = 24.sp * textScale, fontWeight = FontWeight.Normal),
-        bodySmall = ui.copy(fontSize = 14.sp * textScale, lineHeight = 20.sp * textScale, fontWeight = FontWeight.Normal),
-        label = ui.copy(fontSize = 12.sp * textScale, lineHeight = 16.sp * textScale, fontWeight = FontWeight.Medium),
-        code = code.copy(fontSize = 14.sp * codeTextScale, lineHeight = 20.sp * codeTextScale),
-        codeSmall = code.copy(fontSize = 12.sp * codeTextScale, lineHeight = 16.sp * codeTextScale),
+        display = ui.sized(32, 40, textScale).copy(fontWeight = FontWeight.Normal),
+        headline = ui.sized(24, 32, textScale).copy(fontWeight = FontWeight.Normal),
+        title = ui.sized(18, 24, textScale).copy(fontWeight = FontWeight.Medium),
+        body = ui.sized(16, 24, textScale).copy(fontWeight = FontWeight.Normal),
+        bodySmall = ui.sized(14, 20, textScale).copy(fontWeight = FontWeight.Normal),
+        label = ui.sized(12, 16, textScale).copy(fontWeight = FontWeight.Medium),
+        code = code.sized(14, 20, codeTextScale),
+        codeSmall = code.sized(12, 16, codeTextScale),
     )
 }
 

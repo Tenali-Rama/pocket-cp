@@ -53,7 +53,13 @@ fun PcpChoiceRow(
     PcpRow(
         headline = title,
         enabled = enabled,
-        modifier = modifier.selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onClick),
+        modifier =
+            modifier.selectable(
+                selected = selected,
+                enabled = enabled,
+                role = Role.RadioButton,
+                onClick = onClick,
+            ),
         leading = { RadioButton(selected = selected, onClick = null, enabled = enabled) },
     )
 }
