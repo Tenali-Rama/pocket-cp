@@ -7,7 +7,6 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -78,15 +77,6 @@ object Placeholders {
             message = R.string.placeholder_profile,
         )
 
-    val settings =
-        placeholder(
-            route = "settings",
-            label = R.string.nav_settings,
-            icon = Icons.Filled.Settings,
-            order = 40,
-            message = R.string.placeholder_settings,
-        )
-
     private fun placeholder(
         route: String,
         @StringRes label: Int,
@@ -108,6 +98,5 @@ object PlaceholderModule {
             Placeholders.contests,
             Placeholders.problemset,
             Placeholders.profile,
-            Placeholders.settings,
         )
 }

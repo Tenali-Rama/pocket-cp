@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nav item text and content description, and the screen title. -->
+    <string name="settings_label">Settings</string>
+
+    <!-- Categories. -->
+    <string name="settings_category_appearance">Appearance</string>
+    <string name="settings_category_appearance_supporting">Theme, text size, density</string>
+    <string name="settings_category_features">Features</string>
+    <string name="settings_category_features_supporting">Turn optional modules on or off</string>
+
+    <!-- Appearance. -->
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_amoled">AMOLED black</string>
+    <string name="settings_app_text_size">App text size</string>
+    <string name="settings_code_text_size">Code text size</string>
+    <string name="settings_text_size_small">Small</string>
+    <string name="settings_text_size_default">Default</string>
+    <string name="settings_text_size_large">Large</string>
+    <string name="settings_text_size_largest">Largest</string>
+    <string name="settings_code">Code</string>
+    <string name="settings_code_ligatures">Ligatures</string>
+    <string name="settings_code_ligatures_supporting">Draw operators such as != and -&gt; as one symbol</string>
+    <string name="settings_density">Density</string>
+    <string name="settings_density_comfortable">Comfortable</string>
+    <string name="settings_density_compact">Compact</string>
+
+    <!-- Features: one line per optional module (spec §15). -->
+    <string name="settings_features_intro">A module you turn off disappears from the app.</string>
+    <string name="settings_module_local_compute">Local compute</string>
+    <string name="settings_module_local_compute_supporting">Compile and run code on this device</string>
+    <string name="settings_module_ai">AI</string>
+    <string name="settings_module_ai_supporting">Help from the AI provider you choose</string>
+    <string name="settings_module_stress_tester">Stress tester</string>
+    <string name="settings_module_stress_tester_supporting">Compare a solution with a brute force on random tests</string>
+    <string name="settings_module_practice_streaks">Practice and streaks</string>
+    <string name="settings_module_practice_streaks_supporting">Daily practice goals and streaks</string>
+    <string name="settings_module_stats">Stats</string>
+    <string name="settings_module_stats_supporting">Charts of ratings, verdicts and solved problems</string>
+    <string name="settings_module_other_judges_calendar">Other judges\' calendar</string>
+    <string name="settings_module_other_judges_calendar_supporting">Contests from other judges in the calendar</string>
+    <string name="settings_module_focus_mode_auto_start">Focus mode auto-start</string>
+    <string name="settings_module_focus_mode_auto_start_supporting">Start focus mode when a contest starts</string>
+</resources>

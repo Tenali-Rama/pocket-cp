@@ -10,6 +10,7 @@ import app.pocketcp.R
 import app.pocketcp.core.navigation.FeatureEntry
 import app.pocketcp.core.navigation.TopLevelDestination
 import app.pocketcp.core.navigation.inNavigationOrder
+import app.pocketcp.feature.settings.R as SettingsR
 
 /**
  * The shell tests' destinations: the five M1 ones with fixed routes, labels, icons and orders. Independent of
@@ -34,7 +35,7 @@ val shellTestEntries: List<FeatureEntry> =
             R.string.placeholder_profile,
         ),
         PlaceholderEntry(
-            TopLevelDestination("settings", R.string.nav_settings, Icons.Filled.Settings, 40),
-            R.string.placeholder_settings,
+            TopLevelDestination("settings", SettingsR.string.settings_label, Icons.Filled.Settings, 40),
+            SettingsR.string.settings_label,
         ),
     ).inNavigationOrder()

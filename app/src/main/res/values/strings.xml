@@ -7,12 +7,10 @@
     <string name="nav_contests">Contests</string>
     <string name="nav_problemset">Problemset</string>
     <string name="nav_profile">Profile</string>
-    <string name="nav_settings">Settings</string>
 
     <!-- Placeholders until the milestone that delivers each destination (docs/tasks/ROADMAP.md). -->
     <string name="placeholder_home">Arrives in M2: Browse.</string>
     <string name="placeholder_contests">Arrives in M2: Browse.</string>
     <string name="placeholder_problemset">Arrives in M2: Browse.</string>
     <string name="placeholder_profile">Arrives in M9: Community.</string>
-    <string name="placeholder_settings">Arrives in M1: Data base &amp; settings.</string>
 </resources>

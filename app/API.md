@@ -16,7 +16,7 @@ The application module: `PocketCpApplication` (`@HiltAndroidApp`) and the single
 | `themeModeOf(theme, uiMode)` | `System` → `themeModeOf(uiMode)`; `Dark` / `Light` / `Amoled` force their mode. |
 | `TextSizePreference.scale` | `Small` 0.9, `Default` 1.0, `Large` 1.15, `Largest` 1.3: `textScale` / `codeTextScale`, on top of the system font scale. |
 | `DensityPreference.uiDensity` | The design system's `UiDensity`. |
-| `PlaceholderEntry` / `Placeholders` / `PlaceholderModule` | Home (M2), Contests (M2), Problemset (M2), Profile (M9), Settings (M1) as `EmptyState` placeholders. A feature replacing one deletes its line in `PlaceholderModule.placeholders()`. |
+| `PlaceholderEntry` / `Placeholders` / `PlaceholderModule` | Home (M2), Contests (M2), Problemset (M2), Profile (M9) as `EmptyState` placeholders; Settings is `feature/settings`. A feature replacing one deletes its line in `PlaceholderModule.placeholders()`. |
 
 Nav items carry test tags `nav_home`, `nav_contests`, `nav_problemset`, `nav_profile`, `nav_settings` and their label as content description.
 Switching tab pops to Home with saved state, so Back from any tab returns to Home, then leaves the app.
