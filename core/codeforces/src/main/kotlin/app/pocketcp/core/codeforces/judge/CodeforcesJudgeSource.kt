@@ -15,13 +15,13 @@ class CodeforcesJudgeSource(
 ) : JudgeSource {
     override val judge: JudgeId = ID
 
-    override suspend fun contests(gym: Boolean): List<Contest> = judgeCall { api.contests(gym).map { it.toContest(gym) } }
+    override suspend fun contests(gym: Boolean): List<Contest> = call { api.contests(gym).map { it.toContest(gym) } }
 
-    override suspend fun problemset(): List<Problem> = judgeCall { api.problemset().toProblems() }
+    override suspend fun problemset(): List<Problem> = call { api.problemset().toProblems() }
 
-    override suspend fun users(handles: List<String>): List<User> = judgeCall { api.users(handles).map { it.toUser() } }
+    override suspend fun users(handles: List<String>): List<User> = call { api.users(handles).map { it.toUser() } }
 
-    private suspend fun <T> judgeCall(block: suspend () -> T): T =
+    private suspend fun <T> call(block: suspend () -> T): T =
         try {
             block()
         } catch (e: CodeforcesError) {
