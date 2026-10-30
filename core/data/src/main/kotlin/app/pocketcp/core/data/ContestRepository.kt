@@ -39,19 +39,19 @@ internal class CachedContestRepository(
 ) : ContestRepository {
     private val resources =
         listOf(false, true).associateWith { gym ->
-            CachedResource(
-                scope = scope,
-                dispatcher = dispatcher,
-                clock = clock,
-                maxAge = ContestRepository.MAX_AGE,
-                cached = { dao.contests(gym).map { contests -> contests.map { it.toDomain() } } },
-                fetchedAtMillis = { meta.fetchedAt(CacheKeys.contests(gym)) },
-                fetch = {
-                    // replaceAll rejects a contest from the other dataset; a judge's stray record is dropped instead.
-                    val contests = source.contests(gym).filter { it.isGym == gym }.map { it.toEntity() }
-                    dao.replaceAll(gym, contests, clock.millis())
-                },
-            )
+            val dataset =
+                object : CachedDataset<List<Contest>> {
+                    override fun cached() = dao.contests(gym).map { contests -> contests.map { it.toDomain() } }
+
+                    override suspend fun fetchedAtMillis() = meta.fetchedAt(CacheKeys.contests(gym))
+
+                    override suspend fun fetch() {
+                        // replaceAll rejects a contest from the other dataset; drop a judge's stray record instead.
+                        val contests = source.contests(gym).filter { it.isGym == gym }.map { it.toEntity() }
+                        dao.replaceAll(gym, contests, clock.millis())
+                    }
+                }
+            CachedResource(dataset, ContestRepository.MAX_AGE, clock, scope, dispatcher)
         }
 
     override fun contests(gym: Boolean): Flow<Cached<List<Contest>>> = resources.getValue(gym).stream()

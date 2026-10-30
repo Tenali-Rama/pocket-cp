@@ -20,18 +20,28 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 
+/** Where a [CachedResource] reads and writes one dataset. */
+internal interface CachedDataset<T> {
+    /** The Room cache, re-emitting on every write. */
+    fun cached(): Flow<T>
+
+    /** The dataset's `cache_meta` time, or null if never fetched. */
+    suspend fun fetchedAtMillis(): Long?
+
+    /** Reads the judge and swaps the cache. Throws only `JudgeError`. */
+    suspend fun fetch()
+}
+
 /**
- * One stale-while-revalidate dataset (ADR 0010): [cached] is the Room cache, [fetchedAtMillis] its `cache_meta`
- * time, and [fetch] reads the judge and swaps the cache. Refreshes run in [scope], at most one at a time.
+ * One stale-while-revalidate dataset (ADR 0010) over [dataset]: stale after [maxAge] by [clock].
+ * Refreshes run in [scope], at most one at a time; [dispatcher] maps and combines emissions off the main thread.
  */
 internal class CachedResource<T>(
+    private val dataset: CachedDataset<T>,
+    private val maxAge: Duration,
+    private val clock: Clock,
     private val scope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher,
-    private val clock: Clock,
-    private val maxAge: Duration,
-    private val cached: () -> Flow<T>,
-    private val fetchedAtMillis: suspend () -> Long?,
-    private val fetch: suspend () -> Unit,
 ) {
     private data class Status(
         val refreshing: Boolean = false,
@@ -46,7 +56,8 @@ internal class CachedResource<T>(
     fun stream(): Flow<Cached<T>> =
         flow {
             start(force = false)
-            val snapshots = cached().map { data -> data to fetchedAtMillis()?.let(Instant::ofEpochMilli) }
+            val snapshots =
+                dataset.cached().map { data -> data to dataset.fetchedAtMillis()?.let(Instant::ofEpochMilli) }
             val cachedWithStatus =
                 combine(snapshots, status) { (data, fetchedAt), current ->
                     Cached(data.takeIf { fetchedAt != null }, fetchedAt, current.refreshing, current.error)
@@ -69,13 +80,13 @@ internal class CachedResource<T>(
 
     /** Fresh when fetched at most [maxAge] ago. A fetch time in the future (the clock went back) counts as stale. */
     private suspend fun isFresh(): Boolean {
-        val fetchedAt = fetchedAtMillis() ?: return false
+        val fetchedAt = dataset.fetchedAtMillis() ?: return false
         return clock.millis() - fetchedAt in 0..maxAge.toMillis()
     }
 
     private suspend fun run() {
         try {
-            fetch()
+            dataset.fetch()
             status.value = Status()
         } catch (error: JudgeError) {
             status.value = Status(error = error)

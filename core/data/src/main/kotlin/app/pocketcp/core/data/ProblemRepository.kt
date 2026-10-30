@@ -34,16 +34,16 @@ internal class CachedProblemRepository(
     scope: CoroutineScope,
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ProblemRepository {
-    private val resource =
-        CachedResource(
-            scope = scope,
-            dispatcher = dispatcher,
-            clock = clock,
-            maxAge = ProblemRepository.MAX_AGE,
-            cached = { dao.problems().map { problems -> problems.map { it.toDomain() } } },
-            fetchedAtMillis = { meta.fetchedAt(CacheKeys.PROBLEMSET) },
-            fetch = { dao.replaceAll(source.problemset().map { it.toEntity() }, clock.millis()) },
-        )
+    private val problemset =
+        object : CachedDataset<List<Problem>> {
+            override fun cached() = dao.problems().map { problems -> problems.map { it.toDomain() } }
+
+            override suspend fun fetchedAtMillis() = meta.fetchedAt(CacheKeys.PROBLEMSET)
+
+            override suspend fun fetch() = dao.replaceAll(source.problemset().map { it.toEntity() }, clock.millis())
+        }
+
+    private val resource = CachedResource(problemset, ProblemRepository.MAX_AGE, clock, scope, dispatcher)
 
     override fun problemset(): Flow<Cached<List<Problem>>> = resource.stream()
 
