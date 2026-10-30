@@ -24,15 +24,28 @@ import androidx.compose.ui.unit.dp
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.designsystem.Rank
 import app.pocketcp.core.designsystem.ThemeMode
+import app.pocketcp.core.designsystem.UiDensity
 import app.pocketcp.core.screenshot.ThemeWrapper
 
 /** Windows at least this wide (Material 3 medium width) lay the galleries out side by side. */
 private val WideMinWidth = 600.dp
 
 /** [PocketCpTheme] dark or light, for `captureMatrix`. */
-internal val PocketCpThemeWrapper: ThemeWrapper = { dark, content ->
-    PocketCpTheme(mode = if (dark) ThemeMode.Dark else ThemeMode.Light, content = content)
-}
+internal val PocketCpThemeWrapper: ThemeWrapper = themeWrapper()
+
+/** [PocketCpTheme] dark or light with the given [density] and [textScale]. */
+internal fun themeWrapper(
+    density: UiDensity = UiDensity.Comfortable,
+    textScale: Float = 1f,
+): ThemeWrapper =
+    { dark, content ->
+        PocketCpTheme(
+            mode = if (dark) ThemeMode.Dark else ThemeMode.Light,
+            density = density,
+            textScale = textScale,
+            content = content,
+        )
+    }
 
 /** Every component, enabled and disabled: controls on the left, content on the right on wide windows. */
 @Composable
@@ -108,7 +121,7 @@ private fun Content() {
             PcpCard(Modifier.weight(1f), onClick = {}, enabled = enabled) {
                 Text(
                     text = if (enabled) "Clickable card" else "Disabled card",
-                    modifier = Modifier.padding(spacing.lg),
+                    modifier = Modifier.padding(horizontal = spacing.lg, vertical = spacing.cardVertical),
                     style = PocketCpTheme.typography.body,
                 )
             }

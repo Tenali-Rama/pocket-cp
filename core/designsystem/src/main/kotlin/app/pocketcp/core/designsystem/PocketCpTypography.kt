@@ -13,7 +13,8 @@ import androidx.compose.ui.unit.sp
 
 /**
  * The type scale. UI styles use the platform sans-serif; [code] and [codeSmall] use the bundled JetBrains Mono,
- * with ligatures on or off as set by `PocketCpTheme(codeLigatures = …)`.
+ * with ligatures on or off as set by `PocketCpTheme(codeLigatures = …)`. Sizes follow `PocketCpTheme(textScale = …)`
+ * for the UI styles and `PocketCpTheme(codeTextScale = …)` for the code styles.
  */
 @Immutable
 data class PocketCpTypography(
@@ -37,21 +38,27 @@ internal fun jetBrainsMono(assets: AssetManager): FontFamily =
 /** CSS `font-feature-settings` that turn JetBrains Mono's ligatures (contextual alternates) off. */
 internal const val NO_LIGATURES = "\"calt\" 0, \"liga\" 0"
 
+/**
+ * Builds the type scale. [textScale] multiplies the size and line height of every UI style,
+ * [codeTextScale] those of [PocketCpTypography.code] and [PocketCpTypography.codeSmall].
+ */
 internal fun pocketCpTypography(
     codeFamily: FontFamily,
     codeLigatures: Boolean,
+    textScale: Float = 1f,
+    codeTextScale: Float = 1f,
 ): PocketCpTypography {
     val ui = TextStyle(fontFamily = FontFamily.SansSerif)
     val code = TextStyle(fontFamily = codeFamily, fontFeatureSettings = if (codeLigatures) null else NO_LIGATURES)
     return PocketCpTypography(
-        display = ui.copy(fontSize = 32.sp, lineHeight = 40.sp, fontWeight = FontWeight.Normal),
-        headline = ui.copy(fontSize = 24.sp, lineHeight = 32.sp, fontWeight = FontWeight.Normal),
-        title = ui.copy(fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.Medium),
-        body = ui.copy(fontSize = 16.sp, lineHeight = 24.sp, fontWeight = FontWeight.Normal),
-        bodySmall = ui.copy(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.Normal),
-        label = ui.copy(fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium),
-        code = code.copy(fontSize = 14.sp, lineHeight = 20.sp),
-        codeSmall = code.copy(fontSize = 12.sp, lineHeight = 16.sp),
+        display = ui.copy(fontSize = 32.sp * textScale, lineHeight = 40.sp * textScale, fontWeight = FontWeight.Normal),
+        headline = ui.copy(fontSize = 24.sp * textScale, lineHeight = 32.sp * textScale, fontWeight = FontWeight.Normal),
+        title = ui.copy(fontSize = 18.sp * textScale, lineHeight = 24.sp * textScale, fontWeight = FontWeight.Medium),
+        body = ui.copy(fontSize = 16.sp * textScale, lineHeight = 24.sp * textScale, fontWeight = FontWeight.Normal),
+        bodySmall = ui.copy(fontSize = 14.sp * textScale, lineHeight = 20.sp * textScale, fontWeight = FontWeight.Normal),
+        label = ui.copy(fontSize = 12.sp * textScale, lineHeight = 16.sp * textScale, fontWeight = FontWeight.Medium),
+        code = code.copy(fontSize = 14.sp * codeTextScale, lineHeight = 20.sp * codeTextScale),
+        codeSmall = code.copy(fontSize = 12.sp * codeTextScale, lineHeight = 16.sp * codeTextScale),
     )
 }
 

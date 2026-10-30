@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.Key
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.pocketcp.core.designsystem.PocketCpTheme
+import app.pocketcp.core.designsystem.UiDensity
 import app.pocketcp.core.screenshot.SCREENSHOT_SDK
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -62,6 +66,47 @@ class ComponentA11yTest {
 
         rule.onNodeWithText("A").assertTouchTargetAtLeast(minTouchTarget)
         rule.onNodeWithText("B").assertTouchTargetAtLeast(minTouchTarget)
+    }
+
+    @Test
+    fun compactRowsKeepTouchTargetsOfAtLeast48dp() {
+        setThemedContent(UiDensity.Compact) {
+            Column {
+                PcpListItem("One line", onClick = {})
+                PcpListItem("Two lines", supporting = "Supporting", onClick = {})
+                PcpSwitchRow("Switch", checked = true, onCheckedChange = {})
+                PcpChoiceRow("Choice", selected = false, onClick = {})
+                PcpIconButton(Icons.Filled.Refresh, contentDescription = "Refresh", onClick = {})
+                PcpFilterChip("Chip", selected = true, onClick = {})
+            }
+        }
+
+        listOf("One line", "Two lines", "Switch", "Choice", "Chip").forEach { label ->
+            rule.onNodeWithText(label).assertTouchTargetAtLeast(minTouchTarget)
+        }
+        rule.onNodeWithContentDescription("Refresh").assertTouchTargetAtLeast(minTouchTarget)
+    }
+
+    @Test
+    fun compactRowsAreShorterThanComfortableRows() {
+        var density by mutableStateOf(UiDensity.Comfortable)
+        rule.setContent {
+            PocketCpTheme(density = density) { PcpListItem("Row", supporting = "Supporting", onClick = {}) }
+        }
+        val comfortable =
+            rule
+                .onNodeWithText("Row")
+                .fetchSemanticsNode()
+                .size.height
+
+        density = UiDensity.Compact
+        val compact =
+            rule
+                .onNodeWithText("Row")
+                .fetchSemanticsNode()
+                .size.height
+
+        assertTrue("compact $compact >= comfortable $comfortable", compact < comfortable)
     }
 
     @Test
@@ -108,12 +153,15 @@ class ComponentA11yTest {
         rule.runOnIdle { assertEquals(0, clicks) }
     }
 
-    /** Sets [content] inside [PocketCpTheme]; returns the window's input mode manager. */
-    private fun setThemedContent(content: @Composable () -> Unit): InputModeManager {
+    /** Sets [content] inside [PocketCpTheme] at [density]; returns the window's input mode manager. */
+    private fun setThemedContent(
+        density: UiDensity = UiDensity.Comfortable,
+        content: @Composable () -> Unit,
+    ): InputModeManager {
         lateinit var inputModeManager: InputModeManager
         rule.setContent {
             inputModeManager = LocalInputModeManager.current
-            PocketCpTheme(content = content)
+            PocketCpTheme(density = density, content = content)
         }
         return inputModeManager
     }
