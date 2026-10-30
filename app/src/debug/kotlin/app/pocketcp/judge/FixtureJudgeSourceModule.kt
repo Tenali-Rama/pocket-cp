@@ -27,7 +27,7 @@ object FixtureJudgeSourceModule {
         @ApplicationContext context: Context,
     ): JudgeSource {
         val assets = context.assets
-        return fixtureJudgeSource { name -> assets.open(name).bufferedReader().use { it.readText() } }
+        return fixtureJudgeSource(FixtureAssets { name -> assets.open(name).bufferedReader().use { it.readText() } })
     }
 
     /** The dispatcher is a defaulted parameter, as detekt's InjectDispatcher asks. */
