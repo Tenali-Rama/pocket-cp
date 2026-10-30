@@ -25,6 +25,8 @@ import javax.inject.Singleton
  * The settings repository, and the `Set<OptionalModule>` of installed modules: each optional module
  * contributes itself with `@IntoSet`, and Settings lists the set (empty in M1).
  */
+// An abstract class, not an interface: it holds both the abstract `@Multibinds` and a companion of `@Provides`.
+@Suppress("UnnecessaryAbstractClass")
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataStoreModule {
@@ -45,7 +47,7 @@ abstract class DataStoreModule {
                 settingsDataStore(dataStoreScope()) { context.preferencesDataStoreFile(SETTINGS_NAME) },
             )
 
-        /** The store's app-lifetime scope. The dispatcher is a defaulted parameter, as detekt's InjectDispatcher asks. */
+        /** The store's app-lifetime scope. The dispatcher is defaulted, as detekt's InjectDispatcher asks. */
         private fun dataStoreScope(dispatcher: CoroutineDispatcher = Dispatchers.IO): CoroutineScope =
             CoroutineScope(SupervisorJob() + dispatcher)
     }
