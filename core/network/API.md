@@ -16,14 +16,14 @@ Package `app.pocketcp.core.network`. Hilt: `NetworkModule` (singletons) provides
 | HTTP 429 | yes | `RateLimited` |
 | HTTP 502/503/504 | yes | `Unavailable(code)` |
 | `IOException` / timeout | no | `Offline(cause)` |
-| 2xx, classifier says `Retry(finalError)` | yes | `finalError` |
-| 2xx, classifier says `Fail(error)` | no | `error` |
+| 2xx or 4xx (not 429), classifier says `Retry(finalError)` | yes | `finalError` |
+| 2xx or 4xx (not 429), classifier says `Fail(error)` | no | `error` |
 
-Any other status is returned as a `NetworkResponse` for the caller to interpret.
+A 2xx or 4xx the classifier `Accept`s, and any other status, is returned unchanged as a `NetworkResponse` for the caller to interpret.
 
 ## Types
 - `NetworkResponse(code, headers, body: String)`: fully read, shareable between deduplicated callers.
-- `fun interface RetryClassifier { fun classify(response: NetworkResponse): RetryDecision }`, runs on 2xx only.
+- `fun interface RetryClassifier { fun classify(response: NetworkResponse): RetryDecision }`, runs on 2xx and 4xx except 429.
 - `RetryDecision`: `Accept | Retry(finalError) | Fail(error)`.
 - `NetworkError`: `RateLimited | Unavailable(code) | Offline(cause) | Rejected(reason)`. `Rejected` is for classifiers.
 - `HttpTransport` (one exchange, throws `IOException`); `OkHttpTransport(callFactory)` is the production one.
