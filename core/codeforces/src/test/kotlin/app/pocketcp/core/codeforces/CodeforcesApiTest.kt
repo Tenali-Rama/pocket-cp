@@ -16,7 +16,7 @@ class CodeforcesApiTest {
 
             val contests = withApi(server) { it.contests() }
 
-            assertEquals(listOf(2278, 2272, 2277), contests.map { it.id })
+            assertEquals(listOf(2278, 2272, 2277, 2274), contests.map { it.id })
             val upcoming = contests.first()
             assertEquals("Codeforces Round 1131 (Div. 3)", upcoming.name)
             assertEquals("ICPC", upcoming.type)

@@ -1,6 +1,6 @@
 # Contests from the debug fixtures (ADR 0015, `testdata/codeforces/api/contest.list.json`): the upcoming
 # Div. 3 round 2278 counts down, and the Div. 2 chip hides it. Selects by test tag; the row's text is matched
-# as a regex, since a contest row merges its name, phase and time into one node.
+# as a regex, since a contest row merges its name, phase and time into one node. Then contest 2274 opens.
 appId: app.pocketcp
 name: Contests list and filters
 ---
@@ -23,3 +23,20 @@ name: Contests list and filters
 - assertVisible:
     id: contest_2272
 - takeScreenshot: contests_filtered
+
+# Contest detail: the finished Div. 2 round 2274 has problem 2274A in the debug problemset. A phone opens it as a
+# page and Back returns to the list; a tablet shows it beside the list, where Back would leave the tab, so only
+# the phone presses it (the bottom bar is shown only on compact width).
+- tapOn:
+    id: contest_2274
+- assertVisible:
+    id: problem_2274A
+- takeScreenshot: contest_detail
+- runFlow:
+    when:
+      visible:
+        id: shell_bottom_bar
+    commands:
+      - back
+      - assertVisible:
+          id: contest_2274

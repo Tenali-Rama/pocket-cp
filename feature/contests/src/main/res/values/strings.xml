@@ -35,4 +35,19 @@
     <string name="contests_error_rate_limited">Codeforces is limiting requests. Try again in a moment.</string>
     <string name="contests_error_unavailable">Codeforces is unavailable right now. Try again later.</string>
     <string name="contests_error_malformed">Codeforces sent a response the app can\'t read.</string>
+
+    <!-- Contest detail (list | detail on wide windows, a page on phones). -->
+    <string name="contest_detail_title">Contest</string>
+    <!-- Header meta line: division, type and phase, e.g. "Div. 2 · CF · Finished". -->
+    <string name="contest_detail_meta">%1$s · %2$s · %3$s</string>
+    <!-- Header meta line without a type (the judge named none). -->
+    <string name="contest_detail_meta_no_kind">%1$s · %2$s</string>
+    <!-- Finished contest: %1$s is its localized start date and time, %2$s its length like "02:15". -->
+    <string name="contest_detail_held">Started %1$s · Length %2$s</string>
+    <!-- Problems section title and its states. -->
+    <string name="contest_detail_problems">Problems</string>
+    <string name="contest_detail_problems_pending">Problems appear here once Codeforces adds them to the problemset</string>
+    <string name="contest_detail_no_problems">No problems for this contest</string>
+    <string name="contest_detail_not_found">Contest not found</string>
+    <string name="contest_detail_problems_error_offline">You\'re offline. Problems appear here once you\'re back online.</string>
 </resources>

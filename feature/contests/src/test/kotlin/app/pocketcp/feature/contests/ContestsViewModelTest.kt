@@ -1,7 +1,6 @@
 package app.pocketcp.feature.contests
 
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.pocketcp.core.data.Cached
 import app.pocketcp.core.model.Contest
@@ -275,11 +274,3 @@ class ContestsViewModelTest {
 }
 
 private fun ContestsUiState.contests(): List<Contest> = groups.flatMap { it.contests }
-
-/** Skips states until one matches [predicate]: the first item may be the initial state before the data arrives. */
-private suspend fun <T> ReceiveTurbine<T>.awaitUntil(predicate: (T) -> Boolean): T {
-    while (true) {
-        val state = awaitItem()
-        if (predicate(state)) return state
-    }
-}

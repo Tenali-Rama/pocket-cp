@@ -25,7 +25,7 @@ Debug builds also package `codeforces/api/` as their assets and serve it as the 
 ## Current fixtures
 | File | Recorded from | HTTP |
 |------|---------------|------|
-| `codeforces/api/contest.list.json` | `contest.list`, 3 contests (one `BEFORE`) | 200 |
+| `codeforces/api/contest.list.json` | `contest.list`, 4 contests (one `BEFORE`; 2274 was added later, its `relativeTimeSeconds` rebased to the first recording so the file keeps one recording moment) | 200 |
 | `codeforces/api/contest.list.gym.json` | `contest.list?gym=true`, one fully described Gym contest and one without a start time | 200 |
 | `codeforces/api/contest.list.phases.json` | `contest.list` elements with `phase` edited by hand to `CODING`, `PENDING_SYSTEM_TEST`, `SYSTEM_TEST` and an unknown `ARCHIVED`: live phases can't be recorded on demand | 200 |
 | `codeforces/api/problemset.problems.json` | `problemset.problems?tags=implementation;math`, 3 problems (one without `points`) and their statistics | 200 |
