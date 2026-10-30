@@ -24,8 +24,11 @@ A 2xx or 4xx the classifier `Accept`s, and any other status, is returned unchang
 
 ## `NetworkMonitor`
 `val isOnline: Flow<Boolean>`: `true` while the default network has `INTERNET` and `VALIDATED`. Cold; each collector
-registers its own default-network callback (`ConnectivityNetworkMonitor(connectivityManager)`), emits the current
-state first, then distinct changes only. A late `onLost` of a previous default network is ignored.
+registers its own default-network callback (`ConnectivityNetworkMonitor(connectivityManager, dispatcher)`), emits the
+current state first, then distinct changes only. A late `onLost` of a previous default network is ignored.
+- The connectivity calls run on the injected `dispatcher` (`Dispatchers.IO` from `NetworkModule`), not the collector's.
+- Going offline is emitted only once it has lasted `ConnectivityNetworkMonitor.OFFLINE_DELAY` (2 s; the optional
+  `offlineDelay` parameter); a return within it emits nothing. Going online, and an offline initial state, are at once.
 
 ## Types
 - `NetworkResponse(code, headers, body: String)`: fully read, shareable between deduplicated callers.

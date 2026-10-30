@@ -12,6 +12,8 @@ dependencies {
     api(project(":core:model"))
     api(libs.kotlinx.coroutines.core)
     implementation(project(":core:database"))
+    // CacheWarmer watches the connection; core/network has no judge in it (ADR 0009 holds).
+    implementation(project(":core:network"))
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

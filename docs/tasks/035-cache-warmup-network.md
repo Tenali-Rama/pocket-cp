@@ -2,7 +2,7 @@
 id: 035
 title: Warm list caches at start and on reconnect; NetworkMonitor off main and debounced
 milestone: M2
-status: todo
+status: done
 deps: []
 touches: [core/data/src/main/kotlin/app/pocketcp/core/data/CacheWarmer.kt, core/data/src/test/kotlin/app/pocketcp/core/data/CacheWarmerTest.kt, core/data/build.gradle.kts, core/data/API.md, core/network/src/main/kotlin/app/pocketcp/core/network/NetworkMonitor.kt, core/network/src/main/kotlin/app/pocketcp/core/network/NetworkModule.kt, core/network/src/test/kotlin/app/pocketcp/core/network/NetworkMonitorTest.kt, core/network/API.md, app/src/main/kotlin/app/pocketcp/PocketCpApplication.kt]
 spec: ["3. Performance Budgets", "14. Offline", "2. Product Principles"]
@@ -31,4 +31,8 @@ Lists are already warm when the user opens a tab (spec §3 prefetch). The app re
 - Statement prefetch (M3). Profile prefetch (M9). Paging of standings (M8).
 
 ## Notes for next
-<!-- builder fills in -->
+- `CacheWarmer` takes the repositories as `Provider`s and resolves them on its own scope, so `Application.onCreate` doesn't build OkHttp or Room on the main thread (spec §3 cold start).
+- The debounce lives in `ConnectivityNetworkMonitor` (`withIndex` + `transformLatest`): item 0 is never delayed. `OFFLINE_DELAY` = 2 s, overridable through the `offlineDelay` constructor parameter.
+- `CacheWarmer` drops anything a refresh throws (repositories shouldn't, per ADR 0011), so an escape can neither crash the app scope nor stop later reconnects.
+- `:app` Robolectric tests run the real `PocketCpApplication`, so the warmer starts there too. Robolectric's default network isn't `VALIDATED`, so it never fetches; a test that marks it validated must fake `JudgeSource` first.
+- `core/data` now depends on `core/network`, for `NetworkMonitor` only.

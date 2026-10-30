@@ -3,6 +3,7 @@
 Cache-first repositories (stale-while-revalidate, ADR 0011) for contests and the problemset, emitting `Cached<T>` from the Room cache and refreshing it through `JudgeSource`.
 
 Package `app.pocketcp.core.data`. Hilt: `DataModule` provides `ContestRepository` and `ProblemRepository` as singletons, on the app's `JudgeSource` and `core/database` DAOs.
+Depends on `core/network` for `NetworkMonitor` only.
 
 ## `Cached<out T>(data: T?, fetchedAt: Instant?, refreshing: Boolean, error: JudgeError?)`
 - `data`: the cache; `null` only when the dataset was never fetched. An empty list is a real, fetched empty dataset.
@@ -25,3 +26,10 @@ Package `app.pocketcp.core.data`. Hilt: `DataModule` provides `ContestRepository
 - `fun problemset(): Flow<Cached<List<Problem>>>`: newest contest first, then by index.
 - `suspend fun refresh(force: Boolean = false)`
 - `MAX_AGE`: 1 hour.
+
+## `CacheWarmer` (`@Singleton`, `@Inject`)
+- `fun start()`: watches `NetworkMonitor.isOnline` in its own app-lifetime scope. On the first `true` and on every
+  later `false → true` it calls `ContestRepository.refresh(gym = false)` and `ProblemRepository.refresh()`, not
+  forced, so a fresh cache costs no request. Later calls do nothing. `PocketCpApplication.onCreate` calls it.
+- The repositories are resolved lazily on that scope, so `start()` builds neither the HTTP client nor the database.
+- A refresh that throws anyway is dropped; it never stops later reconnects.
