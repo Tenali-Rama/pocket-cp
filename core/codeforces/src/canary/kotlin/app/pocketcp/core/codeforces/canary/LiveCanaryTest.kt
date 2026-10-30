@@ -25,14 +25,21 @@ class LiveCanaryTest {
     fun `problemset decodes`() =
         runBlocking {
             val problemset = live.endpoint("problemset.problems") { it.problemset() }
-            assertTrue(CanaryReport.endpointBroken("problemset.problems", "no problems"), problemset.problems.isNotEmpty())
+            assertTrue(
+                CanaryReport.endpointBroken("problemset.problems", "no problems"),
+                problemset.problems.isNotEmpty(),
+            )
         }
 
     @Test
     fun `user info decodes`() =
         runBlocking {
             val users = live.endpoint("user.info") { it.users(listOf(HANDLE)) }
-            assertEquals(CanaryReport.endpointBroken("user.info", "wrong user"), listOf(HANDLE), users.map { it.handle })
+            assertEquals(
+                CanaryReport.endpointBroken("user.info", "wrong user"),
+                listOf(HANDLE),
+                users.map { it.handle },
+            )
         }
 
     @Test

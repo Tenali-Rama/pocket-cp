@@ -28,7 +28,8 @@ class LiveCodeforces(
     cacheDir: File,
 ) : AutoCloseable {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val client = HttpClients.create(Cache(cacheDir, HttpClients.CACHE_SIZE_BYTES), SharedCookieJar(InMemoryCookieStore()))
+    private val client =
+        HttpClients.create(Cache(cacheDir, HttpClients.CACHE_SIZE_BYTES), SharedCookieJar(InMemoryCookieStore()))
     private val transport = RecordingTransport(OkHttpTransport(client))
     private val queue = RequestQueue(transport, scope)
     private val api = CodeforcesApi(queue, scope)

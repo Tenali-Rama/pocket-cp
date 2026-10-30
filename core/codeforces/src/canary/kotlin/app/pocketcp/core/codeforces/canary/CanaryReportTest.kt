@@ -32,7 +32,8 @@ class CanaryReportTest {
 
     @Test
     fun `a 503 challenge page is a Cloudflare block`() {
-        val body = "<html><head><title>Just a moment...</title></head><body><div id=\"cf-chl-widget\"></div></body></html>"
+        val body =
+            "<html><head><title>Just a moment...</title></head><body><div id=\"cf-chl-widget\"></div></body></html>"
 
         assertEquals("BLOCKED by Cloudflare: $URL", CanaryReport.checkPage(URL, response(503, body), SELECTOR))
     }
