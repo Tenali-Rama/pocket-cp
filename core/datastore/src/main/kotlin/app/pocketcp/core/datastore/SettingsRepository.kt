@@ -1,0 +1,26 @@
+package app.pocketcp.core.datastore
+
+import app.pocketcp.core.model.OptionalModule
+import kotlinx.coroutines.flow.Flow
+
+/** The user's settings. Read with [settings]; each setter persists one field. */
+interface SettingsRepository {
+    /** The current settings, then every change. Never fails: an unreadable store yields the defaults. */
+    val settings: Flow<UserSettings>
+
+    suspend fun setTheme(theme: ThemePreference)
+
+    suspend fun setAppTextSize(size: TextSizePreference)
+
+    suspend fun setCodeTextSize(size: TextSizePreference)
+
+    suspend fun setCodeLigatures(enabled: Boolean)
+
+    suspend fun setDensity(density: DensityPreference)
+
+    /** Turns [module] on or off in `disabledModules`; the other modules keep their state. */
+    suspend fun setModuleEnabled(
+        module: OptionalModule,
+        enabled: Boolean,
+    )
+}
