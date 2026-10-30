@@ -53,6 +53,7 @@ class SettingsScreenTest {
         rule.onNodeWithTag("settings_category_appearance").assertExists()
 
         rule.onNodeWithTag("settings_category_appearance").performClick()
+        rule.onNodeWithTag("settings_theme_light").assertExists()
         rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
         rule.onNodeWithTag("settings_category_appearance").assertExists()
         assertFalse(rule.activity.isFinishing)

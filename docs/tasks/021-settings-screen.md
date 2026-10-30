@@ -2,7 +2,7 @@
 id: 021
 title: Settings feature with Appearance and Features sections
 milestone: M1
-status: todo
+status: done
 deps: [018, 019, 020]
 touches: [feature/settings/, settings.gradle.kts+, app/build.gradle.kts+, app/src/main/kotlin/app/pocketcp/shell/Placeholders.kt, app/src/main/res/values/strings.xml, app/src/test/kotlin/app/pocketcp/shell/ShellTestEntries.kt, .maestro/smoke.yaml, .maestro/settings.yaml]
 spec: ["15. Settings", "5. Design & Layout"]
@@ -36,4 +36,8 @@ The Settings tab is a real feature module. It replaces the placeholder and lets 
 - App and editor font face choice (M5, see 019).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Feature view models are built by their `FeatureEntry` with `viewModel { }` (ADR 0012); screens stay stateless under a `*Route`.
+- New settings sections (Editor, Run, AI, Data, Account, About) add a `SettingsCategory`, a page in `CategoryPage` and a list entry; tags `settings_category_<name>`.
+- Every `OptionalModule` must have a title and description in `SettingsPages.kt` (exhaustive `when`).
+- `ShellTestEntries`' settings entry uses `feature/settings`' `settings_label` for both label and placeholder message.
+- Radio selection is `checked` for Maestro (Compose maps non-tab `selected` to checked).
