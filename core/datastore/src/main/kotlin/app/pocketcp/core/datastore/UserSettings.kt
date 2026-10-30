@@ -10,6 +10,10 @@ data class UserSettings(
     val codeLigatures: Boolean = true,
     val density: DensityPreference = DensityPreference.Comfortable,
     val disabledModules: Set<OptionalModule> = emptySet(),
+    /** Hide problem tags in the problemset, so practice isn't spoiled (spec §7.3). */
+    val hideProblemTags: Boolean = false,
+    /** Hide problem ratings in the problemset, so practice isn't spoiled (spec §7.3). */
+    val hideProblemRatings: Boolean = false,
 )
 
 /** A settings enum stored by [key], never by name or ordinal. Never change or reuse a key. */

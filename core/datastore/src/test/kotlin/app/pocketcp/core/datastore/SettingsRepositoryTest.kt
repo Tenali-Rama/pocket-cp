@@ -2,12 +2,16 @@ package app.pocketcp.core.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import app.cash.turbine.test
 import app.pocketcp.core.model.OptionalModule
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -15,6 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
+import java.io.IOException
 
 class SettingsRepositoryTest {
     @get:Rule
@@ -37,6 +42,8 @@ class SettingsRepositoryTest {
             assertEquals(true, settings.codeLigatures)
             assertEquals(DensityPreference.Comfortable, settings.density)
             assertEquals(emptySet<OptionalModule>(), settings.disabledModules)
+            assertEquals(false, settings.hideProblemTags)
+            assertEquals(false, settings.hideProblemRatings)
         }
 
     @Test
@@ -70,6 +77,18 @@ class SettingsRepositoryTest {
                 repository.setModuleEnabled(OptionalModule.Ai, enabled = false)
                 expected = expected.copy(disabledModules = setOf(OptionalModule.Ai))
                 assertEquals(expected, awaitItem())
+
+                repository.setHideProblemTags(true)
+                expected = expected.copy(hideProblemTags = true)
+                assertEquals(expected, awaitItem())
+
+                repository.setHideProblemRatings(true)
+                expected = expected.copy(hideProblemRatings = true)
+                assertEquals(expected, awaitItem())
+
+                repository.setHideProblemTags(false)
+                expected = expected.copy(hideProblemTags = false)
+                assertEquals(expected, awaitItem())
             }
         }
 
@@ -83,12 +102,57 @@ class SettingsRepositoryTest {
             repository.setAppTextSize(TextSizePreference.Large)
             repository.setDensity(DensityPreference.Compact)
             repository.setModuleEnabled(OptionalModule.PracticeAndStreaks, enabled = false)
+            repository.setHideProblemTags(true)
+            repository.setHideProblemRatings(true)
 
             val raw = store.data.first()
             assertEquals("amoled", raw[stringPreferencesKey("theme")])
             assertEquals("large", raw[stringPreferencesKey("app_text_size")])
             assertEquals("compact", raw[stringPreferencesKey("density")])
             assertEquals(setOf("practice_streaks"), raw[stringSetPreferencesKey("disabled_modules")])
+            assertEquals(true, raw[booleanPreferencesKey("hide_problem_tags")])
+            assertEquals(true, raw[booleanPreferencesKey("hide_problem_ratings")])
+        }
+
+    @Test
+    fun `a spoiler setting written by an earlier launch is read back`() =
+        runTest {
+            val store = dataStore()
+            store.edit {
+                it[booleanPreferencesKey("hide_problem_tags")] = true
+                it[booleanPreferencesKey("hide_problem_ratings")] = true
+            }
+
+            val settings = DataStoreSettingsRepository(store).settings.first()
+
+            assertEquals(UserSettings(hideProblemTags = true, hideProblemRatings = true), settings)
+        }
+
+    @Test
+    fun `after a read IOException the defaults are emitted and later writes still arrive`() =
+        runTest {
+            val repository = DataStoreSettingsRepository(FirstReadFails(dataStore(), IOException("disk unreadable")))
+            repository.settings.test {
+                assertEquals(UserSettings(), awaitItem())
+
+                repository.setHideProblemRatings(true)
+                assertEquals(UserSettings(hideProblemRatings = true), awaitItem())
+
+                repository.setTheme(ThemePreference.Dark)
+                assertEquals(UserSettings(hideProblemRatings = true, theme = ThemePreference.Dark), awaitItem())
+            }
+        }
+
+    @Test
+    fun `a non-IO read error propagates`() =
+        runTest {
+            val error = IllegalStateException("bug")
+            val repository = DataStoreSettingsRepository(FirstReadFails(dataStore(), error))
+            repository.settings.test {
+                val thrown = awaitError()
+                assertEquals(IllegalStateException::class, thrown::class)
+                assertEquals(error.message, thrown.message)
+            }
         }
 
     @Test
@@ -155,4 +219,20 @@ class SettingsRepositoryTest {
                 expectNoEvents()
             }
         }
+
+    /** Delegates to [store], except that the first collection of [data] fails with [error]. */
+    private class FirstReadFails(
+        private val store: DataStore<Preferences>,
+        private val error: Throwable,
+    ) : DataStore<Preferences> {
+        private var reads = 0
+
+        override val data: Flow<Preferences> =
+            flow {
+                if (reads++ == 0) throw error
+                emitAll(store.data)
+            }
+
+        override suspend fun updateData(transform: suspend (Preferences) -> Preferences) = store.updateData(transform)
+    }
 }
