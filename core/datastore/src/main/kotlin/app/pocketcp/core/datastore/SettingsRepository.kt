@@ -5,7 +5,10 @@ import kotlinx.coroutines.flow.Flow
 
 /** The user's settings. Read with [settings]; each setter persists one field. */
 interface SettingsRepository {
-    /** The current settings, then every change. Never fails: an unreadable store yields the defaults. */
+    /**
+     * The current settings, then every change. Never fails on IO: an unreadable store yields the defaults,
+     * and later changes are still emitted once the store reads again.
+     */
     val settings: Flow<UserSettings>
 
     suspend fun setTheme(theme: ThemePreference)
@@ -17,6 +20,10 @@ interface SettingsRepository {
     suspend fun setCodeLigatures(enabled: Boolean)
 
     suspend fun setDensity(density: DensityPreference)
+
+    suspend fun setHideProblemTags(hidden: Boolean)
+
+    suspend fun setHideProblemRatings(hidden: Boolean)
 
     /** Turns [module] on or off in `disabledModules`; the other modules keep their state. */
     suspend fun setModuleEnabled(

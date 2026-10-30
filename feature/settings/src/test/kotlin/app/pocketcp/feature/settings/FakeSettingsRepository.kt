@@ -27,6 +27,10 @@ class FakeSettingsRepository(
 
     override suspend fun setDensity(density: DensityPreference) = stored.update { it.copy(density = density) }
 
+    override suspend fun setHideProblemTags(hidden: Boolean) = stored.update { it.copy(hideProblemTags = hidden) }
+
+    override suspend fun setHideProblemRatings(hidden: Boolean) = stored.update { it.copy(hideProblemRatings = hidden) }
+
     override suspend fun setModuleEnabled(
         module: OptionalModule,
         enabled: Boolean,

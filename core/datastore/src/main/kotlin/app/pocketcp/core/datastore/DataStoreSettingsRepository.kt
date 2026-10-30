@@ -8,20 +8,30 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import app.pocketcp.core.model.OptionalModule
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retryWhen
 import java.io.IOException
 
 /** [SettingsRepository] on a Preferences [DataStore]. Enums are stored by their [StoredPreference.key]. */
 internal class DataStoreSettingsRepository(
     private val dataStore: DataStore<Preferences>,
 ) : SettingsRepository {
+    /**
+     * On a read [IOException] this emits the defaults once (on the first failure), then re-reads the store
+     * after a backoff that doubles from [RETRY_BASE_MS] up to [RETRY_MAX_MS], for as long as it is collected.
+     * A later successful read, and every write after it, is emitted as usual. Any other error propagates.
+     */
     override val settings: Flow<UserSettings> =
         dataStore.data
-            .catch { error -> if (error is IOException) emit(emptyPreferences()) else throw error }
-            .map { it.toUserSettings() }
+            .retryWhen { error, attempt ->
+                if (error !is IOException) return@retryWhen false
+                if (attempt == 0L) emit(emptyPreferences())
+                delay(retryDelayMs(attempt))
+                true
+            }.map { it.toUserSettings() }
             .distinctUntilChanged()
 
     override suspend fun setTheme(theme: ThemePreference) = put(Keys.THEME, theme.key)
@@ -33,6 +43,10 @@ internal class DataStoreSettingsRepository(
     override suspend fun setCodeLigatures(enabled: Boolean) = put(Keys.CODE_LIGATURES, enabled)
 
     override suspend fun setDensity(density: DensityPreference) = put(Keys.DENSITY, density.key)
+
+    override suspend fun setHideProblemTags(hidden: Boolean) = put(Keys.HIDE_PROBLEM_TAGS, hidden)
+
+    override suspend fun setHideProblemRatings(hidden: Boolean) = put(Keys.HIDE_PROBLEM_RATINGS, hidden)
 
     override suspend fun setModuleEnabled(
         module: OptionalModule,
@@ -61,6 +75,8 @@ internal class DataStoreSettingsRepository(
             codeLigatures = this[Keys.CODE_LIGATURES] ?: defaults.codeLigatures,
             density = stored(Keys.DENSITY, defaults.density),
             disabledModules = this[Keys.DISABLED_MODULES].orEmpty().mapNotNull(OptionalModule::fromKey).toSet(),
+            hideProblemTags = this[Keys.HIDE_PROBLEM_TAGS] ?: defaults.hideProblemTags,
+            hideProblemRatings = this[Keys.HIDE_PROBLEM_RATINGS] ?: defaults.hideProblemRatings,
         )
     }
 
@@ -81,5 +97,17 @@ internal class DataStoreSettingsRepository(
         val CODE_LIGATURES = booleanPreferencesKey("code_ligatures")
         val DENSITY = stringPreferencesKey("density")
         val DISABLED_MODULES = stringSetPreferencesKey("disabled_modules")
+        val HIDE_PROBLEM_TAGS = booleanPreferencesKey("hide_problem_tags")
+        val HIDE_PROBLEM_RATINGS = booleanPreferencesKey("hide_problem_ratings")
+    }
+
+    private companion object {
+        const val RETRY_BASE_MS = 100L
+        const val RETRY_MAX_MS = 5_000L
+        const val RETRY_MAX_SHIFT = 6
+
+        /** 100 ms, 200 ms, 400 ms, … capped at [RETRY_MAX_MS]. */
+        fun retryDelayMs(attempt: Long): Long =
+            (RETRY_BASE_MS shl attempt.coerceAtMost(RETRY_MAX_SHIFT.toLong()).toInt()).coerceAtMost(RETRY_MAX_MS)
     }
 }
