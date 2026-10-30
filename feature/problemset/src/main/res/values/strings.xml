@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nav item text and content description, and the screen title (same as the placeholder it replaces). -->
+    <string name="problemset_label">Problemset</string>
+    <string name="problemset_refresh">Refresh problemset</string>
+    <string name="problemset_more">More options</string>
+
+    <!-- Overflow menu: spoiler toggles (spec §7.3). -->
+    <string name="problemset_hide_tags">Hide tags</string>
+    <string name="problemset_hide_ratings">Hide ratings</string>
+
+    <!-- Search. -->
+    <string name="problemset_search_hint">Search by name or ID (1900A)</string>
+    <string name="problemset_clear_search">Clear search</string>
+
+    <!-- Sort. Rating orders read as difficulty. -->
+    <string name="problemset_sort_title">Sort by</string>
+    <string name="problemset_sort_newest">Newest</string>
+    <string name="problemset_sort_rating_ascending">Easiest first</string>
+    <string name="problemset_sort_rating_descending">Hardest first</string>
+    <string name="problemset_sort_most_solved">Most solved</string>
+    <string name="problemset_sort_name">Name</string>
+
+    <!-- Empty states. -->
+    <string name="problemset_empty_title">No problems</string>
+    <string name="problemset_empty_search_title">No problems match “%1$s”</string>
+    <string name="problemset_empty_search_message">Search a name, a problem ID like 1900A, or a contest ID like 1900.</string>
+
+    <!-- Full error state: no cached problems and the refresh failed. -->
+    <string name="problemset_error_offline">You\'re offline. Problems appear here once you\'re back online.</string>
+    <string name="problemset_error_rate_limited">Codeforces is limiting requests. Try again in a moment.</string>
+    <string name="problemset_error_unavailable">Codeforces is unavailable right now. Try again later.</string>
+    <string name="problemset_error_malformed">Codeforces sent a response the app can\'t read.</string>
+</resources>
