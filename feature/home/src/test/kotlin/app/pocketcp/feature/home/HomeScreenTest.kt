@@ -3,6 +3,8 @@ package app.pocketcp.feature.home
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertHasNoClickAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -64,7 +66,8 @@ class HomeScreenTest {
     @Test
     fun upcomingContest_countsDownToItsStart() {
         show(listOf(Upcoming))
-        rule.onNodeWithText(rule.activity.getString(R.string.home_section_upcoming)).assertExists()
+        // The row's phase label says "Upcoming" too: match only the section header.
+        rule.onNode(hasText(rule.activity.getString(R.string.home_section_upcoming)) and isHeading()).assertExists()
         rule.onNodeWithTag("contest_2278").assertExists()
         rule.onNodeWithText("Starts in 00:01:30", substring = true).assertExists()
     }
