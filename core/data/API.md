@@ -8,7 +8,7 @@ Package `app.pocketcp.core.data`. Hilt: `DataModule` provides `ContestRepository
 - `data`: the cache; `null` only when the dataset was never fetched. An empty list is a real, fetched empty dataset.
 - `fetchedAt`: when the cache was last written, or `null`.
 - `refreshing`: a background refresh is running. Show the data, not a spinner, when `data != null`.
-- `error`: the last refresh's `JudgeError`; cleared by the next successful refresh. It never clears `data`.
+- `error`: the last refresh's `JudgeError`; cleared by the next successful refresh. It never clears `data`. A failure that isn't the judge's (e.g. an `SQLiteException` from the cache write) shows as `JudgeError.Unavailable` with it as the cause; it never crashes the refresh scope.
 
 ## Policy (every repository)
 - Collecting emits the cache at once, then every change to it or to the refresh status.

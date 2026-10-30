@@ -1,7 +1,9 @@
 package app.pocketcp.core.data
 
+import android.database.sqlite.SQLiteException
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
+import app.pocketcp.core.database.CacheKeys
 import app.pocketcp.core.database.PocketCpDatabase
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
@@ -12,6 +14,7 @@ import app.pocketcp.core.model.ProblemId
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -20,6 +23,8 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -179,6 +184,48 @@ class StaleWhileRevalidateTest {
             problems().refresh()
 
             assertEquals(1, source.problemsetCalls)
+        }
+
+    @Test
+    fun `a cache write error keeps the data and shows Unavailable, without crashing the scope`() =
+        runTest {
+            database.problemDao().replaceAll(listOf(watermelon.toEntity()), currentTime)
+            advanceTimeBy(2.hours)
+            val writeError = SQLiteException("disk I/O error")
+            val answer = CompletableDeferred<Unit>()
+            // The judge answers, then the Room write fails: a dataset whose write throws.
+            val dataset =
+                object : CachedDataset<List<Problem>> {
+                    override fun cached() = database.problemDao().problems().map { rows -> rows.map { it.toDomain() } }
+
+                    override suspend fun fetchedAtMillis() = database.cacheMetaDao().fetchedAt(CacheKeys.PROBLEMSET)
+
+                    override suspend fun fetch() {
+                        answer.await()
+                        throw writeError
+                    }
+                }
+            val resource =
+                CachedResource(
+                    dataset,
+                    ProblemRepository.MAX_AGE,
+                    SchedulerClock(testScheduler),
+                    backgroundScope,
+                    StandardTestDispatcher(testScheduler),
+                )
+
+            resource.stream().test(timeout = FLOW_TIMEOUT) {
+                assertEquals(Cached(listOf(watermelon), Instant.EPOCH, refreshing = true, error = null), awaitItem())
+
+                answer.complete(Unit)
+
+                val after = awaitItem()
+                assertEquals(listOf(watermelon), after.data)
+                assertFalse(after.refreshing)
+                assertTrue(after.error is JudgeError.Unavailable)
+                assertSame(writeError, after.error?.cause)
+            }
+            assertEquals(listOf(watermelon.toEntity()), database.problemDao().problems().first())
         }
 
     private fun TestScope.problems() =

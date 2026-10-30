@@ -93,9 +93,12 @@ class ContestDaoTest {
         }
 
     private companion object {
-        val old = ContestEntity(1, "Codeforces Beta Round 1", "Finished", 1_266_588_000L, 7_200L, isGym = false)
-        val recent = ContestEntity(2000, "Codeforces Round 960", "Finished", 1_721_000_000L, 7_200L, isGym = false)
-        val upcoming = ContestEntity(2100, "Codeforces Round 1000", "Upcoming", 1_800_000_000L, 9_000L, isGym = false)
-        val gymNoStart = ContestEntity(100_001, "Training gym", "Finished", null, 18_000L, isGym = true)
+        val old =
+            ContestEntity(1, "Codeforces Beta Round 1", "Finished", 1_266_588_000L, 7_200L, isGym = false, kind = "Cf")
+        val recent =
+            ContestEntity(2000, "Codeforces Round 960", "Finished", 1_721_000_000L, 7_200L, isGym = false, kind = "Cf")
+        val upcoming =
+            ContestEntity(2100, "Codeforces Round 1000", "Upcoming", 1_800_000_000L, 9_000L, isGym = false, kind = "Cf")
+        val gymNoStart = ContestEntity(100_001, "Training gym", "Finished", null, 18_000L, isGym = true, kind = "Icpc")
     }
 }

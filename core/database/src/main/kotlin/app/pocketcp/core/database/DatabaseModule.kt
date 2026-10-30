@@ -17,7 +17,11 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
-    ): PocketCpDatabase = Room.databaseBuilder(context, PocketCpDatabase::class.java, PocketCpDatabase.NAME).build()
+    ): PocketCpDatabase =
+        Room
+            .databaseBuilder(context, PocketCpDatabase::class.java, PocketCpDatabase.NAME)
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideContestDao(database: PocketCpDatabase): ContestDao = database.contestDao()
