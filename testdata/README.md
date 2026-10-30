@@ -26,7 +26,10 @@ Tests never make live calls; every response a test needs lives here.
 |------|---------------|------|
 | `codeforces/api/contest.list.json` | `contest.list`, 3 contests (one `BEFORE`) | 200 |
 | `codeforces/api/contest.list.gym.json` | `contest.list?gym=true`, one fully described Gym contest and one without a start time | 200 |
+| `codeforces/api/contest.list.phases.json` | `contest.list` elements with `phase` edited by hand to `CODING`, `PENDING_SYSTEM_TEST`, `SYSTEM_TEST` and an unknown `ARCHIVED`: live phases can't be recorded on demand | 200 |
 | `codeforces/api/problemset.problems.json` | `problemset.problems?tags=implementation;math`, 3 problems (one without `points`) and their statistics | 200 |
+| `codeforces/api/problemset.problems.mixed.json` | `problemset.problems` (one unrated problem; one problem whose statistics entry was trimmed) plus one problem of `problemset.problems?problemsetName=acmsguru` (no `contestId`) with its statistics | 200 |
 | `codeforces/api/user.info.json` | `user.info?handles=tourist;jiangly` | 200 |
+| `codeforces/api/user.info.unrated.json` | `user.info?handles=codeforces;tourist` (the official, unrated `codeforces` account) | 200 |
 | `codeforces/api/error.handle-not-found.json` | `user.info?handles=no_such_handle_zzzq` | 400 |
 | `codeforces/api/error.call-limit.json` | Codeforces' documented "Call limit exceeded" envelope, written by hand: triggering it on purpose would abuse the API | 200 in tests |

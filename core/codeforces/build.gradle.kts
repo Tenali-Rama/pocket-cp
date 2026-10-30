@@ -11,6 +11,8 @@ android {
 dependencies {
     // CodeforcesApi is built on RequestQueue, which is part of this module's public API.
     api(project(":core:network"))
+    // CodeforcesJudgeSource is a JudgeSource and returns core/model types.
+    api(project(":core:model"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)

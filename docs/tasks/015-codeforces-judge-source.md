@@ -2,7 +2,7 @@
 id: 015
 title: CodeforcesJudgeSource mapping API DTOs to the domain
 milestone: M1
-status: todo
+status: done
 deps: [014]
 touches: [core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/judge/, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/CodeforcesModule.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/judge/, core/codeforces/build.gradle.kts, core/codeforces/API.md, testdata/codeforces/api/]
 spec: ["4. Platform & Architecture"]
@@ -32,4 +32,8 @@ Codeforces is the first `JudgeSource`. `CodeforcesJudgeSource` wraps `Codeforces
 - Caching (016/017). New API endpoints.
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Inject `JudgeSource` (bound in `CodeforcesModule`, singleton); never `CodeforcesApi` from the data layer. Its `judge` id `codeforces` is the cache key.
+- Mapping lives in `core/codeforces/.../judge/CodeforcesMapping.kt` (internal); every `JudgeError` carries the original `CodeforcesError` as `cause`.
+- `CodeforcesError.Http` maps to `JudgeError.Malformed` as the criteria ask, although `JudgeError.Unavailable`'s KDoc mentions "unexpected HTTP status"; align the KDoc if that matters.
+- Problems without `contestId` are dropped (ADR 0009); `solvedCount`/`rating` stay `null`, never 0.
+- New fixtures: `contest.list.phases.json` (hand-edited phases), `problemset.problems.mixed.json`, `user.info.unrated.json`; tests use `withSource` (test helper in `judge/CodeforcesJudgeSourceTest.kt`).

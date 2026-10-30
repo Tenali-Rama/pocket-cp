@@ -1,0 +1,65 @@
+{
+  "status": "OK",
+  "result": {
+    "problems": [
+      {
+        "contestId": 2277,
+        "index": "A",
+        "name": "Subset Selecting",
+        "type": "PROGRAMMING",
+        "points": 500.0,
+        "tags": [
+          "greedy"
+        ]
+      },
+      {
+        "contestId": 2276,
+        "index": "G",
+        "name": "Elimination of Players",
+        "type": "PROGRAMMING",
+        "rating": 2100,
+        "tags": [
+          "combinatorics",
+          "dp",
+          "math"
+        ]
+      },
+      {
+        "contestId": 2276,
+        "index": "C",
+        "name": "Subarrays",
+        "type": "PROGRAMMING",
+        "rating": 1100,
+        "tags": [
+          "math",
+          "number theory"
+        ]
+      },
+      {
+        "problemsetName": "acmsguru",
+        "index": "553",
+        "name": "Sultan's Pearls",
+        "type": "PROGRAMMING",
+        "tags": [
+          "*special"
+        ]
+      }
+    ],
+    "problemStatistics": [
+      {
+        "contestId": 2277,
+        "index": "A",
+        "solvedCount": 10475
+      },
+      {
+        "contestId": 2276,
+        "index": "G",
+        "solvedCount": 344
+      },
+      {
+        "index": "553",
+        "solvedCount": 215
+      }
+    ]
+  }
+}

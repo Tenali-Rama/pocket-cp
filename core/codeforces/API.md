@@ -2,7 +2,7 @@
 
 Typed client for the public Codeforces API (`contest.list`, `problemset.problems`, `user.info`) on top of the shared `RequestQueue`, with `OK`/`FAILED` envelope handling.
 
-Package `app.pocketcp.core.codeforces`. Hilt: `CodeforcesModule` (singleton) provides `CodeforcesApi` on the app's `RequestQueue`.
+Package `app.pocketcp.core.codeforces`. Hilt: `CodeforcesModule` (singleton) provides `CodeforcesApi` on the app's `RequestQueue`, and binds `JudgeSource` to `CodeforcesJudgeSource`.
 
 ## `CodeforcesApi(queue, scope, baseUrl = BASE_URL)`
 Each method returns the envelope's `result` or throws `CodeforcesError`. Calls run in `scope` (app lifetime) through `queue`, so they are spaced 2 s apart, deduplicated and backed off.
@@ -25,3 +25,27 @@ Each method returns the envelope's `result` or throws `CodeforcesError`. Calls r
 
 ## DTOs
 `ContestDto`, `ProblemsetDto(problems, problemStatistics)`, `ProblemDto`, `ProblemStatisticsDto`, `UserDto`: the API's objects with its field names; optional fields are nullable, enum-like fields (`type`, `phase`) are strings.
+
+## `judge.CodeforcesJudgeSource(api) : JudgeSource`
+Codeforces as the app's `JudgeSource` (ADR 0009): `judge` is `CodeforcesJudgeSource.ID` = `JudgeId("codeforces")`. DTOs and `CodeforcesError` never leave it.
+
+| Codeforces | Domain |
+|------------|--------|
+| `phase` `BEFORE` | `ContestPhase.Upcoming` |
+| `phase` `CODING`, `PENDING_SYSTEM_TEST`, `SYSTEM_TEST` | `ContestPhase.Running` |
+| `phase` `FINISHED` | `ContestPhase.Finished` |
+| any other `phase` | `ContestPhase.Unknown` |
+| `startTimeSeconds`, `durationSeconds` | `start: Instant?` (`null` when absent), `duration: Duration` |
+| `contests(gym = true)` | every contest has `isGym = true` |
+| `problemStatistics` | joined on `(contestId, index)` as `solvedCount`; `null` when a problem has none |
+| problem without `rating` | `rating = null` (never 0) |
+| problem without `contestId` (e.g. acmsguru) | dropped |
+| unrated user | `rating`, `maxRating` `null`; `avatar` → `avatarUrl` |
+
+| `CodeforcesError` | `JudgeError` (the original is its `cause`) |
+|-------------------|------------|
+| `Offline` | `Offline` |
+| `RateLimited` | `RateLimited` |
+| `Unavailable` | `Unavailable` |
+| `Api(comment)` | `Rejected(comment)` |
+| `Http`, `Malformed` | `Malformed` |
