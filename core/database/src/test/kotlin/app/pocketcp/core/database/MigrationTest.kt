@@ -32,12 +32,12 @@ class MigrationTest {
                 }
             }
 
-            helper.runMigrationsAndValidate(NAME, 2, true, *ALL_MIGRATIONS).close()
+            helper.runMigrationsAndValidate(NAME, 2, true, MIGRATION_1_2).close()
 
             val migrated =
                 Room
                     .databaseBuilder(RuntimeEnvironment.getApplication(), PocketCpDatabase::class.java, NAME)
-                    .addMigrations(*ALL_MIGRATIONS)
+                    .addMigrations(MIGRATION_1_2)
                     .build()
             try {
                 val expected =

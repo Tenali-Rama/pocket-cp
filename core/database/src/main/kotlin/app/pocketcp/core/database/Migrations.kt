@@ -17,6 +17,3 @@ internal val MIGRATION_1_2 =
             )
         }
     }
-
-/** Every migration, oldest first; the app's database builder registers them all. */
-internal val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2)

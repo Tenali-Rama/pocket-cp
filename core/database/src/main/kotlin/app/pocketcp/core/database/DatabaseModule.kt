@@ -20,7 +20,7 @@ object DatabaseModule {
     ): PocketCpDatabase =
         Room
             .databaseBuilder(context, PocketCpDatabase::class.java, PocketCpDatabase.NAME)
-            .addMigrations(*ALL_MIGRATIONS)
+            .addMigrations(MIGRATION_1_2)
             .build()
 
     @Provides

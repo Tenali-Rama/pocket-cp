@@ -27,6 +27,6 @@ Contests can be filtered by division and type (spec §7.2, and the problemset's 
 ## Notes for next
 - `Contest.division` is a body `val` (computed once per instance from `name`, outside `equals`); `ContestDivision.of(name)` is public for filters that only have a name (e.g. a problem's contest in 033).
 - Division regexes accept `Div. 1 + Div. 2` and `Div. 1 + 2`; Educational/Global win over any stated division (task default).
-- `contests.kind` has SQL default `'Unknown'` (`@ColumnInfo`) but no Kotlin default on `ContestEntity`, so every write states it. Migrations live in `Migrations.kt` (`ALL_MIGRATIONS`); the next schema change appends one there and adds a case to `MigrationTest`.
+- `contests.kind` has SQL default `'Unknown'` (`@ColumnInfo`) but no Kotlin default on `ContestEntity`, so every write states it. Migrations live in `Migrations.kt`; `DatabaseModule.addMigrations` lists each one (no array spread: detekt `SpreadOperator`). The next schema change adds one there plus a `MigrationTest` case.
 - `2.json` was written by hand (the VM can't run Room's KSP); its identityHash was recomputed with Room's algorithm and cross-checked by reproducing `1.json`'s hash. `MigrationTest` opens the migrated file with Room, which verifies that hash.
 - `CachedResource.run()` maps any non-`JudgeError`, non-cancellation failure to `JudgeError.Unavailable(cause)`.
