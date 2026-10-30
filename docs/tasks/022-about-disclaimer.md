@@ -2,7 +2,7 @@
 id: 022
 title: About page with the unofficial-client disclaimer
 milestone: M1
-status: todo
+status: done
 deps: [021]
 touches: [feature/settings/, .maestro/settings.yaml]
 spec: ["17. Play Store Compliance", "15. Settings"]
@@ -29,4 +29,7 @@ Settings gets an About category: the app name and version, a clear statement tha
 - Open-source licence listing for dependencies, privacy policy (M14).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- About is `SettingsCategory.About`, always last; a new category goes before it in `SettingsUiState.categories`.
+- Name and version come from `Context.installedAppInfo()` (package label + `versionName`), read on `Dispatchers.IO` via `produceState` in `SettingsRoute`; `SettingsScreen` takes `app: AppInfo?` (null until read, About then omits name and version) so screenshots pass a fixed one.
+- Disclaimer wording is `settings_about_disclaimer` (default text from the task); the Maestro flow asserts the same text, so change both together.
+- M14's dependency licences and privacy policy belong on the About page (append below the licence line).

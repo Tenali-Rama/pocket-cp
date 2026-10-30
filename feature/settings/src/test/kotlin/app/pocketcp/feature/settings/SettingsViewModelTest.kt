@@ -46,7 +46,10 @@ class SettingsViewModelTest {
                 val state = awaitItem()
                 assertEquals(stored, state.settings)
                 assertEquals(listOf(OptionalModule.Ai, OptionalModule.Stats), state.installedModules)
-                assertEquals(listOf(SettingsCategory.Appearance, SettingsCategory.Features), state.categories)
+                assertEquals(
+                    listOf(SettingsCategory.Appearance, SettingsCategory.Features, SettingsCategory.About),
+                    state.categories,
+                )
             }
         }
 
@@ -56,7 +59,23 @@ class SettingsViewModelTest {
             val viewModel = SettingsViewModel(FakeSettingsRepository(), emptySet())
 
             viewModel.state.filterNotNull().test {
-                assertEquals(listOf(SettingsCategory.Appearance), awaitItem().categories)
+                assertEquals(listOf(SettingsCategory.Appearance, SettingsCategory.About), awaitItem().categories)
+            }
+        }
+
+    @Test
+    fun about_isAlwaysTheLastCategory_withAndWithoutFeatures() =
+        runTest {
+            val withFeatures = SettingsViewModel(FakeSettingsRepository(), setOf(OptionalModule.Ai))
+            val withoutFeatures = SettingsViewModel(FakeSettingsRepository(), emptySet())
+
+            withFeatures.state.filterNotNull().test {
+                val categories = awaitItem().categories
+                assertEquals(SettingsCategory.About, categories.last())
+                assertEquals(1, categories.count { it == SettingsCategory.About })
+            }
+            withoutFeatures.state.filterNotNull().test {
+                assertEquals(SettingsCategory.About, awaitItem().categories.last())
             }
         }
 

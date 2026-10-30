@@ -12,9 +12,11 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
@@ -25,30 +27,43 @@ import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.designsystem.component.LoadingPlaceholder
 import app.pocketcp.core.designsystem.component.PcpListItem
 import app.pocketcp.core.designsystem.component.PcpTopAppBar
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /** Share of the width the category list takes next to the detail pane (list 2 : detail 3). */
 private const val LIST_PANE_WEIGHT = 2f
 private const val DETAIL_PANE_WEIGHT = 3f
 
-/** [SettingsScreen] with the open category kept across rotation and process death. */
+/**
+ * [SettingsScreen] with the open category kept across rotation and process death, and the installed app's info,
+ * read from the package manager on [ioDispatcher] (it is a binder call, so never on the main thread).
+ */
 @Composable
 internal fun SettingsRoute(
     state: SettingsUiState?,
     actions: SettingsActions,
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     var selected by rememberSaveable { mutableStateOf<SettingsCategory?>(null) }
-    SettingsScreen(state = state, actions = actions, selected = selected, onSelect = { selected = it })
+    val context = LocalContext.current
+    val app by produceState<AppInfo?>(initialValue = null, context, ioDispatcher) {
+        value = withContext(ioDispatcher) { context.installedAppInfo() }
+    }
+    SettingsScreen(state = state, actions = actions, app = app, selected = selected, onSelect = { selected = it })
 }
 
 /**
  * Settings: a category list and the [selected] category's page. Compact width shows one at a time (the page has a
  * back arrow and handles Back); wider windows show list | page, with Appearance when nothing is [selected].
  * A [selected] category that is no longer offered counts as none. `null` [state] is the first read: a skeleton.
+ * [app] is what the About page names; `null` until it has been read.
  */
 @Composable
 internal fun SettingsScreen(
     state: SettingsUiState?,
     actions: SettingsActions,
+    app: AppInfo?,
     selected: SettingsCategory?,
     onSelect: (SettingsCategory?) -> Unit,
     modifier: Modifier = Modifier,
@@ -67,7 +82,7 @@ internal fun SettingsScreen(
             CategoryList(state.categories, highlighted = null, onSelect = onSelect, modifier = screen)
         } else {
             BackHandler { onSelect(null) }
-            CategoryPage(open, state, actions, onNavigateBack = { onSelect(null) }, modifier = screen)
+            CategoryPage(open, state, actions, app, onNavigateBack = { onSelect(null) }, modifier = screen)
         }
     } else {
         val shown = open ?: SettingsCategory.Appearance
@@ -83,6 +98,7 @@ internal fun SettingsScreen(
                 category = shown,
                 state = state,
                 actions = actions,
+                app = app,
                 onNavigateBack = null,
                 modifier = Modifier.weight(DETAIL_PANE_WEIGHT).fillMaxHeight(),
             )
@@ -125,6 +141,7 @@ private fun CategoryPage(
     category: SettingsCategory,
     state: SettingsUiState,
     actions: SettingsActions,
+    app: AppInfo?,
     onNavigateBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -134,6 +151,7 @@ private fun CategoryPage(
             SettingsCategory.Appearance -> AppearanceSettings(state.settings, actions)
             SettingsCategory.Features ->
                 FeaturesSettings(state.installedModules, state.settings.disabledModules, actions)
+            SettingsCategory.About -> AboutSettings(app)
         }
     }
 }
@@ -143,6 +161,7 @@ private val SettingsCategory.title: Int
         when (this) {
             SettingsCategory.Appearance -> R.string.settings_category_appearance
             SettingsCategory.Features -> R.string.settings_category_features
+            SettingsCategory.About -> R.string.settings_category_about
         }
 
 private val SettingsCategory.supporting: Int
@@ -150,8 +169,12 @@ private val SettingsCategory.supporting: Int
         when (this) {
             SettingsCategory.Appearance -> R.string.settings_category_appearance_supporting
             SettingsCategory.Features -> R.string.settings_category_features_supporting
+            SettingsCategory.About -> R.string.settings_category_about_supporting
         }
 
-/** `settings_category_appearance`, `settings_category_features`: Maestro and tests select categories by these. */
+/**
+ * `settings_category_appearance`, `settings_category_features`, `settings_category_about`: Maestro and tests select
+ * categories by these.
+ */
 internal val SettingsCategory.testTag: String
     get() = "settings_category_${name.lowercase()}"
