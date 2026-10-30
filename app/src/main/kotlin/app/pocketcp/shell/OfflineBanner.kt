@@ -29,11 +29,11 @@ internal fun OfflineBanner(modifier: Modifier = Modifier) {
         text = stringResource(R.string.shell_offline),
         modifier =
             modifier
+                .testTag(OFFLINE_BANNER_TAG)
+                .semantics { liveRegion = LiveRegionMode.Polite }
                 .fillMaxWidth()
                 .background(PocketCpTheme.colors.surfaceRaised)
-                .padding(horizontal = spacing.lg, vertical = spacing.xs)
-                .semantics { liveRegion = LiveRegionMode.Polite }
-                .testTag(OFFLINE_BANNER_TAG),
+                .padding(horizontal = spacing.lg, vertical = spacing.xs),
         color = PocketCpTheme.colors.onSurface,
         style = PocketCpTheme.typography.bodySmall,
         textAlign = TextAlign.Center,

@@ -2,7 +2,7 @@
 id: 023
 title: Network monitor and offline indicator in the shell
 milestone: M1
-status: todo
+status: done
 deps: [020]
 touches: [core/network/src/main/kotlin/app/pocketcp/core/network/NetworkMonitor.kt, core/network/src/main/kotlin/app/pocketcp/core/network/NetworkModule.kt, core/network/src/test/kotlin/app/pocketcp/core/network/NetworkMonitorTest.kt, core/network/src/main/AndroidManifest.xml, core/network/API.md, app/src/test/kotlin/app/pocketcp/AppPermissionsTest.kt, app/src/main/kotlin/app/pocketcp/MainActivity.kt, app/src/main/kotlin/app/pocketcp/shell/PocketCpApp.kt, app/src/main/kotlin/app/pocketcp/shell/PocketCpShell.kt, app/src/main/kotlin/app/pocketcp/shell/OfflineBanner.kt, app/src/main/res/values/strings.xml, app/src/test/kotlin/app/pocketcp/shell/OfflineBannerTest.kt, app/src/test/screenshots/, app/build.gradle.kts+, app/API.md]
 spec: ["14. Offline", "16. Non-Functional"]
@@ -27,4 +27,8 @@ When the device has no validated internet connection, the shell shows a clear, s
 - Offline drafts (M6). Per-screen stale labels (each feature, from `Cached.error`).
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Inject `NetworkMonitor` (core/network) for connectivity; it's cold, so each collector registers one callback. Fake it with any `Flow<Boolean>`.
+- The shell's banner is `PocketCpShell(offline = …)`; `PocketCpApp(entries, settings, online = false)` renders it in tests and screenshots.
+- `PocketCpApp(entries, settingsFlow, isOnline)` defaults `isOnline` to always-online and counts as online until the first emission, so there's no banner flash at launch.
+- The `INTERNET` and `ACCESS_NETWORK_STATE` permissions live in `core/network/src/main/AndroidManifest.xml`, and `AppPermissionsTest` guards the merged manifest.
+- "Announced once per change" is tested as exactly one polite live-region node while offline and none while online. TalkBack events themselves aren't observable on Robolectric.
