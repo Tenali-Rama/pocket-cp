@@ -30,6 +30,8 @@ class DatabaseModuleTest {
 
     @Inject lateinit var cacheMetaDao: CacheMetaDao
 
+    @Inject lateinit var statementDao: StatementDao
+
     @Before
     fun inject() = hilt.inject()
 
@@ -42,5 +44,6 @@ class DatabaseModuleTest {
         assertSame(database.contestDao(), contestDao)
         assertSame(database.problemDao(), problemDao)
         assertSame(database.cacheMetaDao(), cacheMetaDao)
+        assertSame(database.statementDao(), statementDao)
     }
 }
