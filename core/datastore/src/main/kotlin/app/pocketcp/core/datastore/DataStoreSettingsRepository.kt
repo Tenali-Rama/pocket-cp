@@ -16,7 +16,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retryWhen
 import java.io.IOException
 
-/** [SettingsRepository] on a Preferences [DataStore]. Enums are stored by their [StoredPreference.key]. */
+/**
+ * [SettingsRepository] on a Preferences [DataStore]. Enums are stored by their [StoredPreference.key].
+ * One setter per setting, like the interface, so the function count grows with settings.
+ */
+@Suppress("TooManyFunctions")
 internal class DataStoreSettingsRepository(
     private val dataStore: DataStore<Preferences>,
 ) : SettingsRepository {

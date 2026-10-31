@@ -4,7 +4,11 @@ import app.pocketcp.core.model.OptionalModule
 import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.flow.Flow
 
-/** The user's settings. Read with [settings]; each setter persists one field. */
+/**
+ * The user's settings. Read with [settings]; each setter persists one field.
+ * One setter per setting is this module's rule (core/datastore/CLAUDE.md), so the function count grows with settings.
+ */
+@Suppress("TooManyFunctions")
 interface SettingsRepository {
     /**
      * The current settings, then every change. Never fails on IO: an unreadable store yields the defaults,
