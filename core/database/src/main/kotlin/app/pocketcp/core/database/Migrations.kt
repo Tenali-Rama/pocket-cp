@@ -20,7 +20,7 @@ internal val MIGRATION_1_2 =
 
 /** Version 3 adds the `statements` cache table. Every cached contest, problem and `cache_meta` row is kept. */
 internal val MIGRATION_2_3 =
-    object : Migration(2, 3) {
+    object : Migration(startVersion = 2, endVersion = 3) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL(
                 "CREATE TABLE IF NOT EXISTS `statements` (`contestId` INTEGER NOT NULL, `index` TEXT NOT NULL, " +
