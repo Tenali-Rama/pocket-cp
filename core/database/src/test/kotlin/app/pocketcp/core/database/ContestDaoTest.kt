@@ -127,11 +127,11 @@ class ContestDaoTest {
     @Test
     fun `activeContests(0) gives only the running contests`() =
         runTest {
-            val running = regular(1, "Running", start = 100L)
-            val unknown = regular(2, "Unknown", start = 100L)
+            val running = regular(11, "Running", start = 100L)
+            val unknown = regular(12, "Unknown", start = 100L)
             dao.replaceAll(
                 gym = false,
-                contests = listOf(regular(3, "Upcoming", start = 200L), running, unknown, old),
+                contests = listOf(regular(13, "Upcoming", start = 200L), running, unknown, old),
                 fetchedAtEpochMillis = 1L,
             )
 
