@@ -2,7 +2,7 @@
 id: 038
 title: Benchmark build types serve debug fixtures; release stays live
 milestone: M3
-status: todo
+status: done
 deps: []
 touches: [app/build.gradle.kts, app/src/debug/, app/src/fixture/, app/src/testDebug/, app/CLAUDE.md, app/API.md, benchmark/CLAUDE.md, testdata/README.md, docs/decisions/0015-debug-fixtures-release-live.md]
 spec: ["16. Non-Functional", "3. Performance Budgets"]
@@ -29,4 +29,8 @@ CI's `perf` job benchmarks `benchmarkRelease` / `nonMinifiedRelease`. Today thes
 - Statement page fixtures (041 adds them to the same asset set) and the statement scroll benchmark (049).
 
 ## Notes for next
-<!-- builder fills in -->
+- `app/src/fixture/kotlin/` (+ `testdata/codeforces/api` assets) is wired to `debug` in `sourceSets` and to every `benchmark*` / `nonMinified*` type in `finalizeDsl`; `src/live/kotlin` is `release` only.
+- `checkFixtureBinding` walks `build/intermediates/assets/<type>/` (AGP 8.10 merged-assets location) and the release APK; it collects every problem and fails once, so one red run shows both messages.
+- The tests stay in `src/testDebug/` (they run against the debug graph); only the bound classes moved.
+- Comment-only updates outside `touches`: `LiveJudgeSourceModule.kt` and `DataWiringTest.kt` named `src/debug`.
+- Follow-up: perf budgets can be re-based on fixture numbers after ≥ 20 runs (ADR 0013); a perf-sized fixture is still out of scope.
