@@ -9,8 +9,8 @@ plugins {
 }
 
 // The only place the app version lives. app/CLAUDE.md says when it changes.
-val appVersionName = "0.1.0"
-val appVersionCode = 2
+val appVersionName = "0.2.0"
+val appVersionCode = 3
 
 // Where the live JudgeSource binding lives; debug builds bind recorded responses instead (ADR 0015).
 val liveSources = "src/live/kotlin"

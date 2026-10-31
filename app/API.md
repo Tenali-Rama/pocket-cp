@@ -24,10 +24,10 @@ The application module: `PocketCpApplication` (`@HiltAndroidApp`) and the single
 | `themeModeOf(theme, uiMode)` | `System` → `themeModeOf(uiMode)`; `Dark` / `Light` / `Amoled` force their mode. |
 | `TextSizePreference.scale` | `Small` 0.9, `Default` 1.0, `Large` 1.15, `Largest` 1.3: `textScale` / `codeTextScale`, on top of the system font scale. |
 | `DensityPreference.uiDensity` | The design system's `UiDensity`. |
-| `PlaceholderEntry` / `Placeholders` / `PlaceholderModule` | Home (M2), Contests (M2), Problemset (M2), Profile (M9) as `EmptyState` placeholders; Settings is `feature/settings`. A feature replaces one by binding an entry with the same route; it never edits this file. |
+| `PlaceholderEntry` / `Placeholders` / `PlaceholderModule` | Profile (M9) as an `EmptyState` placeholder, the only one left; Home, Contests, Problemset and Settings are `feature/*` modules. A feature replaces it by binding an entry with the same route; it never edits this file. |
 | `Iterable<FeatureEntry>.withoutReplacedPlaceholders()` | Drops each `PlaceholderEntry` whose route a non-placeholder entry also binds. The feature replacing the last placeholder deletes `PlaceholderEntry`, `Placeholders`, `PlaceholderModule` and this function (no dead code). |
 
 Nav items carry test tags `nav_home`, `nav_contests`, `nav_problemset`, `nav_profile`, `nav_settings` and their label as content description. Maestro checks `nav_<route>` selected plus `screen_<route>`, never a screen's text.
 Switching tab pops to Home with saved state, so Back from any tab returns to Home, then leaves the app.
-Shell tests use the test-only `shellTestEntries` (`src/test/.../ShellTestEntries.kt`), never `PlaceholderModule`, so replacing a placeholder leaves them and their goldens alone.
+Shell tests use the test-only `shellTestEntries` (`src/test/.../ShellTestEntries.kt`): `EmptyState` screens labelled with the features' own label strings, never `PlaceholderModule` or the bound features, so a feature's screen changes leave them and their goldens alone.
 Screenshots: `shell_<device>_<theme>`, `shell_amoled_phone_dark`, `shell_compact_tablet_dark`, `shell_textLargest_phone_dark`, `shell_offline_<device>_<theme>`, `shell_offline_font150_phone_dark`.

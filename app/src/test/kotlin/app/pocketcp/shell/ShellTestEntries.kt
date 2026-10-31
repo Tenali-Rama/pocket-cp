@@ -10,25 +10,29 @@ import app.pocketcp.R
 import app.pocketcp.core.navigation.FeatureEntry
 import app.pocketcp.core.navigation.TopLevelDestination
 import app.pocketcp.core.navigation.inNavigationOrder
+import app.pocketcp.feature.contests.R as ContestsR
+import app.pocketcp.feature.home.R as HomeR
+import app.pocketcp.feature.problemset.R as ProblemsetR
 import app.pocketcp.feature.settings.R as SettingsR
 
 /**
- * The shell tests' destinations: the five M1 ones with fixed routes, labels, icons and orders. Independent of
- * `PlaceholderModule`, so a feature replacing a placeholder changes neither the shell tests nor their goldens.
+ * The shell tests' destinations: the five top-level ones with fixed routes, labels, icons and orders, each an
+ * `EmptyState` titled by its label. Independent of the bound features and `PlaceholderModule`, so a feature
+ * changing its screen changes neither the shell tests nor their goldens.
  */
 val shellTestEntries: List<FeatureEntry> =
     listOf(
         PlaceholderEntry(
-            TopLevelDestination("home", R.string.nav_home, Icons.Filled.Home, 0),
-            R.string.placeholder_home,
+            TopLevelDestination("home", HomeR.string.home_label, Icons.Filled.Home, 0),
+            HomeR.string.home_label,
         ),
         PlaceholderEntry(
-            TopLevelDestination("contests", R.string.nav_contests, Icons.Filled.DateRange, 10),
-            R.string.placeholder_contests,
+            TopLevelDestination("contests", ContestsR.string.contests_label, Icons.Filled.DateRange, 10),
+            ContestsR.string.contests_label,
         ),
         PlaceholderEntry(
-            TopLevelDestination("problemset", R.string.nav_problemset, Icons.AutoMirrored.Filled.List, 20),
-            R.string.placeholder_problemset,
+            TopLevelDestination("problemset", ProblemsetR.string.problemset_label, Icons.AutoMirrored.Filled.List, 20),
+            ProblemsetR.string.problemset_label,
         ),
         PlaceholderEntry(
             TopLevelDestination("profile", R.string.nav_profile, Icons.Filled.Person, 30),
