@@ -1,5 +1,6 @@
 package app.pocketcp.feature.contests
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -18,8 +19,10 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import app.pocketcp.core.adaptive.LocalWindowLayout
 import app.pocketcp.core.adaptive.WindowWidthClass
@@ -30,28 +33,41 @@ import app.pocketcp.core.designsystem.component.LoadingPlaceholder
 import app.pocketcp.core.designsystem.component.PcpIconButton
 import app.pocketcp.core.designsystem.component.PcpSecondaryButton
 import app.pocketcp.core.designsystem.component.PcpTopAppBar
+import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.ui.ContestRow
 import app.pocketcp.core.ui.RefreshErrorBanner
 import java.time.Instant
 
-/** Share of the width the filter pane takes next to the list on wide windows (filters 1 : list 2). */
+/** Share of the width each pane takes on wide windows: filters 1 : list 2 : detail 2 (detail only when shown). */
 private const val FILTER_PANE_WEIGHT = 1f
 private const val LIST_PANE_WEIGHT = 2f
+private const val DETAIL_PANE_WEIGHT = 2f
 
 /**
- * Contests: a title bar with a refresh button, the filter chips (a row above the list on compact width, a side
- * pane on wider windows) and the list area for [state]'s status. [now] (from `rememberNow()`) drives the rows'
- * countdowns. Stateless, so screenshots pass a fixed state and time.
+ * Contests: a title bar with a refresh button, the filter chips and the list area for [state]'s status, plus the
+ * [detail] of a contest. Compact width shows the opened contest as a page instead (back arrow and Back close it);
+ * medium width shows chips above the list | detail; expanded shows filter pane | list | detail, with the shown
+ * contest's row highlighted. Without a shown contest, wide windows show filter pane | list. [now] (from
+ * `rememberNow()`) drives every countdown. Stateless, so screenshots pass a fixed state and time.
  */
 @Composable
 internal fun ContestsScreen(
     state: ContestsUiState,
+    detail: ContestDetailUiState,
     now: Instant,
     actions: ContestsActions,
+    detailActions: ContestDetailActions,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxSize().background(PocketCpTheme.colors.background)) {
+    val screen = modifier.fillMaxSize().background(PocketCpTheme.colors.background)
+    val width = LocalWindowLayout.current.widthClass
+    if (width == WindowWidthClass.Compact && detail.selected != null) {
+        BackHandler(onBack = detailActions::close)
+        ContestDetailPage(detail, now, detailActions, onNavigateBack = detailActions::close, modifier = screen)
+        return
+    }
+    Column(screen) {
         PcpTopAppBar(
             title = stringResource(R.string.contests_label),
             actions = {
@@ -62,28 +78,63 @@ internal fun ContestsScreen(
                 )
             },
         )
-        if (LocalWindowLayout.current.widthClass == WindowWidthClass.Compact) {
+        if (width == WindowWidthClass.Compact) {
             FilterRows(state.filter, actions)
-            ListArea(state, now, actions, Modifier.weight(1f))
+            ListArea(state, now, actions, detailActions::open, highlighted = null, Modifier.weight(1f))
         } else {
-            Row(Modifier.weight(1f)) {
-                FilterPane(state.filter, actions, Modifier.weight(FILTER_PANE_WEIGHT).fillMaxHeight())
-                VerticalDivider(color = PocketCpTheme.colors.outline)
-                ListArea(state, now, actions, Modifier.weight(LIST_PANE_WEIGHT).fillMaxHeight())
-            }
+            WidePanes(state, detail, now, actions, detailActions, Modifier.weight(1f))
         }
     }
 }
 
-/** The status-dependent part under the filters: skeleton, full error, empty state or the sections. */
+/** Medium and wider: the filters and the list, and beside them the shown contest's detail when there is one. */
+@Composable
+private fun WidePanes(
+    state: ContestsUiState,
+    detail: ContestDetailUiState,
+    now: Instant,
+    actions: ContestsActions,
+    detailActions: ContestDetailActions,
+    modifier: Modifier = Modifier,
+) {
+    val shown = detail.shown
+    Row(modifier) {
+        if (shown != null && LocalWindowLayout.current.widthClass == WindowWidthClass.Medium) {
+            Column(Modifier.weight(LIST_PANE_WEIGHT).fillMaxHeight()) {
+                FilterRows(state.filter, actions)
+                ListArea(state, now, actions, detailActions::open, shown, Modifier.weight(1f))
+            }
+        } else {
+            FilterPane(state.filter, actions, Modifier.weight(FILTER_PANE_WEIGHT).fillMaxHeight())
+            PaneDivider()
+            val listModifier = Modifier.weight(LIST_PANE_WEIGHT).fillMaxHeight()
+            ListArea(state, now, actions, detailActions::open, shown, listModifier)
+        }
+        if (shown != null) {
+            PaneDivider()
+            ContestDetailPane(detail, now, detailActions, Modifier.weight(DETAIL_PANE_WEIGHT).fillMaxHeight())
+        }
+    }
+}
+
+@Composable
+private fun PaneDivider() = VerticalDivider(color = PocketCpTheme.colors.outline)
+
+/**
+ * The status-dependent part under the filters: skeleton, full error, empty state or the sections. A tapped row
+ * calls [onOpen]; the [highlighted] row is the contest shown beside the list.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ListArea(
     state: ContestsUiState,
     now: Instant,
     actions: ContestsActions,
+    onOpen: (ContestId) -> Unit,
+    highlighted: ContestId?,
     modifier: Modifier = Modifier,
 ) {
+    val raised = PocketCpTheme.colors.surfaceRaised
     when (state.status) {
         ContestsStatus.Loading -> LoadingPlaceholder(modifier.fillMaxWidth())
         ContestsStatus.Error ->
@@ -111,8 +162,17 @@ private fun ListArea(
                                 SectionHeader(group.section.title)
                             }
                             items(group.contests, key = { it.id.value }, contentType = { "contest" }) { contest ->
-                                // Opening a contest is task 031.
-                                ContestRow(contest = contest, now = now, onClick = {})
+                                ContestRow(
+                                    contest = contest,
+                                    now = now,
+                                    onClick = { onOpen(contest.id) },
+                                    modifier =
+                                        if (highlighted == null) {
+                                            Modifier
+                                        } else {
+                                            Modifier.highlighted(contest.id == highlighted, raised)
+                                        },
+                                )
                             }
                         }
                     }
@@ -120,6 +180,12 @@ private fun ListArea(
             }
     }
 }
+
+/** A row of a list shown beside the detail: `selected` for accessibility, and [raised] when it is the shown one. */
+private fun Modifier.highlighted(
+    isHighlighted: Boolean,
+    raised: Color,
+): Modifier = semantics { selected = isHighlighted }.then(if (isHighlighted) Modifier.background(raised) else Modifier)
 
 @Composable
 private fun Banner(
@@ -185,7 +251,7 @@ private val ContestSection.title: Int
 
 /** The full error state's message; a rejection shows the judge's own words. */
 @Composable
-private fun errorMessage(error: JudgeError): String =
+internal fun errorMessage(error: JudgeError): String =
     when (error) {
         is JudgeError.Offline -> stringResource(R.string.contests_error_offline)
         is JudgeError.RateLimited -> stringResource(R.string.contests_error_rate_limited)

@@ -116,7 +116,7 @@ internal val ContestDivision.testTag: String get() = "contests_division_${name.l
 internal val ContestKind.testTag: String get() = "contests_kind_${name.lowercase()}"
 
 @get:StringRes
-private val ContestDivision.label: Int
+internal val ContestDivision.label: Int
     get() =
         when (this) {
             ContestDivision.Div1 -> R.string.contests_division_div1
@@ -130,7 +130,7 @@ private val ContestDivision.label: Int
         }
 
 @get:StringRes
-private val ContestKind.label: Int
+internal val ContestKind.label: Int
     get() =
         when (this) {
             ContestKind.Cf -> R.string.contests_kind_cf

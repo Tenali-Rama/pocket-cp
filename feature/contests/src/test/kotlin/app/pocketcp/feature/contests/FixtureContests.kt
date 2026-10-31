@@ -3,6 +3,8 @@ package app.pocketcp.feature.contests
 import app.pocketcp.core.codeforces.CodeforcesApi
 import app.pocketcp.core.codeforces.judge.CodeforcesJudgeSource
 import app.pocketcp.core.model.Contest
+import app.pocketcp.core.model.JudgeSource
+import app.pocketcp.core.model.Problem
 import app.pocketcp.core.network.RequestQueue
 import app.pocketcp.core.testing.FixtureServer
 import kotlinx.coroutines.CoroutineScope
@@ -23,19 +25,33 @@ internal val FixtureNow: Instant = Instant.ofEpochSecond(1_793_309_980)
 /** Stopped at [FixtureNow] in UTC, so countdowns and dates don't depend on when or where tests run. */
 internal val FixtureClock: Clock = Clock.fixed(FixtureNow, ZoneOffset.UTC)
 
-/** `testdata/codeforces/api/contest.list.json` through the real Codeforces mapping: one Div. 3, two Div. 2. */
-internal val FixtureContests: List<Contest> by lazy { loadFixtureContests() }
+/**
+ * `testdata/codeforces/api/contest.list.json` through the real Codeforces mapping: the upcoming Div. 3 2278, and
+ * the finished Div. 2 rounds 2272, 2277 and 2274.
+ */
+internal val FixtureContests: List<Contest> by lazy {
+    loadFixture("/api/contest.list", "codeforces/api/contest.list.json") { it.contests(gym = false) }
+}
 
-private fun loadFixtureContests(): List<Contest> {
-    var contests = emptyList<Contest>()
+/** `testdata/codeforces/api/problemset.problems.json` through the real mapping: 2276F, 2274A and 2273D. */
+internal val FixtureProblems: List<Problem> by lazy {
+    loadFixture("/api/problemset.problems", "codeforces/api/problemset.problems.json") { it.problemset() }
+}
+
+private fun <T> loadFixture(
+    path: String,
+    fixture: String,
+    call: suspend (JudgeSource) -> List<T>,
+): List<T> {
+    var result = emptyList<T>()
     runTest {
         val scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
         try {
-            val server = FixtureServer().map("/api/contest.list", "codeforces/api/contest.list.json")
-            contests = CodeforcesJudgeSource(CodeforcesApi(RequestQueue(server, scope), scope)).contests(gym = false)
+            val server = FixtureServer().map(path, fixture)
+            result = call(CodeforcesJudgeSource(CodeforcesApi(RequestQueue(server, scope), scope)))
         } finally {
             scope.cancel()
         }
     }
-    return contests
+    return result
 }

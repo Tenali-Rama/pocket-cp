@@ -9,6 +9,7 @@ android {
 dependencies {
     implementation(project(":core:adaptive"))
     implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:designsystem"))
     // Also brings navigation-compose, whose `api` includes lifecycle-viewmodel-compose (`viewModel { }`).
     implementation(project(":core:navigation"))
@@ -16,7 +17,8 @@ dependencies {
 
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
-    // Screenshots show `contest.list.json` through the real Codeforces mapping, served by FixtureServer.
+    // Screenshots show `contest.list.json` and `problemset.problems.json` through the real Codeforces mapping,
+    // served by FixtureServer.
     testImplementation(project(":core:codeforces"))
     testImplementation(project(":core:testing"))
 }

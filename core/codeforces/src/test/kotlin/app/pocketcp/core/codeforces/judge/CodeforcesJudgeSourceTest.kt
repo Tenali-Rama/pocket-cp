@@ -76,7 +76,8 @@ class CodeforcesJudgeSourceTest {
 
             val contests = withSource(server) { it.contests(gym = false) }
 
-            val expected = listOf(2278 to ContestKind.Icpc, 2272 to ContestKind.Cf, 2277 to ContestKind.Cf)
+            val expected =
+                listOf(2278 to ContestKind.Icpc, 2272 to ContestKind.Cf, 2277 to ContestKind.Cf, 2274 to ContestKind.Cf)
             assertEquals(expected, contests.map { it.id.value to it.kind })
         }
 

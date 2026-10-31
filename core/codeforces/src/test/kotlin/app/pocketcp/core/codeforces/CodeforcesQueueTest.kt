@@ -76,7 +76,7 @@ class CodeforcesQueueTest {
 
             val contests = withApi(recovering) { api -> api.contests() }
 
-            assertEquals(listOf(2278, 2272, 2277), contests.map { it.id })
+            assertEquals(listOf(2278, 2272, 2277, 2274), contests.map { it.id })
             assertEquals(2, attempts)
         }
 
