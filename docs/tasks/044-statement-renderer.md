@@ -40,7 +40,7 @@ Spec §2 wants native screens, not a wrapper. After this task, `core/statement` 
   - `statementGallery_textScale130_phone_dark` (`textScale = 1.3f`, the `Largest` factor)
   - `statementGallery_font150_phone_dark`
   - `statementImage_loading_phone_dark` and `statementImage_error_phone_dark`
-- [ ] If the release APK goes over its `perf` budget, the PR raises `release_apk_bytes` under ADR 0013, with the reason and the artifact values, and rebased on whatever the in-flight `chore/apk-budget-margin` landed.
+- [ ] If the release APK goes over its `perf` budget, the PR raises `release_apk_bytes` per ADR 0013 Addendum 2's between-closes rule: it says what grew and why (Coil is the kind of new large library the budget is meant to trip) and gives the artifact values.
 
 ## Out of scope
 - Typesetting TeX (045). "Send to editor" on samples: the editor is M5 (default — owner may change).

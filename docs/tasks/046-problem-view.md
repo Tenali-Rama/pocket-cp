@@ -4,7 +4,7 @@ title: Problem view in core/problemview with EN/RU, text size, reading width and
 milestone: M3
 status: todo
 deps: [043, 044]
-touches: [core/problemview/, settings.gradle.kts+, core/datastore/src/main/kotlin/app/pocketcp/core/datastore/TextSizeScale.kt, core/datastore/src/test/kotlin/app/pocketcp/core/datastore/TextSizeScaleTest.kt, core/datastore/API.md, app/src/main/kotlin/app/pocketcp/shell/AppearanceMapping.kt, gradle/libs.versions.toml, docs/decisions/0012-feature-view-models.md]
+touches: [core/problemview/, settings.gradle.kts+, core/datastore/src/main/kotlin/app/pocketcp/core/datastore/TextSizeScale.kt, core/datastore/src/test/kotlin/app/pocketcp/core/datastore/TextSizeScaleTest.kt, core/datastore/API.md, app/src/main/kotlin/app/pocketcp/shell/AppearanceMapping.kt, app/src/main/kotlin/app/pocketcp/shell/PocketCpApp.kt, app/src/test/kotlin/app/pocketcp/shell/ShellThemeTest.kt, gradle/libs.versions.toml, docs/decisions/0012-feature-view-models.md]
 spec: ["7.4 Problem View", "3. Performance Budgets", "14. Offline", "5. Design & Layout"]
 ---
 
@@ -16,7 +16,8 @@ After this task there is one problem view that any feature can embed, as a page 
   - `ProblemViewModelFactory @Inject constructor(...)` with `create(problem: ProblemId): ProblemViewModel`. Features inject the factory and build the view model with `viewModel(key = problem.display) { factory.create(problem) }`.
   - So adding a dependency to the view model never edits a feature. ADR 0012 gets this as an addendum.
 - [ ] Reading settings resolve in this module, since `core/statement` takes plain values (044):
-  - `TextSizePreference.scale` moves unchanged (same factors 0.9 / 1 / 1.15 / 1.3) from `app/src/main/kotlin/app/pocketcp/shell/AppearanceMapping.kt` to `core/datastore`'s new `TextSizeScale.kt`, next to the enum, so the app shell and the problem view share one mapping. `AppearanceMapping.kt` loses its copy and imports it; no app golden changes. `TextSizeScaleTest` pins the four factors.
+  - `TextSizePreference.scale` moves unchanged (same factors 0.9 / 1 / 1.15 / 1.3) from `app/src/main/kotlin/app/pocketcp/shell/AppearanceMapping.kt` to `core/datastore`'s new `TextSizeScale.kt`, next to the enum, so the app shell and the problem view share one mapping. `AppearanceMapping.kt` loses its copy. Its callers in package `app.pocketcp.shell` used it without an import, so `PocketCpApp.kt` (`settings.appTextSize.scale`, `settings.codeTextSize.scale`) and `ShellThemeTest.kt` now import `app.pocketcp.core.datastore.scale`. No app golden changes.
+  - `TextSizeScaleTest` pins the four factors. `ShellThemeTest.textSizes_scaleAsSettingsOffers` moves there (it is deleted from `ShellThemeTest`), so the factors are pinned once.
   - `StatementWidthPreference` maps to `spacing.readingWidthNarrow`, `spacing.readingWidthComfortable` and `Dp.Infinity` (`Full`) in `core/problemview`.
 - [ ] `ProblemViewModel` builds `state: StateFlow<ProblemUiState>` from `StatementRepository.statement(problem, settings.statementLanguage)` and the reading settings, and implements `ProblemActions`:
   - `setLanguage(StatementLanguage)`, `setTextSize(TextSizePreference)` and `setWidth(StatementWidthPreference)` write through `SettingsRepository`
