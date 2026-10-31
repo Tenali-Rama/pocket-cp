@@ -24,7 +24,7 @@ Package `app.pocketcp.core.datastore`. Hilt: `DataStoreModule` provides `Setting
 | `statementTextSize` | `TextSizePreference` (`statement_text_size`): the statement's text size (spec §7.4) | `Default` |
 | `statementWidth` | `StatementWidthPreference` (`statement_width`): `Narrow` (`narrow`), `Comfortable` (`comfortable`), `Full` (`full`); how wide statement text may run (spec §7.4) | `Comfortable` |
 
-The enums (`ThemePreference`, `TextSizePreference`, `DensityPreference`, `StatementLanguage`, `StatementWidthPreference`) implement `StoredPreference` (`key: String`); the key in brackets is what is stored.
+The enums (`ThemePreference`, `TextSizePreference`, `DensityPreference`, `StatementWidthPreference`) implement `StoredPreference` (`key: String`); the key in brackets is what is stored. `StatementLanguage` (core/model) does not: it is stored by its own `key`.
 
 ## Installed modules
 `Set<OptionalModule>`: each optional module's own Hilt module adds itself with `@Provides @IntoSet`. Empty in M1. Settings' Features section lists it; a module is shown when installed and not in `disabledModules`.
