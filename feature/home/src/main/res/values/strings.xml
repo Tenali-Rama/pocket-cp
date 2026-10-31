@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Nav item text and content description, and the screen title (same as the placeholder it replaces). -->
+    <string name="home_label">Home</string>
+    <string name="home_refresh">Refresh contests</string>
+
+    <!-- Until sign-in lands (M4). Owner may change the wording. -->
+    <string name="home_guest">Browsing as a guest. Your rating, rank and recent verdicts appear here after you sign in.</string>
+
+    <!-- Section headers. -->
+    <string name="home_section_running">Running now</string>
+    <string name="home_section_upcoming">Upcoming</string>
+
+    <!-- Neither section has a contest. -->
+    <string name="home_empty_title">No scheduled contests</string>
+    <string name="home_empty_message">Running and upcoming contests appear here once Codeforces announces them.</string>
+
+    <!-- Full error state: no cached contests and the refresh failed. -->
+    <string name="home_error_offline">You\'re offline. Contests appear here once you\'re back online.</string>
+    <string name="home_error_rate_limited">Codeforces is limiting requests. Try again in a moment.</string>
+    <string name="home_error_unavailable">Codeforces is unavailable right now. Try again later.</string>
+    <string name="home_error_malformed">Codeforces sent a response the app can\'t read.</string>
+</resources>

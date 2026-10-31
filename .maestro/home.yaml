@@ -1,0 +1,18 @@
+# Home from the debug fixtures (ADR 0015, `testdata/codeforces/api/contest.list.json`): the start destination shows
+# the guest card and the upcoming Div. 3 round 2278 counting down. Selects by test tag; the row's text is matched
+# as a regex, since a contest row merges its name, phase and time into one node.
+appId: app.pocketcp
+name: Home
+---
+- stopApp
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: screen_home
+- assertVisible:
+    id: home_guest
+- assertVisible:
+    id: contest_2278
+- assertVisible:
+    text: ".*Starts in.*"
+- takeScreenshot: home
