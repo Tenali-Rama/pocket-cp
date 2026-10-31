@@ -2,7 +2,7 @@
 id: 036
 title: Delete the Home, Contests and Problemset placeholders once their features are on main
 milestone: M2
-status: todo
+status: done
 deps: [030, 032, 034]
 touches: [app/src/main/kotlin/app/pocketcp/shell/Placeholders.kt, app/src/main/res/values/strings.xml, app/src/test/kotlin/app/pocketcp/shell/ShellTestEntries.kt, app/src/test/screenshots/, app/build.gradle.kts, app/API.md]
 spec: ["4. Platform & Architecture"]
@@ -22,4 +22,7 @@ After 030, 032 and 034, the `home`, `contests` and `problemset` placeholders are
 - Deleting `PlaceholderEntry` or the Profile placeholder (M4/M9: the last feature to replace a placeholder deletes them, per ADR 0008).
 
 ## Notes for next
-<!-- builder fills in -->
+- Only Profile is still a placeholder; the feature replacing it deletes `PlaceholderEntry`, `Placeholders`, `PlaceholderModule` and `withoutReplacedPlaceholders` (ADR 0008).
+- `shellTestEntries` labels Home/Contests/Problemset with the feature modules' `*_label` strings and uses the label as the `EmptyState` message (as Settings does), so shell goldens now read "Home / Home".
+- `PlaceholderOverrideTest` (outside touches) builds its placeholders from `shellTestEntries`; it had to change because it named the deleted `Placeholders.*`. Added `placeholderModule_bindsOnlyProfile`.
+- M2 closed: app version 0.2.0 / code 3. Release APK 2,146,694 B (budget 2,154,719 B, about 8.0 KB headroom, up from about 5.7 KB).

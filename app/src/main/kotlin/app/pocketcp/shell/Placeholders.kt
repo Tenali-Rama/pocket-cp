@@ -3,9 +3,6 @@ package app.pocketcp.shell
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -39,35 +36,8 @@ class PlaceholderEntry(
     }
 }
 
-/** The default top-level destinations, until their features replace them. */
+/** The default top-level destinations whose features have not landed yet. */
 object Placeholders {
-    val home =
-        placeholder(
-            route = "home",
-            label = R.string.nav_home,
-            icon = Icons.Filled.Home,
-            order = 0,
-            message = R.string.placeholder_home,
-        )
-
-    val contests =
-        placeholder(
-            route = "contests",
-            label = R.string.nav_contests,
-            icon = Icons.Filled.DateRange,
-            order = 10,
-            message = R.string.placeholder_contests,
-        )
-
-    val problemset =
-        placeholder(
-            route = "problemset",
-            label = R.string.nav_problemset,
-            icon = Icons.AutoMirrored.Filled.List,
-            order = 20,
-            message = R.string.placeholder_problemset,
-        )
-
     val profile =
         placeholder(
             route = "profile",
@@ -104,11 +74,5 @@ fun Iterable<FeatureEntry>.withoutReplacedPlaceholders(): List<FeatureEntry> {
 object PlaceholderModule {
     @Provides
     @ElementsIntoSet
-    fun placeholders(): Set<FeatureEntry> =
-        setOf(
-            Placeholders.home,
-            Placeholders.contests,
-            Placeholders.problemset,
-            Placeholders.profile,
-        )
+    fun placeholders(): Set<FeatureEntry> = setOf(Placeholders.profile)
 }

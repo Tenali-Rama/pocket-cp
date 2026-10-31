@@ -3,15 +3,9 @@
     <string name="app_name">PocketCP</string>
 
     <!-- Top-level destinations: item text and content description. -->
-    <string name="nav_home">Home</string>
-    <string name="nav_contests">Contests</string>
-    <string name="nav_problemset">Problemset</string>
     <string name="nav_profile">Profile</string>
 
-    <!-- Placeholders until the milestone that delivers each destination (docs/tasks/ROADMAP.md). -->
-    <string name="placeholder_home">Arrives in M2: Browse.</string>
-    <string name="placeholder_contests">Arrives in M2: Browse.</string>
-    <string name="placeholder_problemset">Arrives in M2: Browse.</string>
+    <!-- Placeholder until the milestone that delivers the destination (docs/tasks/ROADMAP.md). -->
     <string name="placeholder_profile">Arrives in M9: Community.</string>
 
     <!-- Shell banner while the device has no validated internet connection (spec §14). -->
