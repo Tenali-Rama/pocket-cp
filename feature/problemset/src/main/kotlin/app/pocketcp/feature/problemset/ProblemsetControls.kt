@@ -141,17 +141,22 @@ internal fun SortChips(
     }
 }
 
-/** Medium and wider: the search field and the offered orders as a side pane. */
+/**
+ * Medium and wider: the search field, [buttons] ("Filters" and "Random", or just "Random" next to the filter
+ * panel) and the offered orders as a side pane.
+ */
 @Composable
 internal fun SearchPane(
     searchText: String,
     options: ProblemsetOptions,
     actions: ProblemsetActions,
     modifier: Modifier = Modifier,
+    buttons: @Composable () -> Unit,
 ) {
     val spacing = PocketCpTheme.spacing
     Column(modifier.verticalScroll(rememberScrollState()).padding(vertical = spacing.lg)) {
         SearchField(searchText, actions, Modifier.fillMaxWidth().padding(horizontal = spacing.lg))
+        Box(Modifier.padding(start = spacing.lg, end = spacing.lg, top = spacing.md)) { buttons() }
         Text(
             text = stringResource(R.string.problemset_sort_title),
             style = PocketCpTheme.typography.label,

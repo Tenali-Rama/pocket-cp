@@ -21,10 +21,38 @@
     <string name="problemset_sort_most_solved">Most solved</string>
     <string name="problemset_sort_name">Name</string>
 
+    <!-- Filters (spec §7.3): the button carries the count of active filters. -->
+    <string name="problemset_filters">Filters</string>
+    <string name="problemset_filters_count">Filters · %1$d</string>
+    <string name="problemset_filters_clear">Clear</string>
+    <string name="problemset_filters_done">Done</string>
+    <string name="problemset_filter_rating">Rating</string>
+    <string name="problemset_filter_rating_any">Any</string>
+    <string name="problemset_filter_rating_range">%1$d–%2$d</string>
+    <string name="problemset_filter_division">Division</string>
+    <string name="problemset_filter_tags">Tags</string>
+    <string name="problemset_filter_show_tags">Show tag filter</string>
+    <string name="problemset_filter_show_tags_selected">Show tag filter (%1$d selected)</string>
+    <string name="problemset_division_div1">Div. 1</string>
+    <string name="problemset_division_div2">Div. 2</string>
+    <string name="problemset_division_div3">Div. 3</string>
+    <string name="problemset_division_div4">Div. 4</string>
+    <string name="problemset_division_div1and2">Div. 1 + 2</string>
+    <string name="problemset_division_educational">Educational</string>
+    <string name="problemset_division_global">Global</string>
+    <string name="problemset_division_other">Other</string>
+
+    <!-- A random problem from the filtered list. -->
+    <string name="problemset_random">Random</string>
+
     <!-- Empty states. -->
     <string name="problemset_empty_title">No problems</string>
     <string name="problemset_empty_search_title">No problems match “%1$s”</string>
     <string name="problemset_empty_search_message">Search a name, a problem ID like 1900A, or a contest ID like 1900.</string>
+
+    <string name="problemset_empty_filtered_title">No problems match these filters</string>
+    <string name="problemset_empty_filtered_message">Widen the rating range, or select fewer tags or divisions.</string>
+    <string name="problemset_clear_filters">Clear filters</string>
 
     <!-- Full error state: no cached problems and the refresh failed. -->
     <string name="problemset_error_offline">You\'re offline. Problems appear here once you\'re back online.</string>

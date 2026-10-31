@@ -1,5 +1,6 @@
 package app.pocketcp.feature.problemset
 
+import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.Problem
 
 /** A problem id, whole (`1900A`, `1234B1`) or just its contest (`1900`): searched by `display` prefix. */
@@ -39,15 +40,17 @@ enum class ProblemSort {
 }
 
 /**
- * [problems] (in repository order) that match [query], in [sort] order. Unrated problems, and problems without a
- * solved count, sort last; ties keep the repository's order.
+ * [problems] (in repository order) that match [query] and pass [filter] (contest divisions from [divisionOf]), in
+ * [sort] order. Unrated problems, and problems without a solved count, sort last; ties keep the repository's order.
  */
 internal fun searchProblems(
     problems: List<Problem>,
     query: ProblemQuery,
     sort: ProblemSort,
+    filter: ProblemFilter = ProblemFilter(),
+    divisionOf: Map<Int, ContestDivision> = emptyMap(),
 ): List<Problem> {
-    val matching = problems.filter(query::matches)
+    val matching = problems.filter { query.matches(it) && filter.matches(it, divisionOf) }
     return when (sort) {
         ProblemSort.Newest -> matching
         ProblemSort.RatingAscending -> matching.sortedWith(compareBy(nullsLast()) { it.rating })
