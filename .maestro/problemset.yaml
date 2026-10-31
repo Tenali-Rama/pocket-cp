@@ -1,9 +1,10 @@
 # Problemset from the debug fixtures (ADR 0015, `testdata/codeforces/api/problemset.problems.json`): searching a
-# problem id leaves its row, and "Hide tags" from the overflow menu persists across a relaunch that keeps the
-# app's data. Selects by test tag; a problem row merges its id, name, tags and counts into one node, so its text is
-# matched as a regex. 2276F is tagged "dsu"; no other fixture problem is.
+# problem id leaves its row, filtering by a tag and "Random" highlight the one matching row, and "Hide tags" from
+# the overflow menu persists across a relaunch that keeps the app's data. Selects by test tag; a problem row merges
+# its id, name, tags and counts into one node, so its text is matched as a regex. 2276F is tagged "dsu"; no other
+# fixture problem is.
 appId: app.pocketcp
-name: Problemset search and spoiler hiding
+name: Problemset search, filters, random and spoiler hiding
 ---
 - stopApp
 - launchApp:
@@ -29,6 +30,35 @@ name: Problemset search and spoiler hiding
     id: problemset_search_clear
 - assertVisible:
     text: ".*dsu.*"
+
+# Filter by the "dsu" tag (only 2276F has it), then a random pick highlights (selects) that row.
+- tapOn:
+    id: problemset_filters
+- scrollUntilVisible:
+    element:
+      id: problemset_tag_dsu
+    direction: DOWN
+- tapOn:
+    id: problemset_tag_dsu
+- tapOn:
+    id: problemset_filters_done
+- assertNotVisible:
+    id: problem_2274A
+- tapOn:
+    id: problemset_random
+- assertVisible:
+    id: problem_2276F
+    selected: true
+- takeScreenshot: problemset_random
+- tapOn:
+    id: problemset_filters
+- tapOn:
+    id: problemset_filters_clear
+- tapOn:
+    id: problemset_filters_done
+- assertVisible:
+    id: problem_2274A
+
 - tapOn:
     id: problemset_menu
 # The menu is a popup window, outside the root that exposes test tags as resource ids: tap its text.

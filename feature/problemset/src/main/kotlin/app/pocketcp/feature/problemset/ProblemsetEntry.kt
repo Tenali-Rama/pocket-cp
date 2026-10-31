@@ -9,6 +9,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import app.pocketcp.core.data.ContestRepository
 import app.pocketcp.core.data.ProblemRepository
 import app.pocketcp.core.datastore.SettingsRepository
 import app.pocketcp.core.navigation.FeatureEntry
@@ -25,6 +26,7 @@ class ProblemsetEntry
     @Inject
     constructor(
         private val problems: ProblemRepository,
+        private val contests: ContestRepository,
         private val settings: SettingsRepository,
     ) : FeatureEntry {
         override val destination =
@@ -32,7 +34,8 @@ class ProblemsetEntry
 
         override fun register(graph: NavGraphBuilder) {
             graph.composable(destination.route) {
-                val viewModel = viewModel { ProblemsetViewModel(problems, settings, createSavedStateHandle()) }
+                val viewModel =
+                    viewModel { ProblemsetViewModel(problems, contests, settings, createSavedStateHandle()) }
                 ProblemsetRoute(viewModel)
             }
         }

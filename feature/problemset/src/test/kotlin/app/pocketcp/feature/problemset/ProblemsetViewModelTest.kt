@@ -1,10 +1,10 @@
 package app.pocketcp.feature.problemset
 
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.pocketcp.core.data.Cached
 import app.pocketcp.core.datastore.UserSettings
+import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
@@ -23,8 +23,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.time.Instant
+import kotlin.random.Random
 
 private val FetchedAt: Instant = Instant.parse("2026-10-31T12:00:00Z")
+private const val SEED = 33
 
 private fun problem(
     contestId: Int,
@@ -32,12 +34,16 @@ private fun problem(
     name: String,
     rating: Int?,
     solved: Int,
-) = Problem(ProblemId(contestId, index), name, rating, listOf("math"), solved)
+    tags: List<String> = listOf("math"),
+) = Problem(ProblemId(contestId, index), name, rating, tags, solved)
 
-private val p1901b = problem(1901, "B", "Zebra Tiles", rating = 1500, solved = 900)
+private val p1901b = problem(1901, "B", "Zebra Tiles", rating = 1500, solved = 900, listOf("greedy", "math"))
 private val p1900a = problem(1900, "A", "Cover in Water", rating = 800, solved = 30_000)
 private val p1900b = problem(1900, "B", "Laura and Operations", rating = null, solved = 20_000)
-private val p1899c = problem(1899, "C", "Bad Water", rating = 1200, solved = 10)
+private val p1899c = problem(1899, "C", "Bad Water", rating = 1200, solved = 10, listOf("greedy"))
+
+/** Contest 1901 is Div. 2 and 1900 Educational; 1899 is not cached, so its division is unknown. */
+private val ContestNames = mapOf(1901 to "Codeforces Round 912 (Div. 2)", 1900 to "Educational Codeforces Round 159")
 
 /** In repository order: newest contest first, then by index. */
 private val all = listOf(p1901b, p1900a, p1900b, p1899c)
@@ -261,18 +267,129 @@ class ProblemsetViewModelTest {
             }
         }
 
+    @Test
+    fun tagFilter_keepsProblemsWithEverySelectedTag() =
+        runTest {
+            val viewModel = newViewModel()
+            viewModel.state.test {
+                viewModel.toggleTag("greedy")
+                assertEquals(listOf(p1901b, p1899c), awaitUntil { it.options.filter.tags == setOf("greedy") }.problems)
+
+                viewModel.toggleTag("math")
+                val both = awaitUntil { it.options.filter.tags.size == 2 }
+                assertEquals(listOf(p1901b), both.problems)
+                assertEquals(2, both.options.filter.activeCount)
+                assertEquals(listOf("greedy", "math"), both.tags)
+
+                viewModel.toggleTag("greedy")
+                assertEquals(
+                    listOf(p1901b, p1900a, p1900b),
+                    awaitUntil { it.options.filter.tags == setOf("math") }.problems,
+                )
+            }
+        }
+
+    @Test
+    fun ratingFilter_snapsTheRange_dropsUnratedProblems_andCombinesWithSearch() =
+        runTest {
+            val viewModel = newViewModel()
+            viewModel.state.test {
+                viewModel.setRatingRange(1180, 1620)
+                val state = awaitUntil { it.options.filter.ratingNarrowed }
+                assertEquals(1200 to 1600, state.options.filter.ratingMin to state.options.filter.ratingMax)
+                assertEquals(listOf(p1901b, p1899c), state.problems)
+
+                // Combined with the search.
+                viewModel.search("water")
+                assertEquals(listOf(p1899c), awaitUntil { it.options.query == "water" }.problems)
+
+                viewModel.setRatingRange(ProblemFilter.MIN_RATING, ProblemFilter.MAX_RATING)
+                assertEquals(listOf(p1900a, p1899c), awaitUntil { !it.options.filter.ratingNarrowed }.problems)
+            }
+        }
+
+    @Test
+    fun divisionFilter_looksUpCachedContests_andDropsMissingOnes_untilCleared() =
+        runTest {
+            val viewModel = newViewModel()
+            viewModel.state.test {
+                viewModel.toggleDivision(ContestDivision.Div2)
+                assertEquals(listOf(p1901b), awaitUntil { it.options.filter.activeCount == 1 }.problems)
+
+                // 1899 is not cached: kept by no division.
+                viewModel.toggleDivision(ContestDivision.Educational)
+                assertEquals(
+                    listOf(p1901b, p1900a, p1900b),
+                    awaitUntil { it.options.filter.activeCount == 2 }.problems,
+                )
+
+                viewModel.clearFilters()
+                assertEquals(all, awaitUntil { it.options.filter == ProblemFilter() }.problems)
+            }
+        }
+
+    @Test
+    fun random_picksFromTheFilteredList_withTheInjectedRandom() =
+        runTest {
+            val viewModel = newViewModel(random = Random(SEED))
+            viewModel.state.test {
+                viewModel.toggleTag("math")
+                val filtered = awaitUntil { it.options.filter.activeCount == 1 }.problems
+
+                viewModel.pickRandom()
+                val expected = filtered[Random(SEED).nextInt(filtered.size)]
+                assertEquals(RandomPick(expected.id.display, count = 1), awaitUntil { it.pick.count == 1 }.pick)
+            }
+        }
+
+    @Test
+    fun random_isDisabledAndDoesNothing_whenTheListIsEmpty() =
+        runTest {
+            val viewModel = newViewModel()
+            viewModel.state.test {
+                viewModel.toggleTag("graphs")
+                val state = awaitUntil { it.options.filter.activeCount == 1 }
+                assertEquals(ProblemsetStatus.Empty, state.status)
+                assertFalse(state.canPickRandom)
+
+                viewModel.pickRandom()
+                viewModel.toggleTag("graphs")
+                val unfiltered = awaitUntil { it.options.filter.activeCount == 0 }
+                assertTrue(unfiltered.canPickRandom)
+                assertEquals(RandomPick(), unfiltered.pick)
+            }
+        }
+
+    @Test
+    fun filtersAndPick_areRestoredFrom_savedState() =
+        runTest {
+            val handle = SavedStateHandle()
+            val first = newViewModel(handle = handle)
+            first.state.test {
+                first.toggleTag("greedy")
+                first.toggleDivision(ContestDivision.Div2)
+                first.setRatingRange(1200, 1600)
+                awaitUntil { it.options.filter.activeCount == 3 }
+                first.pickRandom()
+                awaitUntil { it.pick.count == 1 }
+            }
+
+            // Process death: a new view model over the handle's saved values.
+            val restored = SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) })
+            newViewModel(handle = restored).state.test {
+                val state = awaitUntil { it.status == ProblemsetStatus.Loaded }
+                val expected = ProblemFilter(setOf("greedy"), 1200, 1600, setOf(ContestDivision.Div2))
+                assertEquals(expected, state.options.filter)
+                assertEquals(listOf(p1901b), state.problems)
+                assertEquals(RandomPick(p1901b.id.display, count = 1), state.pick)
+            }
+        }
+
     /** The view model on the test's main dispatcher, so its searching runs on the test scheduler. */
     private fun newViewModel(
         repository: FakeProblemRepository = FakeProblemRepository(cached()),
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         handle: SavedStateHandle = SavedStateHandle(),
-    ) = ProblemsetViewModel(repository, settings, handle, Dispatchers.Main)
-}
-
-/** Skips states until one matches [predicate]: the first item may be the initial state before the data arrives. */
-private suspend fun <T> ReceiveTurbine<T>.awaitUntil(predicate: (T) -> Boolean): T {
-    while (true) {
-        val state = awaitItem()
-        if (predicate(state)) return state
-    }
+        random: Random = Random(SEED),
+    ) = ProblemsetViewModel(repository, FakeContestRepository(ContestNames), settings, handle, Dispatchers.Main, random)
 }

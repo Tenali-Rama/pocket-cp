@@ -2,8 +2,12 @@ package app.pocketcp.feature.problemset
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -22,6 +26,7 @@ import app.pocketcp.core.adaptive.navigationTypeOf
 import app.pocketcp.core.data.Cached
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.designsystem.ThemeMode
+import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
 import org.junit.Assert.assertEquals
@@ -52,6 +57,29 @@ class ProblemsetScreenTest {
 
             override fun setHideRatings(hidden: Boolean) {
                 calls += "hideRatings $hidden"
+            }
+
+            override fun toggleTag(tag: String) {
+                calls += "tag $tag"
+            }
+
+            override fun toggleDivision(division: ContestDivision) {
+                calls += "division ${division.name}"
+            }
+
+            override fun setRatingRange(
+                min: Int,
+                max: Int,
+            ) {
+                calls += "rating $min-$max"
+            }
+
+            override fun clearFilters() {
+                calls += "clearFilters"
+            }
+
+            override fun pickRandom() {
+                calls += "random"
             }
 
             override fun refresh() {
@@ -126,6 +154,61 @@ class ProblemsetScreenTest {
         assertEquals(listOf("search "), calls)
     }
 
+    @Test
+    fun filterButton_showsTheCount_andOpensTheSheet_whoseChipsFilter() {
+        val filter = ProblemFilter(tags = setOf("dp"), ratingMin = 1200, divisions = setOf(ContestDivision.Div2))
+        show(WindowWidthClass.Compact, options = ProblemsetOptions(filter = filter))
+        rule.onNodeWithTag("problemset_filter_sheet").assertDoesNotExist()
+        rule.onNodeWithTag("problemset_filters").assertTextContains("Filters · 3").performClick()
+
+        rule.onNodeWithTag(tagTestTag("dsu")).performScrollTo().performClick()
+        rule.onNodeWithTag(ContestDivision.Educational.testTag).performScrollTo().performClick()
+        rule.onNodeWithTag("problemset_filters_clear").performClick()
+        rule.onNodeWithTag("problemset_filters_done").performClick()
+        rule.onNodeWithTag("problemset_filter_sheet").assertDoesNotExist()
+        assertEquals(listOf("tag dsu", "division Educational", "clearFilters"), calls)
+    }
+
+    @Test
+    fun expandedWidth_showsTheFilterPanel_withoutAFilterButton() {
+        show(WindowWidthClass.Expanded)
+        rule.onNodeWithTag("problemset_filters").assertDoesNotExist()
+        rule.onNodeWithTag("problemset_filters_done").assertDoesNotExist()
+        rule.onNodeWithTag(tagTestTag("brute force")).performScrollTo().performClick()
+        assertEquals(listOf("tag brute force"), calls)
+    }
+
+    @Test
+    fun hiddenTags_collapseTheTagFilter_untilShown() {
+        show(WindowWidthClass.Expanded, options = ProblemsetOptions(hideTags = true))
+        rule.onNodeWithTag(tagTestTag("dsu")).assertDoesNotExist()
+        rule.onNodeWithTag("problemset_show_tags").performScrollTo().performClick()
+        rule.onNodeWithTag(tagTestTag("dsu")).assertExists()
+    }
+
+    @Test
+    fun random_picks() {
+        show(WindowWidthClass.Compact)
+        rule.onNodeWithTag("problemset_random").assertIsEnabled().performClick()
+        assertEquals(listOf("random"), calls)
+    }
+
+    @Test
+    fun random_isDisabled_whenTheListIsEmpty() {
+        show(WindowWidthClass.Compact, options = ProblemsetOptions(filter = ProblemFilter(tags = setOf("graphs"))))
+        rule.onNodeWithTag("problemset_random").assertIsNotEnabled()
+        rule.onNodeWithText("No problems match these filters").assertExists()
+        rule.onNodeWithText("Clear filters").performClick()
+        assertEquals(listOf("clearFilters"), calls)
+    }
+
+    @Test
+    fun pickedProblem_isHighlighted() {
+        show(WindowWidthClass.Compact, pick = RandomPick("2274A", count = 1))
+        rule.onNodeWithTag("problem_2274A").assertIsSelected()
+        rule.onNodeWithTag("problem_2276F").assertIsNotSelected()
+    }
+
     private fun sorts(width: WindowWidthClass) {
         show(width)
         rule.onNodeWithTag(ProblemSort.MostSolved.testTag).performScrollTo().performClick()
@@ -138,9 +221,10 @@ class ProblemsetScreenTest {
         data: List<Problem>? = FixtureProblems,
         error: JudgeError? = null,
         options: ProblemsetOptions = ProblemsetOptions(),
+        pick: RandomPick = RandomPick(),
     ) {
         val cached = Cached(data, fetchedAt = null, refreshing = false, error = error)
-        val state = problemsetUiState(cached, options, userRefreshing = false)
+        val state = problemsetUiState(cached, options, userRefreshing = false, pick = pick)
         val layout = WindowLayout(width, WindowHeightClass.Medium, DevicePosture.Flat, navigationTypeOf(width))
         rule.setContent {
             PocketCpTheme(ThemeMode.Dark) {
