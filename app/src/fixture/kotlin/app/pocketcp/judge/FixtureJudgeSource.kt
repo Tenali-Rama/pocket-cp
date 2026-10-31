@@ -18,8 +18,9 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * Debug builds' [JudgeSource] (ADR 0015): the real [CodeforcesJudgeSource] mapping over recorded responses read
- * from [assets], so UI flows get stable, real-looking data and never reach the network.
+ * The [JudgeSource] of debug and the benchmark build types (ADR 0015): the real [CodeforcesJudgeSource] mapping over
+ * recorded responses read from [assets], so UI flows and benchmarks get stable, real-looking data and never reach
+ * the network.
  * Contest starts are shifted so the moment `contest.list.json` was recorded is [clock]'s now: upcoming contests
  * keep their recorded countdowns, and phases stay as recorded.
  * @param scope where queued calls run, as for [CodeforcesApi]; [dispatcher] reads the files.

@@ -12,8 +12,11 @@ plugins {
 val appVersionName = "0.2.0"
 val appVersionCode = 3
 
-// Where the live JudgeSource binding lives; debug builds bind recorded responses instead (ADR 0015).
+// The two JudgeSource bindings (ADR 0015): live Codeforces for release only; recorded responses, with
+// testdata/codeforces/api/ as assets, for debug and the benchmark / Baseline Profile build types.
 val liveSources = "src/live/kotlin"
+val fixtureSources = "src/fixture/kotlin"
+val fixtureAssets = rootProject.file("testdata/codeforces/api")
 
 // release.yml passes -Pkeystore=<path> plus the env vars below. Without it the release APK is unsigned.
 val releaseKeystore = providers.gradleProperty("keystore").orNull?.let { file(it) }
@@ -47,18 +50,21 @@ android {
         }
     }
 
-    // The JudgeSource binding is per build type (ADR 0015): live Codeforces from src/live/kotlin, recorded
-    // responses in debug, which packages testdata/codeforces/api/ as its assets. Release-like types get src/live
-    // below; a new build type adds one of the two explicitly (app/CLAUDE.md).
+    // The JudgeSource binding is per build type (ADR 0015): live Codeforces from src/live/kotlin in release only;
+    // recorded responses from src/fixture/kotlin plus testdata/codeforces/api/ as assets in debug and, below, the
+    // benchmark types. A new build type adds one of the two explicitly (app/CLAUDE.md).
     sourceSets {
         getByName("release").kotlin.srcDir(liveSources)
-        getByName("debug").assets.srcDir(rootProject.file("testdata/codeforces/api"))
+        getByName("debug") {
+            kotlin.srcDir(fixtureSources)
+            assets.srcDir(fixtureAssets)
+        }
     }
 }
 
 // The baselineprofile plugin derives benchmarkRelease and nonMinifiedRelease from release, which has no signing
 // config without -Pkeystore. The perf CI job installs them on an emulator, so they use the debug key (ADR 0013).
-// They also bind the live JudgeSource like release, so benchmarks measure the real mapping path.
+// They bind the fixture JudgeSource like debug, so benchmarks never call Codeforces and see the same data each run.
 androidComponents {
     finalizeDsl { android ->
         val debugKey = android.signingConfigs.getByName("debug")
@@ -66,7 +72,9 @@ androidComponents {
         derived.forEach { buildType ->
             buildType.signingConfig = debugKey
             val sources = android.sourceSets.maybeCreate(buildType.name)
-            sources.kotlin.srcDir(liveSources)
+            // The plugin copies release's source dirs, src/live/kotlin included, into these types: replace them.
+            sources.kotlin.setSrcDirs(listOf(fixtureSources))
+            sources.assets.srcDir(fixtureAssets)
         }
         val bound = derived.map { it.name } + "debug" + "release"
         val unbound = android.buildTypes.map { it.name } - bound.toSet()
@@ -105,11 +113,42 @@ val checkBaselineProfile by tasks.registering {
     }
 }
 
+// Fixture data must never ship, and the benchmark types must serve it (ADR 0015). Checks the release APK and the
+// merged assets of the benchmark types; reports every problem at once.
+val checkFixtureBinding by tasks.registering {
+    description = "Fails when the release APK holds fixture assets or a benchmark build type lacks them."
+    val fixtureMarker = "contest.list.json"
+    val benchmarkTypes = listOf("benchmarkRelease", "nonMinifiedRelease")
+    dependsOn("assembleRelease")
+    dependsOn(benchmarkTypes.map { "merge${it.replaceFirstChar(Char::uppercase)}Assets" })
+    val apkDir = layout.buildDirectory.dir("outputs/apk/release")
+    val mergedDirs = benchmarkTypes.associateWith { layout.buildDirectory.dir("intermediates/assets/$it") }
+    doLast {
+        val problems = mutableListOf<String>()
+        val releaseDir = apkDir.get().asFile
+        val apks = releaseDir.listFiles().orEmpty().filter { it.extension == "apk" }
+        if (apks.isEmpty()) problems += "No release APK in $releaseDir"
+        apks.forEach { apk ->
+            ZipFile(apk).use { zip ->
+                if (zip.getEntry("assets/$fixtureMarker") != null) {
+                    problems += "${apk.name} ships the fixture asset assets/$fixtureMarker: release must bind live only"
+                }
+            }
+        }
+        mergedDirs.forEach { (type, dir) ->
+            val merged = dir.get().asFile
+            val found = merged.walk().any { it.isFile && it.name == fixtureMarker }
+            if (!found) problems += "$type's merged assets lack $fixtureMarker: benchmarks must serve fixtures"
+        }
+        check(problems.isEmpty()) { "Fixture binding (ADR 0015):\n" + problems.joinToString("\n") }
+    }
+}
+
 // CI also builds the (unsigned) release APK, so R8 and resource-shrinking problems fail the PR,
 // and checks that it ships the Baseline Profile. ciCheck's unit tests cover debug only, so it also compiles the
-// release-like build types with their Hilt graph (no R8): a broken live JudgeSource binding fails CI there too.
+// release-like build types with their Hilt graph (no R8): a broken JudgeSource binding fails CI there too.
 tasks.named("ciCheck") {
-    dependsOn("assembleRelease", checkBaselineProfile)
+    dependsOn("assembleRelease", checkBaselineProfile, checkFixtureBinding)
     dependsOn(
         listOf("Release", "BenchmarkRelease", "NonMinifiedRelease").flatMap {
             listOf("compile${it}JavaWithJavac", "hiltJavaCompile$it")
@@ -121,7 +160,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(project(":core:adaptive"))
-    // CodeforcesApi and CodeforcesJudgeSource behind the JudgeSource bindings in src/live and src/debug;
+    // CodeforcesApi and CodeforcesJudgeSource behind the JudgeSource bindings in src/live and src/fixture;
     // DataWiringTest checks the binding reaches the core/data repositories.
     implementation(project(":core:codeforces"))
     implementation(project(":core:data"))
