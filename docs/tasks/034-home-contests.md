@@ -3,8 +3,8 @@ id: 034
 title: Home feature with running and upcoming contests, countdowns and the guest state
 milestone: M2
 status: todo
-deps: [025, 026, 027]
-touches: [feature/home/, settings.gradle.kts+, app/build.gradle.kts+, .maestro/home.yaml]
+deps: [025, 026, 027, 037]
+touches: [feature/home/, settings.gradle.kts+, app/build.gradle.kts+, .maestro/home.yaml, app/src/main/baseline-prof.txt, config/perf-budgets.json]
 spec: ["7.1 Home", "2. Product Principles", "6. Authentication"]
 ---
 
@@ -12,15 +12,21 @@ spec: ["7.1 Home", "2. Product Principles", "6. Authentication"]
 Home is the start destination, and it shows what's happening now: running contests and the next upcoming ones, with live countdowns. Until login lands (M4), it shows a guest card. It replaces the `home` placeholder by route (025) and keeps order 0.
 
 ## Acceptance criteria
-- [ ] `feature/home` binds the `home` `FeatureEntry` (order 0, same label and icon), with its view model per ADR 0012 over `ContestRepository.contests(gym = false)`.
+- [ ] `feature/home` binds the `home` `FeatureEntry` (order 0, same label and icon), with its view model per ADR 0012 over `ContestRepository.activeContests(upcomingLimit = 5)` (037). Home never collects `ContestRepository.contests(...)` and never holds finished contests.
 - [ ] Sections:
   - "Running now": all running contests, with "Ends in" countdowns
-  - "Upcoming": the next 5, soonest first (default — owner may change), with "Starts in" countdowns
+  - "Upcoming": the next 5, soonest first (default — owner may change), with "Starts in" countdowns. After a local flip at zero, Upcoming may show 4 until the refresh brings the next contest into the bounded query (default — owner may change).
   - each section is hidden when empty; when both are, an empty state says there are no scheduled contests
 - [ ] When a countdown reaches zero, the list re-sorts on the next tick: the contest moves from Upcoming to Running locally, without waiting for a refresh. A refresh is also triggered at that moment.
 - [ ] Guest card: "Browsing as a guest. Your rating, rank and recent verdicts appear here after you sign in." (default — owner may change). It has no button until M4, and its tag is `home_guest`.
 - [ ] Data states as in 030: no spinner over data, banner on a stale error, full error, loading.
-- [ ] `HomeViewModelTest` (fixed and advancing test clock) covers sectioning, the limit of 5, the local phase flip at zero plus the triggered refresh, and the data states.
+- [ ] `HomeViewModelTest` (fixed and advancing test clock) covers sectioning, the limit of 5, the local phase flip at zero plus the triggered refresh, and the data states. Its `FakeContestRepository.contests(...)` fails the test if called, and the test asserts that `activeContests` was requested with `upcomingLimit = 5`.
+- [ ] Memory budget (ADR 0013): `config/perf-budgets.json` stays as on main (`memory_max_kb` 84450). Re-run `perf` with the bounded source. Raise the budget only if the gated `memory_max_kb` still exceeds 84450 kB. A raise then needs, in the PR body:
+  - the `perf` artifact values (warm and cold medians) of every run
+  - where the remaining memory goes, e.g. a `perf` run with Home's collection stubbed
+  - why that growth is wanted
+
+  The addendum's "observed max + 15 %" rule is for flaky timings; it does not apply to memory.
 - [ ] Screenshots:
   - `home_<device>_<dark|light>`: all 8, with 1 running and 5 upcoming. On expanded width the two sections sit side by side (default — owner may change)
   - `home_noContests_phone_dark`, `home_error_phone_dark`
