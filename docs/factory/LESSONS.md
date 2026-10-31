@@ -12,6 +12,7 @@ These rules come from repeated review findings, and the COO maintains them throu
   - the nav graph
   - the DI module
   - ADRs
+  - every implementation of an interface the task extends, test fakes included (`grep -rn ": <Interface>"`; 037 had three fakes, one added by a parallel task)
 
   A missing hub entry makes parallel dispatch unsafe. It was polykov's most common review note.
 - Put a new feature in its own module (`feature/<name>/`) with its own tests. Shared hubs get only append-only registration lines (a `touches` entry with a trailing `+`).
@@ -24,6 +25,9 @@ These rules come from repeated review findings, and the COO maintains them throu
 - Keep system-service, package-manager, disk and network calls off the main thread. Run them on an injected background dispatcher, which also satisfies detekt `InjectDispatcher` (blocking on 022, raised on 023).
 - Screenshot names follow ADR 0005: `<name>[_<variant>]_<device>_<dark|light>`, even when a task's criteria word it differently.
 - Never share a Gradle `build/` dir between worktrees. Sharing the dependency cache (`~/.gradle/caches`) is fine.
+- Reviewers and planners: never check out a PR head or branch in the main checkout `/home/ubuntu/pocketcp` (left detached or on another branch 5 times in M2). Use a scratch clone or `git worktree add` in the scratchpad, and remove it afterwards.
+- The last task of each milestone carries the version bump (`appVersionName = "0.<n>.0"`, `appVersionCode = n + 1`, per `app/CLAUDE.md`). M1 missed it and needed a separate PR.
+- Never raise a perf budget to the measured value just to make CI pass. For memory and size budgets, explain the cause, and fix the code first when the growth isn't justified (034 loaded ~2000 contests to show 6 and proposed +44 % memory).
 
 ## Rebase
 Shared files and append-only (`+`) files may conflict when parallel PRs land. Resolve them mechanically, then let CI check the result:
