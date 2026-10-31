@@ -55,6 +55,7 @@ android {
     // benchmark types. A new build type adds one of the two explicitly (app/CLAUDE.md).
     sourceSets {
         getByName("release").kotlin.srcDir(liveSources)
+        getByName("release").assets.srcDir(fixtureAssets)
         getByName("debug") {
             kotlin.srcDir(fixtureSources)
             assets.srcDir(fixtureAssets)
