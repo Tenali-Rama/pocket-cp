@@ -2,10 +2,12 @@ package app.pocketcp.feature.contests
 
 import app.pocketcp.core.datastore.DensityPreference
 import app.pocketcp.core.datastore.SettingsRepository
+import app.pocketcp.core.datastore.StatementWidthPreference
 import app.pocketcp.core.datastore.TextSizePreference
 import app.pocketcp.core.datastore.ThemePreference
 import app.pocketcp.core.datastore.UserSettings
 import app.pocketcp.core.model.OptionalModule
+import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -30,6 +32,18 @@ class FakeSettingsRepository(
     override suspend fun setHideProblemTags(hidden: Boolean) = stored.update { it.copy(hideProblemTags = hidden) }
 
     override suspend fun setHideProblemRatings(hidden: Boolean) = stored.update { it.copy(hideProblemRatings = hidden) }
+
+    override suspend fun setStatementLanguage(language: StatementLanguage) {
+        stored.update { it.copy(statementLanguage = language) }
+    }
+
+    override suspend fun setStatementTextSize(size: TextSizePreference) {
+        stored.update { it.copy(statementTextSize = size) }
+    }
+
+    override suspend fun setStatementWidth(width: StatementWidthPreference) {
+        stored.update { it.copy(statementWidth = width) }
+    }
 
     override suspend fun setModuleEnabled(
         module: OptionalModule,

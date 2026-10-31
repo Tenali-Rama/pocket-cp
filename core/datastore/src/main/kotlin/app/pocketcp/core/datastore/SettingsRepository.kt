@@ -1,6 +1,7 @@
 package app.pocketcp.core.datastore
 
 import app.pocketcp.core.model.OptionalModule
+import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.flow.Flow
 
 /** The user's settings. Read with [settings]; each setter persists one field. */
@@ -24,6 +25,12 @@ interface SettingsRepository {
     suspend fun setHideProblemTags(hidden: Boolean)
 
     suspend fun setHideProblemRatings(hidden: Boolean)
+
+    suspend fun setStatementLanguage(language: StatementLanguage)
+
+    suspend fun setStatementTextSize(size: TextSizePreference)
+
+    suspend fun setStatementWidth(width: StatementWidthPreference)
 
     /** Turns [module] on or off in `disabledModules`; the other modules keep their state. */
     suspend fun setModuleEnabled(

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import app.cash.turbine.test
 import app.pocketcp.core.model.OptionalModule
+import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -44,6 +45,9 @@ class SettingsRepositoryTest {
             assertEquals(emptySet<OptionalModule>(), settings.disabledModules)
             assertEquals(false, settings.hideProblemTags)
             assertEquals(false, settings.hideProblemRatings)
+            assertEquals(StatementLanguage.En, settings.statementLanguage)
+            assertEquals(TextSizePreference.Default, settings.statementTextSize)
+            assertEquals(StatementWidthPreference.Comfortable, settings.statementWidth)
         }
 
     @Test
@@ -89,6 +93,22 @@ class SettingsRepositoryTest {
                 repository.setHideProblemTags(false)
                 expected = expected.copy(hideProblemTags = false)
                 assertEquals(expected, awaitItem())
+
+                repository.setStatementLanguage(StatementLanguage.Ru)
+                expected = expected.copy(statementLanguage = StatementLanguage.Ru)
+                assertEquals(expected, awaitItem())
+
+                repository.setStatementTextSize(TextSizePreference.Large)
+                expected = expected.copy(statementTextSize = TextSizePreference.Large)
+                assertEquals(expected, awaitItem())
+
+                repository.setStatementWidth(StatementWidthPreference.Full)
+                expected = expected.copy(statementWidth = StatementWidthPreference.Full)
+                assertEquals(expected, awaitItem())
+
+                repository.setStatementWidth(StatementWidthPreference.Narrow)
+                expected = expected.copy(statementWidth = StatementWidthPreference.Narrow)
+                assertEquals(expected, awaitItem())
             }
         }
 
@@ -104,6 +124,9 @@ class SettingsRepositoryTest {
             repository.setModuleEnabled(OptionalModule.PracticeAndStreaks, enabled = false)
             repository.setHideProblemTags(true)
             repository.setHideProblemRatings(true)
+            repository.setStatementLanguage(StatementLanguage.Ru)
+            repository.setStatementTextSize(TextSizePreference.Small)
+            repository.setStatementWidth(StatementWidthPreference.Narrow)
 
             val raw = store.data.first()
             assertEquals("amoled", raw[stringPreferencesKey("theme")])
@@ -112,6 +135,31 @@ class SettingsRepositoryTest {
             assertEquals(setOf("practice_streaks"), raw[stringSetPreferencesKey("disabled_modules")])
             assertEquals(true, raw[booleanPreferencesKey("hide_problem_tags")])
             assertEquals(true, raw[booleanPreferencesKey("hide_problem_ratings")])
+            assertEquals("ru", raw[stringPreferencesKey("statement_language")])
+            assertEquals("small", raw[stringPreferencesKey("statement_text_size")])
+            assertEquals("narrow", raw[stringPreferencesKey("statement_width")])
+        }
+
+    @Test
+    fun `reading settings written by an earlier launch are read back`() =
+        runTest {
+            val store = dataStore()
+            store.edit {
+                it[stringPreferencesKey("statement_language")] = "ru"
+                it[stringPreferencesKey("statement_text_size")] = "largest"
+                it[stringPreferencesKey("statement_width")] = "full"
+            }
+
+            val settings = DataStoreSettingsRepository(store).settings.first()
+
+            assertEquals(
+                UserSettings(
+                    statementLanguage = StatementLanguage.Ru,
+                    statementTextSize = TextSizePreference.Largest,
+                    statementWidth = StatementWidthPreference.Full,
+                ),
+                settings,
+            )
         }
 
     @Test
@@ -166,6 +214,9 @@ class SettingsRepositoryTest {
                 it[stringPreferencesKey("code_text_size")] = ""
                 it[stringPreferencesKey("density")] = "1"
                 it[stringSetPreferencesKey("disabled_modules")] = setOf("removed_module", "ai")
+                it[stringPreferencesKey("statement_language")] = "de"
+                it[stringPreferencesKey("statement_text_size")] = "Small"
+                it[stringPreferencesKey("statement_width")] = "wide"
             }
 
             val settings = DataStoreSettingsRepository(store).settings.first()

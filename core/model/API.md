@@ -23,6 +23,16 @@ The only way the data layer reaches a judge (ADR 0009). Every method throws only
 - `User(handle, rating: Int?, maxRating: Int?, avatarUrl: String?)`.
 - `JudgeError : Exception`, sealed: `Offline(cause?) | RateLimited(cause?) | Unavailable(cause?) | Rejected(message, cause?) | Malformed(cause?)`. `Rejected.message` is shown to the user. `Unavailable`: the judge is down or temporarily unreachable (e.g. HTTP 503); other unexpected statuses are `Malformed`.
 
+## Statements (spec §7.4)
+`Statement.kt`. Every type is `@Serializable` with explicit `@SerialName`s (snake_case), cached as JSON (ADR 0017); serial names are stored keys, never change one. Sealed subtypes are told apart by the default `type` discriminator, whose value is the subtype's serial name.
+- `StatementLanguage(key)`: `En` (`en`), `Ru` (`ru`). `fromKey(key): StatementLanguage?`, `null` for an unknown key. Keys are persisted: never change one.
+- `Statement(problem: ProblemId, language, title, timeLimitMillis: Long?, memoryLimitMegabytes: Int?, inputFile: String?, outputFile: String?, sections: List<StatementSection>, samples: List<Sample>, materials: List<MaterialLink>)`. Limits are `null` when the judge states none; `inputFile`/`outputFile` are `null` for standard input/output.
+- `StatementSection(kind: SectionKind, title: String?, blocks: List<StatementBlock>)`. `SectionKind`: `Legend | Input | Output | Interaction | Scoring | Note | Other`.
+- `StatementBlock`, sealed: `Paragraph(inlines)` (`paragraph`), `DisplayMath(tex)` (`display_math`), `Image(url, description?)` (`image`), `Table(rows: List<TableRow>)` (`table`), `ListBlock(ordered, items: List<List<StatementBlock>>)` (`list`), `Preformatted(text)` (`preformatted`). `TableRow(cells: List<TableCell>)`, `TableCell(inlines, header: Boolean)`. TeX is stored without delimiters.
+- `Inline`, sealed: `Text(text, bold = false, italic = false, monospace = false)` (`text`), `Math(tex)` (`math`), `Link(text, url)` (`link`), `LineBreak` (`line_break`).
+- `Sample(input, output)`; `MaterialLink(title, url, kind: MaterialKind)`, `MaterialKind`: `Tutorial | Announcement | Other`.
+- `ProblemId` is `@Serializable` too (`contest_id`, `index`).
+
 ## `OptionalModule(key: String)`
 `LocalCompute` (`local_compute`), `Ai` (`ai`), `StressTester` (`stress_tester`), `PracticeAndStreaks` (`practice_streaks`), `Stats` (`stats`), `OtherJudgesCalendar` (`other_judges_calendar`), `FocusModeAutoStart` (`focus_mode_auto_start`).
 - `OptionalModule.fromKey(key): OptionalModule?`: `null` for an unknown key.
