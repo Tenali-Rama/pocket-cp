@@ -34,7 +34,7 @@ Spec §18: when the parser can't read a page, that page falls back to the WebVie
   - a material tap opens the page, and back closes it
   - `ProblemViewModelTest` gains the link routing
 - [ ] Screenshots (WebView content is blank on the JVM; these show the chrome around it):
-  - `problemView_fallback_phone_dark`
+  - `problemView_fallback_phone_dark` and `problemView_fallback_tablet_dark` (the notice and WebView fill the pane, not a centred reading column)
   - `problemView_materials_<device>_<theme>` (the materials list open)
   - `problemView_materialPage_tablet_dark`
 

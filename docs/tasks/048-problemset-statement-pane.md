@@ -15,7 +15,7 @@ Problem rows in the Problemset tab finally open something. After this task, a ta
 - [ ] The opened problem lives in `ProblemsetViewModel`'s `SavedStateHandle` as its `display` (ADR 0016). `ProblemsetActions` gains `open(ProblemId)` and `close()`. Rows get `onClick = { open(it.id) }` and show `highlighted`/`selected` for the opened one on wide windows.
 - [ ] Layout:
   - Compact: the opened problem replaces the list with `ProblemPane(onBack = close)`; `BackHandler` closes it; scroll position and filters are kept.
-  - Medium and expanded: list | statement, statement pane ≥ 55 % of the width.
+  - Medium and expanded: list | statement, statement pane ≥ 55 % of the width; no `BackHandler` for the problem and no back arrow (`onBack = null`): the list is already visible, so Back leaves the tab as it does today (ADR 0016).
   - With none opened, the first problem of the current filtered list is shown (ADR 0016 default); with an empty list, an `EmptyState` "Select a problem".
   - On expanded, the filter controls move to the Filters sheet while a statement is shown (default — owner may change).
 - [ ] `ProblemsetEntry` injects `ProblemViewModelFactory` and also registers `problemset/{id}` (`id` such as `2274A`): the same screen, seeded once; a saved selection wins afterwards (ADR 0016).
@@ -29,10 +29,12 @@ Problem rows in the Problemset tab finally open something. After this task, a ta
   - tablet/foldable/desktop: list | statement with the opened row highlighted
   - also `problemsetDetail_default_tablet_dark` (none opened: first problem) and `problemsetDetail_empty_tablet_dark`
   - existing `problemset_*` goldens that now show a statement pane are re-accepted
-- [ ] `.maestro/problemset.yaml` adds:
+- [ ] `.maestro/problemset.yaml` adds, on every device CI runs it on:
   - tap `problem_2274A`
   - `problem_view` visible
-  - tap `sample_1_input_copy`
+  - `scrollUntilVisible` `sample_1_input_copy` (it is below the fold on a phone), then tap it
+
+  and then, only on compact width, inside `runFlow: when: visible: id: shell_bottom_bar` (as `.maestro/contests.yaml` does), since on wide windows the list stays beside the statement and Back leaves the tab (ADR 0016):
   - back
   - `problem_2274A` visible again (fixture data, ADR 0015)
 

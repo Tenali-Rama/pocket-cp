@@ -26,7 +26,7 @@ CI's `perf` job benchmarks `benchmarkRelease` / `nonMinifiedRelease`. Today thes
 ## Out of scope
 - Editing `.github/workflows/` (token scope), `config/perf-budgets.json` or `app/src/main/baseline-prof.txt`. Re-basing budgets on the new numbers is a later chore under the ADR 0013 rule (≥ 20 runs for timings).
 - A larger, perf-sized fixture (for example the full problemset) so benchmarks see realistic list sizes. Note it as a follow-up if the numbers drop a lot.
-- Statement page fixtures (041 adds them to the same asset set).
+- Statement page fixtures (041 adds them to the same asset set) and the statement scroll benchmark (049).
 
 ## Notes for next
 <!-- builder fills in -->
