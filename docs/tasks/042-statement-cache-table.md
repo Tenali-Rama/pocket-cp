@@ -2,7 +2,7 @@
 id: 042
 title: Room v3 statements cache table and StatementDao
 milestone: M3
-status: todo
+status: done
 deps: []
 touches: [core/database/src/main/kotlin/app/pocketcp/core/database/StatementEntity.kt, core/database/src/main/kotlin/app/pocketcp/core/database/StatementDao.kt, core/database/src/main/kotlin/app/pocketcp/core/database/PocketCpDatabase.kt, core/database/src/main/kotlin/app/pocketcp/core/database/DatabaseModule.kt, core/database/src/main/kotlin/app/pocketcp/core/database/Migrations.kt, core/database/src/test/kotlin/app/pocketcp/core/database/StatementDaoTest.kt, core/database/src/test/kotlin/app/pocketcp/core/database/MigrationTest.kt, core/database/src/test/kotlin/app/pocketcp/core/database/DatabaseModuleTest.kt, core/database/schemas/, core/database/API.md]
 spec: ["14. Offline", "3. Performance Budgets"]
@@ -34,4 +34,8 @@ Spec §14 wants viewed statements available offline, and §3 wants a statement o
 - Tables for bookmarks, notes, tags or recent problems (M10 / M4).
 
 ## Notes for next
-<!-- builder fills in -->
+- `schemas/…/3.json` was written without a local build: it is 2.json plus the `statements` entity, with the identity hash computed by Room's algorithm (checked to reproduce the 1.json and 2.json hashes). CI's build regenerates it; a diff there would mean a field/order mismatch.
+- `StatementDao.statement` is a Room `Flow`, so it re-emits on any write to `statements`, not only to its own row; 043 can add `distinctUntilChanged()` if that matters.
+- No extra index: the primary key `(contestId, index, language)` already serves `cachedIndices`' `contestId` filter.
+- `core/database/CLAUDE.md` now allows per-row `upsert` for per-item caches like `statements` (outside `touches`, a one-line rule fix).
+- Migrations are listed one by one in `addMigrations` (detekt `SpreadOperator`); the next schema change adds `MIGRATION_3_4` there and in `MigrationTest`.

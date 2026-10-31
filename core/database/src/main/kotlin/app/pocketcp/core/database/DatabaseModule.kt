@@ -20,7 +20,7 @@ object DatabaseModule {
     ): PocketCpDatabase =
         Room
             .databaseBuilder(context, PocketCpDatabase::class.java, PocketCpDatabase.NAME)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides
@@ -31,4 +31,7 @@ object DatabaseModule {
 
     @Provides
     fun provideCacheMetaDao(database: PocketCpDatabase): CacheMetaDao = database.cacheMetaDao()
+
+    @Provides
+    fun provideStatementDao(database: PocketCpDatabase): StatementDao = database.statementDao()
 }
