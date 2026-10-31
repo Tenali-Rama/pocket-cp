@@ -30,7 +30,7 @@ CI's `perf` job benchmarks `benchmarkRelease` / `nonMinifiedRelease`. Today thes
 
 ## Notes for next
 - `app/src/fixture/kotlin/` (+ `testdata/codeforces/api` assets) is wired to `debug` in `sourceSets` and to every `benchmark*` / `nonMinified*` type in `finalizeDsl`; `src/live/kotlin` is `release` only.
-- `checkFixtureBinding` walks `build/intermediates/assets/<type>/` (AGP 8.10 merged-assets location) and the release APK; it collects every problem and fails once, so one red run shows both messages.
+- `checkFixtureBinding` walks `build/intermediates/assets/<type>/` (AGP 8.10 merged-assets location) and the release APK; it reports every problem in one failure. The `baselineprofile` plugin copies release's DSL source dirs into the types it derives (`copyBuildTypeSources`), hence `setSrcDirs` for their Kotlin dirs.
 - The tests stay in `src/testDebug/` (they run against the debug graph); only the bound classes moved.
 - Comment-only updates outside `touches`: `LiveJudgeSourceModule.kt` and `DataWiringTest.kt` named `src/debug`.
 - Follow-up: perf budgets can be re-based on fixture numbers after ≥ 20 runs (ADR 0013); a perf-sized fixture is still out of scope.
