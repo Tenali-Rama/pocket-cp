@@ -1,9 +1,14 @@
 package app.pocketcp.core.datastore
 
 import app.pocketcp.core.model.OptionalModule
+import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.flow.Flow
 
-/** The user's settings. Read with [settings]; each setter persists one field. */
+/**
+ * The user's settings. Read with [settings]; each setter persists one field.
+ * One setter per setting is this module's rule (core/datastore/CLAUDE.md), so the function count grows with settings.
+ */
+@Suppress("TooManyFunctions")
 interface SettingsRepository {
     /**
      * The current settings, then every change. Never fails on IO: an unreadable store yields the defaults,
@@ -24,6 +29,12 @@ interface SettingsRepository {
     suspend fun setHideProblemTags(hidden: Boolean)
 
     suspend fun setHideProblemRatings(hidden: Boolean)
+
+    suspend fun setStatementLanguage(language: StatementLanguage)
+
+    suspend fun setStatementTextSize(size: TextSizePreference)
+
+    suspend fun setStatementWidth(width: StatementWidthPreference)
 
     /** Turns [module] on or off in `disabledModules`; the other modules keep their state. */
     suspend fun setModuleEnabled(

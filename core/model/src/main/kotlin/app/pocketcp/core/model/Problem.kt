@@ -1,9 +1,13 @@
 package app.pocketcp.core.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 /** A problem's contest and its index within it, e.g. `4` and `A`; shown as [display] (`4A`). */
+@Serializable
 data class ProblemId(
-    val contestId: Int,
-    val index: String,
+    @SerialName("contest_id") val contestId: Int,
+    @SerialName("index") val index: String,
 ) {
     val display: String get() = "$contestId$index"
 }

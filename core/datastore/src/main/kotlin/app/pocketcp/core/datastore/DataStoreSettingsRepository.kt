@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import app.pocketcp.core.model.OptionalModule
+import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -15,7 +16,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retryWhen
 import java.io.IOException
 
-/** [SettingsRepository] on a Preferences [DataStore]. Enums are stored by their [StoredPreference.key]. */
+/**
+ * [SettingsRepository] on a Preferences [DataStore]. Enums are stored by their [StoredPreference.key].
+ * One setter per setting, like the interface, so the function count grows with settings.
+ */
+@Suppress("TooManyFunctions")
 internal class DataStoreSettingsRepository(
     private val dataStore: DataStore<Preferences>,
 ) : SettingsRepository {
@@ -48,6 +53,12 @@ internal class DataStoreSettingsRepository(
 
     override suspend fun setHideProblemRatings(hidden: Boolean) = put(Keys.HIDE_PROBLEM_RATINGS, hidden)
 
+    override suspend fun setStatementLanguage(language: StatementLanguage) = put(Keys.STATEMENT_LANGUAGE, language.key)
+
+    override suspend fun setStatementTextSize(size: TextSizePreference) = put(Keys.STATEMENT_TEXT_SIZE, size.key)
+
+    override suspend fun setStatementWidth(width: StatementWidthPreference) = put(Keys.STATEMENT_WIDTH, width.key)
+
     override suspend fun setModuleEnabled(
         module: OptionalModule,
         enabled: Boolean,
@@ -77,6 +88,10 @@ internal class DataStoreSettingsRepository(
             disabledModules = this[Keys.DISABLED_MODULES].orEmpty().mapNotNull(OptionalModule::fromKey).toSet(),
             hideProblemTags = this[Keys.HIDE_PROBLEM_TAGS] ?: defaults.hideProblemTags,
             hideProblemRatings = this[Keys.HIDE_PROBLEM_RATINGS] ?: defaults.hideProblemRatings,
+            statementLanguage =
+                this[Keys.STATEMENT_LANGUAGE]?.let(StatementLanguage::fromKey) ?: defaults.statementLanguage,
+            statementTextSize = stored(Keys.STATEMENT_TEXT_SIZE, defaults.statementTextSize),
+            statementWidth = stored(Keys.STATEMENT_WIDTH, defaults.statementWidth),
         )
     }
 
@@ -90,6 +105,9 @@ internal class DataStoreSettingsRepository(
         val DISABLED_MODULES = stringSetPreferencesKey("disabled_modules")
         val HIDE_PROBLEM_TAGS = booleanPreferencesKey("hide_problem_tags")
         val HIDE_PROBLEM_RATINGS = booleanPreferencesKey("hide_problem_ratings")
+        val STATEMENT_LANGUAGE = stringPreferencesKey("statement_language")
+        val STATEMENT_TEXT_SIZE = stringPreferencesKey("statement_text_size")
+        val STATEMENT_WIDTH = stringPreferencesKey("statement_width")
     }
 }
 

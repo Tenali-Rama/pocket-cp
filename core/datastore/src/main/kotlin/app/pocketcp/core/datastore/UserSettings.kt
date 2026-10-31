@@ -1,6 +1,7 @@
 package app.pocketcp.core.datastore
 
 import app.pocketcp.core.model.OptionalModule
+import app.pocketcp.core.model.StatementLanguage
 
 /** The user's settings (spec §15). A field never set, or stored with an unknown key, has its default. */
 data class UserSettings(
@@ -14,6 +15,12 @@ data class UserSettings(
     val hideProblemTags: Boolean = false,
     /** Hide problem ratings in the problemset, so practice isn't spoiled (spec §7.3). */
     val hideProblemRatings: Boolean = false,
+    /** The language problem statements are shown in (spec §7.4), stored by [StatementLanguage.key]. */
+    val statementLanguage: StatementLanguage = StatementLanguage.En,
+    /** The text size of problem statements (spec §7.4). */
+    val statementTextSize: TextSizePreference = TextSizePreference.Default,
+    /** How wide a problem statement's text may run on wide windows (spec §7.4). */
+    val statementWidth: StatementWidthPreference = StatementWidthPreference.Comfortable,
 )
 
 /** A settings enum stored by [key], never by name or ordinal. Never change or reuse a key. */
@@ -44,4 +51,12 @@ enum class DensityPreference(
 ) : StoredPreference {
     Comfortable("comfortable"),
     Compact("compact"),
+}
+
+enum class StatementWidthPreference(
+    override val key: String,
+) : StoredPreference {
+    Narrow("narrow"),
+    Comfortable("comfortable"),
+    Full("full"),
 }
