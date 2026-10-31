@@ -7,7 +7,7 @@ Package `app.pocketcp.feature.home`. The app adds it with `implementation(projec
 | Symbol | What it is |
 |--------|-----------|
 | `HomeEntry` | The `FeatureEntry`: route `home`, label `R.string.home_label` ("Home"), `Icons.Filled.Home`, order 0 (start destination), tag `nav_home`. Replaces the `home` placeholder. Bound `@IntoSet` by `HomeModule`. Injects `ContestRepository`. |
-| `HomeViewModel(repository, clock, computeDispatcher = Default)` | `state: StateFlow<HomeUiState>` over `contests(gym = false)`. When a countdown reaches zero it re-sections locally and calls `refresh(gym = false, force = true)`. Implements `HomeActions`. |
+| `HomeViewModel(repository, clock, computeDispatcher = Default)` | `state: StateFlow<HomeUiState>` over the bounded `activeContests(upcomingLimit = 5)`; never the full `contests(...)` list. When a countdown reaches zero it re-sections locally and calls `refresh(gym = false, force = true)`. Implements `HomeActions`. |
 | `HomeActions` | `refresh()`: the user's refresh (button, Retry), always forced; shows the pull indicator while it runs. |
 | `HomeUiState(status, groups, error, userRefreshing)` | `status`: `Loading`, `Error`, `Empty` (no running or upcoming contest), `Loaded`. `groups`: non-empty `HomeGroup(section, contests)`, `Running` (ending soonest first) then `Upcoming` (soonest first, at most 5). |
 

@@ -31,9 +31,10 @@ interface HomeActions {
 }
 
 /**
- * The Home screen's state: running and upcoming regular contests (no gyms) from [repository], sectioned as of
- * [clock]'s now. When a countdown reaches zero the list is re-sectioned locally at once and a forced refresh is
- * started, so the judge's phases catch up. Sectioning runs on [computeDispatcher], off the main thread. Built by
+ * The Home screen's state: the running and next [UPCOMING_LIMIT] upcoming regular contests from [repository]'s
+ * bounded `activeContests` view (never the full list), sectioned as of [clock]'s now. When a countdown reaches zero
+ * the list is re-sectioned locally at once and a forced refresh is started, so the judge's phases catch up; until it
+ * lands, Upcoming may show one fewer. Sectioning runs on [computeDispatcher], off the main thread. Built by
  * [HomeEntry] for its back stack entry (ADR 0012).
  */
 class HomeViewModel(
@@ -46,7 +47,7 @@ class HomeViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<HomeUiState> =
-        combine(repository.contests(gym = false), userRefreshing, ::Inputs)
+        combine(repository.activeContests(upcomingLimit = UPCOMING_LIMIT), userRefreshing, ::Inputs)
             .transformLatest { inputs -> emitSectioned(inputs) }
             .flowOn(computeDispatcher)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())

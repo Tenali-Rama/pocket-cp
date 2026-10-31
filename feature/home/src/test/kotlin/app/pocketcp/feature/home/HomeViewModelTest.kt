@@ -52,7 +52,7 @@ private val unscheduled = contest(5, ContestPhase.Upcoming, start = null)
 private val finished = contest(6, ContestPhase.Finished, Now.minus(Duration.ofDays(1)))
 private val unknown = contest(7, ContestPhase.Unknown, Now)
 
-/** In repository order (newest start first, no start last), as `ContestRepository` emits them. */
+/** Unordered, with finished and unknown rows: Home still sections and limits whatever the repository emits. */
 private val all = listOf(inADay, inAnHour, endsLater, endsSooner, unknown, finished, unscheduled)
 
 private fun cached(
@@ -88,8 +88,10 @@ class HomeViewModelTest {
     fun upcoming_isLimitedToTheNextFive() =
         runTest {
             val later = (1..7).map { upcoming(100 + it, 3_600L * (8 - it)) }
-            newViewModel(FakeContestRepository(cached(later))).state.test {
+            val repository = FakeContestRepository(cached(later))
+            newViewModel(repository).state.test {
                 val state = awaitUntil { it.status == HomeStatus.Loaded }
+                assertEquals(listOf(5), repository.upcomingLimits)
                 assertEquals(listOf(HomeSection.Upcoming), state.groups.map { it.section })
                 assertEquals(listOf(107, 106, 105, 104, 103), state.contests().map { it.id.value })
             }

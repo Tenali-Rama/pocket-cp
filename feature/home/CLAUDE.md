@@ -1,7 +1,8 @@
 # feature/home
 
 ## Rules
-- Contests come from `ContestRepository.contests(gym = false)` only (ADR 0011); this module caches nothing itself.
+- Contests come from the bounded `ContestRepository.activeContests(upcomingLimit = 5)` only (ADR 0011). Never collect
+  `contests(...)`: the full list costs ~2000 rows of memory (PR #47 review). This module caches nothing itself.
 - Sectioning is pure (`homeUiState`, `homeSections`, `nextCountdownEnd` in `HomeUiState.kt`) and runs off the main
   thread in `HomeViewModel`. Time comes from the injected `Clock`, never `Instant.now()`.
 - A countdown reaching zero re-sections at once and starts one forced refresh; never poll on a timer.
