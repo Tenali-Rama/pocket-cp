@@ -2,7 +2,7 @@
 id: 034
 title: Home feature with running and upcoming contests, countdowns and the guest state
 milestone: M2
-status: todo
+status: done
 deps: [025, 026, 027, 037]
 touches: [feature/home/, settings.gradle.kts+, app/build.gradle.kts+, .maestro/home.yaml, app/src/main/baseline-prof.txt, config/perf-budgets.json]
 spec: ["7.1 Home", "2. Product Principles", "6. Authentication"]
@@ -38,4 +38,8 @@ Home is the start destination, and it shows what's happening now: running contes
 - Rating/rank and recent verdicts (M4). Continue card (M3). Upsolve preview and daily suggestion (M10). Opening a contest from Home (cross-feature navigation arrives with deep links, M4).
 
 ## Notes for next
-<!-- builder fills in -->
+- Home collects `activeContests(upcomingLimit = 5)` only; the test fake fails on `contests(...)`. Sectioning stays pure in `HomeUiState.kt` and still applies `Contest.asOf(now)` (duplicated with `feature/contests`; move it to `core/model` when a third user appears).
+- At a countdown's zero Home re-sections locally and calls `refresh(gym = false, force = true)` (forced: the cache is usually < 5 min old). A running contest's end also refreshes; it stays Running until the judge says otherwise.
+- Expanded width: guest card + Running on the left, Upcoming on the right; a lone section takes the right pane. Narrower widths show one list.
+- Perf (bounded view): `memory_max_kb` 73728 / 71434 kB, under 84450, unchanged. `release_apk_bytes` raised by the measured +20,876 B of this module (#46's rule).
+- The guest card (`home_guest`) shows in every state; M4 replaces it. Row `onClick` is a no-op until deep links (M4).
