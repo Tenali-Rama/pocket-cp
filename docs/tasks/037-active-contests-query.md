@@ -4,7 +4,7 @@ title: Bounded running + next N upcoming contests query and repository API
 milestone: M2
 status: todo
 deps: []
-touches: [core/database/src/main/kotlin/app/pocketcp/core/database/ContestDao.kt, core/database/src/test/kotlin/app/pocketcp/core/database/ContestDaoTest.kt, core/database/API.md, core/data/src/main/kotlin/app/pocketcp/core/data/ContestRepository.kt, core/data/src/main/kotlin/app/pocketcp/core/data/CachedResource.kt, core/data/src/test/kotlin/app/pocketcp/core/data/ActiveContestsTest.kt, core/data/API.md]
+touches: [core/database/src/main/kotlin/app/pocketcp/core/database/ContestDao.kt, core/database/src/test/kotlin/app/pocketcp/core/database/ContestDaoTest.kt, core/database/API.md, core/data/src/main/kotlin/app/pocketcp/core/data/ContestRepository.kt, core/data/src/main/kotlin/app/pocketcp/core/data/CachedResource.kt, core/data/src/test/kotlin/app/pocketcp/core/data/ActiveContestsTest.kt, core/data/src/test/kotlin/app/pocketcp/core/data/CacheWarmerTest.kt, feature/contests/src/test/kotlin/app/pocketcp/feature/contests/FakeContestRepository.kt, core/data/API.md]
 spec: ["7.1 Home", "3. Performance Budgets"]
 ---
 
@@ -26,15 +26,21 @@ Home needs only the running contests and the next few upcoming ones, but today t
   - it is a view of the same `CachedResource` as `contests(gym = false)`. It shares `fetchedAt`, `refreshing`, `error`, staleness (`MAX_AGE`) and the single in-flight refresh. `refresh(gym = false, ...)` refreshes both views. `CachedResource` gets a stream over another `Flow` of the same dataset; it does not get a second policy (core/data rule).
   - `data` is `null` until the first fetch, and the bounded list after that, possibly empty
   - `IllegalArgumentException` if `upcomingLimit < 0`
+  - the interface method has no default body, so no implementation can silently fall back to the full `contests(false)` list
+- [ ] The two existing test fakes implement the new method, and nothing else in them changes:
+  - `CacheWarmerTest.FakeContestRepository.activeContests` returns `emptyFlow()`, like its `contests`
+  - `feature/contests` `FakeContestRepository.activeContests` fails the test if called (`error("The Contests tab never uses the bounded view")`)
 - [ ] `ActiveContestsTest` (in-memory Room, `FakeJudgeSource`, `SchedulerClock`, Turbine, as in `StaleWhileRevalidateTest`) covers:
   - the first item is `data = null, refreshing = true`; after the fetch, only running + N upcoming are emitted, in DAO order
+  - after a refresh in which the earliest Upcoming contest comes back as Running, the next emission lists it among the running rows, and the next-earliest upcoming contest fills its upcoming slot (the zero-crossing case Home relies on)
+  - `activeContests(-1)` throws `IllegalArgumentException`
   - collecting `activeContests(5)` and `contests(gym = false)` at once triggers one judge fetch
   - a failed refresh keeps the bounded data and sets `error`
   - a fresh cache (younger than `MAX_AGE`) causes no fetch
 - [ ] `core/database/API.md` and `core/data/API.md` document the new functions and their ordering.
 
 ## Out of scope
-- Any change in `feature/home` (034 switches to this API) or `feature/contests`.
+- Any change in `feature/home` (034 switches to this API). Any change in `feature/contests` beyond the one stub in its test fake.
 - Moving `Contest.asOf` to `core/model`. Making Upcoming lists time-aware in SQL (a `Flow` query with a fixed `now` goes stale). Indexes or a migration.
 - Gym: there is no bounded gym view.
 
