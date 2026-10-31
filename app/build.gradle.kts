@@ -74,6 +74,7 @@ androidComponents {
             val sources = android.sourceSets.maybeCreate(buildType.name)
             // The plugin copies release's source dirs, src/live/kotlin included, into these types: replace them.
             sources.kotlin.setSrcDirs(listOf(fixtureSources))
+            sources.assets.srcDir(fixtureAssets)
         }
         val bound = derived.map { it.name } + "debug" + "release"
         val unbound = android.buildTypes.map { it.name } - bound.toSet()
