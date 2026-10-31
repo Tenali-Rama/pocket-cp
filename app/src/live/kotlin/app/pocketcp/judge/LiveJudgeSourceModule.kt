@@ -10,8 +10,8 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Live Codeforces as the app's [JudgeSource] (ADR 0015). `src/live/kotlin` is a source dir of `release` and of the
- * Baseline Profile build types derived from it; debug binds recorded responses instead (`src/debug/`).
+ * Live Codeforces as the app's [JudgeSource] (ADR 0015). `src/live/kotlin` is a source dir of `release` only; debug
+ * and the benchmark / Baseline Profile build types bind recorded responses instead (`src/fixture/`).
  */
 @Module
 @InstallIn(SingletonComponent::class)

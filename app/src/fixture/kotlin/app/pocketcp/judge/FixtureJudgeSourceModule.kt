@@ -15,8 +15,8 @@ import java.time.Clock
 import javax.inject.Singleton
 
 /**
- * Debug builds bind recorded Codeforces responses as the app's [JudgeSource] (ADR 0015). The files are the debug
- * assets, i.e. `testdata/codeforces/api/`. Release-like build types bind the live source from `src/live/`.
+ * Debug and the benchmark build types bind recorded Codeforces responses as the app's [JudgeSource] (ADR 0015).
+ * The files are their assets, i.e. `testdata/codeforces/api/`. Only `release` binds the live source (`src/live/`).
  */
 @Module
 @InstallIn(SingletonComponent::class)
