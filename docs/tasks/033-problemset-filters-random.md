@@ -2,7 +2,7 @@
 id: 033
 title: Problemset filters (tags, rating range, division) and random problem
 milestone: M2
-status: todo
+status: done
 deps: [028, 032]
 touches: [feature/problemset/, .maestro/problemset.yaml]
 spec: ["7.3 Problemset", "5. Design & Layout"]
@@ -33,4 +33,8 @@ The problemset can be narrowed by tags, rating range and contest division, and t
 - Solved/unsolved filter (needs the account, M4). Saved filter presets (not in spec).
 
 ## Notes for next
-<!-- builder fills in -->
+- Defaults taken: tags AND; active count = selected tags + selected divisions + 1 for a narrowed rating range; filters apply live (the sheet's "Done" just closes it); the rating filter stays usable while ratings are hidden.
+- The sheet is `FilterSheet`, drawn in the window over a scrim (Back, scrim tap or "Done" close it), not M3 `ModalBottomSheet`: a dialog window is neither captured by Roborazzi nor tappable by id in Maestro.
+- Expanded width is three panes: search/sort/Random | list | `FilterPanel`. Medium keeps search | list and opens the sheet.
+- Divisions come from `ContestRepository.contests(gym = false)`; collecting it can start a (non-forced) contest refresh, like the Contests tab. The debug fixtures share no contest ids with the problemset, so the Maestro flow filters by tag.
+- `problemsetFilters_*` screenshots use a 9-problem in-test sample (`FilterSample`), since the 3-problem fixture has nothing in 1200–1600.

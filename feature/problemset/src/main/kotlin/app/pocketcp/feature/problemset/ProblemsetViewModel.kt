@@ -33,14 +33,14 @@ private const val STOP_TIMEOUT_MS = 5_000L
 
 /**
  * Saved-state keys, so the options survive process death: the search text, the sort (enum name), the filter
- * (selected tags, division enum names, rating bounds) and the random pick (problem display, pick count).
+ * (selected tags, division enum names, the rating range as one `[min, max]` value so a change is one update) and
+ * the random pick (problem display, pick count).
  */
 internal const val KEY_QUERY = "problemset_query"
 internal const val KEY_SORT = "problemset_sort"
 internal const val KEY_TAGS = "problemset_tags"
 internal const val KEY_DIVISIONS = "problemset_divisions"
-internal const val KEY_RATING_MIN = "problemset_rating_min"
-internal const val KEY_RATING_MAX = "problemset_rating_max"
+internal const val KEY_RATING = "problemset_rating"
 internal const val KEY_PICK = "problemset_pick"
 internal const val KEY_PICK_COUNT = "problemset_pick_count"
 
@@ -102,9 +102,9 @@ class ProblemsetViewModel(
         combine(
             savedState.getStateFlow(KEY_TAGS, ArrayList<String>()),
             savedState.getStateFlow(KEY_DIVISIONS, ArrayList<String>()),
-            savedState.getStateFlow(KEY_RATING_MIN, ProblemFilter.MIN_RATING),
-            savedState.getStateFlow(KEY_RATING_MAX, ProblemFilter.MAX_RATING),
-        ) { tags, divisions, min, max ->
+            savedState.getStateFlow(KEY_RATING, FullRange),
+        ) { tags, divisions, rating ->
+            val (min, max) = rating.takeIf { it.size == 2 } ?: FullRange
             ProblemFilter(
                 tags = tags.toSet(),
                 ratingMin = min,
@@ -167,24 +167,22 @@ class ProblemsetViewModel(
         viewModelScope.launch { settings.setHideProblemRatings(hidden) }
     }
 
-    override fun toggleTag(tag: String) = toggle(KEY_TAGS, tag)
+    override fun toggleTag(tag: String) = savedState.toggle(KEY_TAGS, tag)
 
-    override fun toggleDivision(division: ContestDivision) = toggle(KEY_DIVISIONS, division.name)
+    override fun toggleDivision(division: ContestDivision) = savedState.toggle(KEY_DIVISIONS, division.name)
 
     override fun setRatingRange(
         min: Int,
         max: Int,
     ) {
         val (low, high) = ProblemFilter.snapRange(min, max)
-        savedState[KEY_RATING_MIN] = low
-        savedState[KEY_RATING_MAX] = high
+        savedState[KEY_RATING] = arrayListOf(low, high)
     }
 
     override fun clearFilters() {
         savedState[KEY_TAGS] = ArrayList<String>()
         savedState[KEY_DIVISIONS] = ArrayList<String>()
-        savedState[KEY_RATING_MIN] = ProblemFilter.MIN_RATING
-        savedState[KEY_RATING_MAX] = ProblemFilter.MAX_RATING
+        savedState[KEY_RATING] = FullRange
     }
 
     override fun pickRandom() {
@@ -206,14 +204,6 @@ class ProblemsetViewModel(
         }
     }
 
-    private fun toggle(
-        key: String,
-        value: String,
-    ) {
-        val selected = savedState.get<ArrayList<String>>(key).orEmpty()
-        savedState[key] = ArrayList(if (value in selected) selected - value else selected + value)
-    }
-
     /** The values [state] is computed from. */
     private data class Inputs(
         val cached: Cached<List<Problem>>,
@@ -222,4 +212,16 @@ class ProblemsetViewModel(
         val divisions: Map<Int, ContestDivision>,
         val pick: RandomPick,
     )
+}
+
+/** The unfiltered rating range, as kept under [KEY_RATING]. */
+private val FullRange: ArrayList<Int> get() = arrayListOf(ProblemFilter.MIN_RATING, ProblemFilter.MAX_RATING)
+
+/** Adds [value] to the string list under [key], or removes it when present. */
+private fun SavedStateHandle.toggle(
+    key: String,
+    value: String,
+) {
+    val selected = get<ArrayList<String>>(key).orEmpty()
+    set(key, ArrayList(if (value in selected) selected - value else selected + value))
 }

@@ -31,31 +31,53 @@ name: Problemset search, filters, random and spoiler hiding
 - assertVisible:
     text: ".*dsu.*"
 
-# Filter by the "dsu" tag (only 2276F has it), then a random pick highlights (selects) that row.
-- tapOn:
-    id: problemset_filters
+# Filter by the "dsu" tag (only 2276F has it), then a random pick highlights that row. Phones open the filter
+# sheet with "Filters"; on an expanded window (the tablet) the filter panel is always beside the list.
+- runFlow:
+    when:
+      visible:
+        id: problemset_filters
+    commands:
+      - tapOn:
+          id: problemset_filters
 - scrollUntilVisible:
     element:
       id: problemset_tag_dsu
     direction: DOWN
 - tapOn:
     id: problemset_tag_dsu
-- tapOn:
-    id: problemset_filters_done
+- runFlow:
+    when:
+      visible:
+        id: problemset_filters_done
+    commands:
+      - tapOn:
+          id: problemset_filters_done
 - assertNotVisible:
     id: problem_2274A
 - tapOn:
     id: problemset_random
+# Compose reports a highlighted (selected, not a tab) row to accessibility as checked.
 - assertVisible:
     id: problem_2276F
-    selected: true
+    checked: true
 - takeScreenshot: problemset_random
-- tapOn:
-    id: problemset_filters
+- runFlow:
+    when:
+      visible:
+        id: problemset_filters
+    commands:
+      - tapOn:
+          id: problemset_filters
 - tapOn:
     id: problemset_filters_clear
-- tapOn:
-    id: problemset_filters_done
+- runFlow:
+    when:
+      visible:
+        id: problemset_filters_done
+    commands:
+      - tapOn:
+          id: problemset_filters_done
 - assertVisible:
     id: problem_2274A
 
