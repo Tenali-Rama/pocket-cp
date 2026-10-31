@@ -2,7 +2,7 @@
 id: 037
 title: Bounded running + next N upcoming contests query and repository API
 milestone: M2
-status: todo
+status: done
 deps: []
 touches: [core/database/src/main/kotlin/app/pocketcp/core/database/ContestDao.kt, core/database/src/test/kotlin/app/pocketcp/core/database/ContestDaoTest.kt, core/database/API.md, core/data/src/main/kotlin/app/pocketcp/core/data/ContestRepository.kt, core/data/src/main/kotlin/app/pocketcp/core/data/CachedResource.kt, core/data/src/test/kotlin/app/pocketcp/core/data/ActiveContestsTest.kt, core/data/src/test/kotlin/app/pocketcp/core/data/CacheWarmerTest.kt, feature/contests/src/test/kotlin/app/pocketcp/feature/contests/FakeContestRepository.kt, core/data/API.md]
 spec: ["7.1 Home", "3. Performance Budgets"]
@@ -45,4 +45,7 @@ Home needs only the running contests and the next few upcoming ones, but today t
 - Gym: there is no bounded gym view.
 
 ## Notes for next
-<!-- builder fills in: ≤ 5 bullets that a later task needs to know -->
+- Home (034) collects `ContestRepository.activeContests(n)`. It shares the regular dataset's refresh, so `refresh(gym = false)` and pull-to-refresh need no new call.
+- `CachedResource.stream(cached: Flow<R>)` is the hook for further bounded views of one dataset; it keeps one status and one in-flight refresh.
+- Ordering uses the stored phase; Upcoming → Running by the clock alone is not in SQL and waits for a refresh (scoped out here).
+- SQLite treats a negative `LIMIT` as no limit, so the repository rejects `upcomingLimit < 0` before building the flow.

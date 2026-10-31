@@ -121,6 +121,8 @@ class CacheWarmerTest {
 
         override fun contests(gym: Boolean): Flow<Cached<List<Contest>>> = emptyFlow()
 
+        override fun activeContests(upcomingLimit: Int): Flow<Cached<List<Contest>>> = emptyFlow()
+
         override suspend fun refresh(
             gym: Boolean,
             force: Boolean,

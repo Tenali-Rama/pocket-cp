@@ -20,6 +20,8 @@ class FakeContestRepository(
         return cached
     }
 
+    override fun activeContests(upcomingLimit: Int): Flow<Cached<List<Contest>>> = error("The Contests tab never uses the bounded view")
+
     override suspend fun refresh(
         gym: Boolean,
         force: Boolean,

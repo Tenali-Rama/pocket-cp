@@ -16,6 +16,7 @@ Package `app.pocketcp.core.database`. Hilt: `DatabaseModule` provides `PocketCpD
 ## DAOs
 - `ContestDao`
   - `fun contests(gym: Boolean): Flow<List<ContestEntity>>`: newest `startEpochSeconds` first, null starts last, ties by `id` descending.
+  - `fun activeContests(upcomingLimit: Int): Flow<List<ContestEntity>>`: regular dataset only. Every `Running` contest, then at most `upcomingLimit` `Upcoming` ones; each group earliest `startEpochSeconds` first, null starts last, ties by `id` ascending. `Finished` and `Unknown` are never returned. A negative limit means no limit (SQLite); `core/data` rejects it.
   - `suspend fun replaceAll(gym, contests, fetchedAtEpochMillis)`: one transaction; deletes that dataset, inserts `contests`, writes `CacheKeys.contests(gym)`. The other dataset is untouched. `IllegalArgumentException` if a contest's `isGym != gym`.
 - `ProblemDao`
   - `fun problems(): Flow<List<ProblemEntity>>`: `contestId` descending, then `index` ascending.

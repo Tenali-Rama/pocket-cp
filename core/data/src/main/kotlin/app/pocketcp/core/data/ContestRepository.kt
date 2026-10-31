@@ -18,6 +18,13 @@ interface ContestRepository {
     /** The cached contests (or gyms), refreshed in the background when older than [MAX_AGE]. */
     fun contests(gym: Boolean): Flow<Cached<List<Contest>>>
 
+    /**
+     * The regular contests' running ones, then at most [upcomingLimit] upcoming ones; each group earliest start
+     * first, no start last. A bounded view of `contests(gym = false)`: same fetch time, refresh status and refresh.
+     * Throws [IllegalArgumentException] if [upcomingLimit] is negative.
+     */
+    fun activeContests(upcomingLimit: Int): Flow<Cached<List<Contest>>>
+
     /** Refreshes when stale, or always when [force]. Returns when done; failures show up in [contests]. */
     suspend fun refresh(
         gym: Boolean,
@@ -31,7 +38,7 @@ interface ContestRepository {
 
 internal class CachedContestRepository(
     source: JudgeSource,
-    dao: ContestDao,
+    private val dao: ContestDao,
     meta: CacheMetaDao,
     clock: Clock,
     scope: CoroutineScope,
@@ -55,6 +62,12 @@ internal class CachedContestRepository(
         }
 
     override fun contests(gym: Boolean): Flow<Cached<List<Contest>>> = resources.getValue(gym).stream()
+
+    override fun activeContests(upcomingLimit: Int): Flow<Cached<List<Contest>>> {
+        require(upcomingLimit >= 0) { "upcomingLimit must be at least 0, was $upcomingLimit" }
+        val active = dao.activeContests(upcomingLimit).map { contests -> contests.map { it.toDomain() } }
+        return resources.getValue(false).stream(active)
+    }
 
     override suspend fun refresh(
         gym: Boolean,
