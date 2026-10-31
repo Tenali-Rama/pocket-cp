@@ -2,7 +2,7 @@
 id: 039
 title: Statement domain model and reading settings (language, text size, width)
 milestone: M3
-status: todo
+status: done
 deps: []
 touches: [core/model/src/main/kotlin/app/pocketcp/core/model/Statement.kt, core/model/src/test/kotlin/app/pocketcp/core/model/StatementTest.kt, core/model/build.gradle.kts, core/model/CLAUDE.md, core/model/API.md, core/datastore/src/main/kotlin/app/pocketcp/core/datastore/UserSettings.kt, core/datastore/src/main/kotlin/app/pocketcp/core/datastore/SettingsRepository.kt, core/datastore/src/main/kotlin/app/pocketcp/core/datastore/DataStoreSettingsRepository.kt, core/datastore/src/test/kotlin/app/pocketcp/core/datastore/SettingsRepositoryTest.kt, core/datastore/API.md, feature/settings/src/test/kotlin/app/pocketcp/feature/settings/FakeSettingsRepository.kt, feature/contests/src/test/kotlin/app/pocketcp/feature/contests/FakeSettingsRepository.kt, feature/problemset/src/test/kotlin/app/pocketcp/feature/problemset/FakeSettingsRepository.kt, gradle/libs.versions.toml, docs/decisions/]
 spec: ["7.4 Problem View", "4. Platform & Architecture", "15. Settings"]
@@ -38,4 +38,8 @@ This task adds the judge-agnostic shape of a problem statement, which the parser
 - Bookmarks, notes and personal tags (moved to M10 with spec §10's notes and lists).
 
 ## Notes for next
-<!-- builder fills in -->
+- Serial names are snake_case; sealed subtypes use the default `type` discriminator (`paragraph`, `display_math`, `line_break`, …). 043 can use a plain `Json { ignoreUnknownKeys = true }`.
+- `ProblemId` serial names are `contest_id` and `index`. Editing `Problem.kt` was outside `touches` but needed for criterion 2.
+- `Inline.Text` flags default to `false`, so the parser (040) can write `Inline.Text("x")`.
+- `core/model` exports `kotlinx-serialization-core` as `api`; consumers need no serialization plugin to use the types.
+- Test fakes use block bodies for the new setters: ktlint (140 cols) forces a one-line expression body, which exceeds detekt's 120.
