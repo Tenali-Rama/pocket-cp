@@ -88,10 +88,18 @@ data class ContestDetailUiState(
     val hideRatings: Boolean = false,
 )
 
-/** The detail of [shown] in [contests] and [problemset], as of [now], with the spoiler flags of [settings]. */
+/** The contest the user [opened] (or `null`), and the one [shown]: [opened], or else the wide-window default. */
+internal data class DetailSelection(
+    val opened: ContestId?,
+    val shown: ContestId?,
+)
+
+/**
+ * The detail of [selection]'s shown contest in [contests] and [problemset], as of [now], with the spoiler flags of
+ * [settings].
+ */
 internal fun contestDetailUiState(
-    selected: ContestId?,
-    shown: ContestId?,
+    selection: DetailSelection,
     contests: Cached<List<Contest>>,
     problemset: Cached<List<Problem>>,
     settings: UserSettings,
@@ -99,23 +107,30 @@ internal fun contestDetailUiState(
 ): ContestDetailUiState {
     val base =
         ContestDetailUiState(
-            selected = selected,
-            shown = shown,
+            selected = selection.opened,
+            shown = selection.shown,
             hideTags = settings.hideProblemTags,
             hideRatings = settings.hideProblemRatings,
         )
-    if (shown == null) return base
-    val data = contests.data ?: return base.copy(status = DetailStatus.Loading)
-    val contest = data.find { it.id == shown }?.asOf(now) ?: return base.copy(status = DetailStatus.NotFound)
-    val problems = problemset.data?.let { problemsOf(shown, it) }
-    return base.copy(
-        status = DetailStatus.Loaded,
-        contest = contest,
-        timing = contest.timing(),
-        problemsStatus = problemsStatus(contest, problems, problemset),
-        problems = problems.orEmpty(),
-        problemsError = problemset.error,
-    )
+    val shown = selection.shown
+    val data = contests.data
+    val contest = shown?.let { id -> data?.find { it.id == id } }?.asOf(now)
+    return when {
+        shown == null -> base
+        data == null -> base.copy(status = DetailStatus.Loading)
+        contest == null -> base.copy(status = DetailStatus.NotFound)
+        else -> {
+            val problems = problemset.data?.let { problemsOf(shown, it) }
+            base.copy(
+                status = DetailStatus.Loaded,
+                contest = contest,
+                timing = contest.timing(),
+                problemsStatus = problemsStatus(contest, problems, problemset),
+                problems = problems.orEmpty(),
+                problemsError = problemset.error,
+            )
+        }
+    }
 }
 
 /** [contest]'s problems in [problemset], ordered by index (`A`, `B1`, `B2`, `C`). */

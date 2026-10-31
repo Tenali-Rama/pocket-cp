@@ -65,8 +65,7 @@ internal fun detailState(
     problemsError: JudgeError? = null,
     settings: UserSettings = UserSettings(),
 ) = contestDetailUiState(
-    selected = ContestId(id).takeIf { opened },
-    shown = ContestId(id),
+    selection = DetailSelection(opened = ContestId(id).takeIf { opened }, shown = ContestId(id)),
     contests = Cached(FixtureContests, FixtureNow, refreshing = false, error = null),
     problemset = Cached(problems, problems?.let { FixtureNow }, problemsRefreshing, problemsError),
     settings = settings,

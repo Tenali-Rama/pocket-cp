@@ -78,10 +78,10 @@ class ContestDetailViewModel(
         if (!savedState.contains(KEY_SELECTED)) savedState[KEY_SELECTED] = savedState.get<Int>(ARG_ID)
     }
 
-    private val selection: Flow<Selection> =
+    private val selection: Flow<DetailSelection> =
         combine(savedState.getStateFlow<Int?>(KEY_SELECTED, null), fallback) { selected, default ->
             val opened = selected?.let(::ContestId)
-            Selection(opened, opened ?: default)
+            DetailSelection(opened, opened ?: default)
         }.distinctUntilChanged()
 
     init {
@@ -129,28 +129,14 @@ class ContestDetailViewModel(
         val contest = inputs.contests.data?.find { it.id == inputs.selection.shown }
         while (true) {
             val now = clock.instant()
-            emit(
-                contestDetailUiState(
-                    selected = inputs.selection.opened,
-                    shown = inputs.selection.shown,
-                    contests = inputs.contests,
-                    problemset = inputs.problemset,
-                    settings = inputs.settings,
-                    now = now,
-                ),
-            )
+            emit(contestDetailUiState(inputs.selection, inputs.contests, inputs.problemset, inputs.settings, now))
             val next = nextPhaseChange(listOfNotNull(contest), now) ?: return
             delay(Duration.between(now, next).toMillis().coerceAtLeast(1))
         }
     }
 
-    private data class Selection(
-        val opened: ContestId?,
-        val shown: ContestId?,
-    )
-
     private data class Inputs(
-        val selection: Selection,
+        val selection: DetailSelection,
         val contests: Cached<List<Contest>>,
         val problemset: Cached<List<Problem>>,
         val settings: UserSettings,

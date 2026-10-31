@@ -2,7 +2,7 @@
 id: 031
 title: Contest detail with timer and problem list, list | detail on wide windows
 milestone: M2
-status: todo
+status: done
 deps: [029, 030]
 touches: [feature/contests/, .maestro/contests.yaml]
 spec: ["7.2 Contests", "5. Design & Layout", "3. Performance Budgets"]
@@ -36,4 +36,8 @@ Tapping a contest opens its detail: name, phase, timer and the contest's problem
 - Solve status (M4). Announcements, standings, register (M8). Opening a problem (M3).
 
 ## Notes for next
-<!-- builder fills in -->
+- The opened contest is `ContestDetailViewModel` state (`KEY_SELECTED` in `SavedStateHandle`), not a nav back-stack entry: `register` has no `NavController` (ADR 0016). `contests/{id}` seeds it once. Cross-feature links (Home, M4 deep links) should navigate to `contests/{id}`.
+- Wide default = first contest of the list as displayed (after filters), set by `ContestsRoute` through `showByDefault`; compact sets none, so a phone never opens a page by itself.
+- Layout: compact shows the page; medium shows chips and list beside detail (1:1); expanded shows filter pane, list and detail (1:2:2). Without a shown contest, wide keeps filter pane beside list.
+- `contest.list.json` gained finished Div. 2 round 2274 (its 2274A is in `problemset.problems.json`), so fixture screenshots and Maestro can show problems. Contest ids 2278/2272/2277 keep their order.
+- Problem rows have a no-op click until M3 opens problems; solve status is M4.
