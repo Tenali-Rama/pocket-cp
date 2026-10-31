@@ -14,6 +14,27 @@ abstract class ContestDao {
     abstract fun contests(gym: Boolean): Flow<List<ContestEntity>>
 
     /**
+     * The regular dataset's running contests, then at most [upcomingLimit] upcoming ones. Each group is earliest
+     * start first, contests without a start last, ties by id. Finished and unknown phases are left out.
+     * A negative [upcomingLimit] means no limit in SQLite; callers pass zero or more.
+     */
+    @Query(
+        """
+        SELECT * FROM contests
+        WHERE isGym = 0 AND (
+            phase = 'Running' OR id IN (
+                SELECT id FROM contests
+                WHERE isGym = 0 AND phase = 'Upcoming'
+                ORDER BY startEpochSeconds IS NULL, startEpochSeconds, id
+                LIMIT :upcomingLimit
+            )
+        )
+        ORDER BY phase = 'Upcoming', startEpochSeconds IS NULL, startEpochSeconds, id
+        """,
+    )
+    abstract fun activeContests(upcomingLimit: Int): Flow<List<ContestEntity>>
+
+    /**
      * Replaces the regular or gym dataset with [contests] and records [fetchedAtEpochMillis] under
      * [CacheKeys.contests]. Contests missing from [contests] are removed; the other dataset is untouched.
      */

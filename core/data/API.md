@@ -19,6 +19,7 @@ Depends on `core/network` for `NetworkMonitor` only.
 
 ## `ContestRepository`
 - `fun contests(gym: Boolean): Flow<Cached<List<Contest>>>`: newest start first, contests without a start last. Regular and gym are separate datasets.
+- `fun activeContests(upcomingLimit: Int): Flow<Cached<List<Contest>>>`: regular contests only, bounded for Home. Every running contest, then at most `upcomingLimit` upcoming ones; each group earliest start first, no start last, ties by id. A view of the same dataset as `contests(gym = false)`: same `fetchedAt`, `refreshing`, `error`, staleness and single refresh; `refresh(gym = false)` updates both. `data` is `null` until the first fetch. `IllegalArgumentException` if `upcomingLimit < 0`.
 - `suspend fun refresh(gym: Boolean, force: Boolean = false)`
 - `MAX_AGE`: 5 minutes.
 

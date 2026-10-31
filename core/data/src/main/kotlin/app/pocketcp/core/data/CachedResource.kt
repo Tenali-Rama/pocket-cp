@@ -54,11 +54,17 @@ internal class CachedResource<T>(
     private var inFlight: Job? = null
 
     /** The cache at once, then every change to it or to the refresh status. Starts a refresh when stale. */
-    fun stream(): Flow<Cached<T>> =
+    fun stream(): Flow<Cached<T>> = stream(dataset.cached())
+
+    /**
+     * Like [stream], over [cached]: another Room view of the same dataset (e.g. a bounded query), re-emitting on
+     * its writes. It shares this resource's fetch time, refresh status and in-flight refresh.
+     */
+    fun <R> stream(cached: Flow<R>): Flow<Cached<R>> =
         flow {
             start(force = false)
             val snapshots =
-                dataset.cached().map { data -> data to dataset.fetchedAtMillis()?.let(Instant::ofEpochMilli) }
+                cached.map { data -> data to dataset.fetchedAtMillis()?.let(Instant::ofEpochMilli) }
             val cachedWithStatus =
                 combine(snapshots, status) { (data, fetchedAt), current ->
                     Cached(data.takeIf { fetchedAt != null }, fetchedAt, current.refreshing, current.error)

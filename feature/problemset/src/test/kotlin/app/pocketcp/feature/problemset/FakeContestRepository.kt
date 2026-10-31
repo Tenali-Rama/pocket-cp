@@ -26,6 +26,8 @@ class FakeContestRepository(
         return flowOf(Cached(contests, fetchedAt = null, refreshing = false, error = null))
     }
 
+    override fun activeContests(upcomingLimit: Int): Flow<Cached<List<Contest>>> = error("The Problemset tab never uses the bounded view")
+
     override suspend fun refresh(
         gym: Boolean,
         force: Boolean,
