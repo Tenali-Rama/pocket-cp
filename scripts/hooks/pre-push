@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Git pre-push hook: main changes only through merged PRs.
+set -euo pipefail
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main | refs/heads/master)
+      echo "pre-push: never push to ${remote_ref#refs/heads/}: push your task branch and open a PR." >&2
+      exit 1
+      ;;
+  esac
+done
