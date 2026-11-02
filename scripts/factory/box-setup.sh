@@ -6,28 +6,37 @@ cd "$(git rev-parse --show-toplevel)"
 source scripts/factory/owner.env
 KTLINT_VERSION=1.3.1
 GITLEAKS_VERSION=8.30.1
+GH_VERSION=2.103.3
 main_checkout=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
 token_file="$main_checkout/.factory/gh_token"
 
 export DEBIAN_FRONTEND=noninteractive
-if ! command -v java >/dev/null || ! [ -x /usr/bin/gh ] || ! command -v jq >/dev/null || ! command -v curl >/dev/null; then
+if ! command -v java >/dev/null || ! command -v jq >/dev/null || ! command -v curl >/dev/null; then
   apt-get update -qq
-  apt-get install -y -qq gh jq curl openjdk-17-jre-headless >/dev/null
+  apt-get install -y -qq jq curl openjdk-17-jre-headless >/dev/null
+fi
+# The box's network drops connections now and then.
+fetch() { curl -fsSL --retry 5 --retry-all-errors --retry-delay 5 "$@"; }
+# The box's own gh package is too old for the factory scripts.
+if ! [ -x /opt/gh/bin/gh ] || ! /opt/gh/bin/gh --version | grep -q "version $GH_VERSION "; then
+  mkdir -p /opt/gh
+  fetch "https://github.com/cli/cli/releases/download/v$GH_VERSION/gh_${GH_VERSION}_linux_amd64.tar.gz" \
+    | tar -xz --no-same-owner --strip-components=1 -C /opt/gh
 fi
 if ! command -v ktlint >/dev/null; then
-  curl -fsSL -o /usr/local/bin/ktlint \
+  fetch -o /usr/local/bin/ktlint \
     "https://github.com/pinterest/ktlint/releases/download/$KTLINT_VERSION/ktlint"
   chmod +x /usr/local/bin/ktlint
 fi
 if ! command -v gitleaks >/dev/null; then
-  curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v$GITLEAKS_VERSION/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
-    | tar -xz -C /usr/local/bin gitleaks
+  fetch "https://github.com/gitleaks/gitleaks/releases/download/v$GITLEAKS_VERSION/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+    | tar -xz --no-same-owner -C /usr/local/bin gitleaks
 fi
 
 # gh reads the token file on every call, so replacing the token needs no other step.
 cat >/usr/local/bin/gh <<WRAPPER
 #!/usr/bin/env bash
-GH_TOKEN=\$(cat "$token_file") GH_REPO="$GH_REPO" exec /usr/bin/gh "\$@"
+GH_TOKEN=\$(cat "$token_file") GH_REPO="$GH_REPO" exec /opt/gh/bin/gh "\$@"
 WRAPPER
 chmod +x /usr/local/bin/gh
 
