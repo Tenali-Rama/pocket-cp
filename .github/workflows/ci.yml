@@ -150,7 +150,7 @@ jobs:
           range=HEAD~1..HEAD
           [ "${{ github.event_name }}" = pull_request ] && range="origin/${{ github.base_ref }}..HEAD"
           if git log --format=%B "$range" \
-              | grep -iqE 'co-authored-by:.*(claude|anthropic)|generated with \[?claude'; then
+              | grep -iqE 'co-authored-by:.*(claude|anthropic|omnirush|openai|gpt)|generated with \[?(claude|omnirush)'; then
             echo "::error::Remove AI attribution lines from commit messages"; exit 1
           fi
       - name: Secret scan

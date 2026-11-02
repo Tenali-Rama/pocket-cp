@@ -31,6 +31,7 @@ step collect-shots-test scripts/factory/test-ci-collect-shots.sh
 step ui-flows-test scripts/factory/test-ci-ui-flows.sh
 step shots-test scripts/factory/test-shots.sh
 step perf-budget-test scripts/test-perf-budget-check.sh
+step hooks-test scripts/factory/test-hooks.sh
 
 if [ -n "$(git ls-files '*.kt' '*.kts')" ]; then
   if command -v ktlint >/dev/null; then
