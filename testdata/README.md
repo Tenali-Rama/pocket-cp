@@ -8,6 +8,8 @@ Debug builds and the benchmark / Baseline Profile build types also package `code
 - `codeforces/api/<method>.json`: an API response, e.g. `contest.list.json`.
 - `codeforces/api/<method>.<variant>.json`: the same method with other parameters, e.g. `contest.list.gym.json` (`gym=true`).
 - `codeforces/api/error.<case>.json`: a `FAILED` envelope, e.g. `error.handle-not-found.json`.
+- `codeforces/pages/contest/<contestId>/problem/<index>.<en|ru>.html`: a trimmed Codeforces problem page with its
+  `html`/`body` wrapper, `.problem-statement`, and contest-materials sidebar when present.
 
 ## Recording a fixture
 1. Call the public API from your machine, without logging in and without an API key, so no cookie, session or signature is involved:
@@ -34,3 +36,22 @@ Debug builds and the benchmark / Baseline Profile build types also package `code
 | `codeforces/api/user.info.unrated.json` | `user.info?handles=codeforces;tourist` (the official, unrated `codeforces` account) | 200 |
 | `codeforces/api/error.handle-not-found.json` | `user.info?handles=no_such_handle_zzzq` | 400 |
 | `codeforces/api/error.call-limit.json` | Codeforces' documented "Call limit exceeded" envelope, written by hand: triggering it on purpose would abuse the API | 200 in tests |
+
+## Recorded problem pages
+
+The six pages below are the only pages recorded for task 040. Each was fetched one at a time with a fresh, headless
+browser and at least two seconds between fetches, then trimmed without changing statement content. Playwright captured
+`2276/F.en` and `2274/A.en`; Crawl4AI captured `2274/A.ru`, `2273/D.en`, and `2273/D.ru`. Codeforces returned a
+Cloudflare challenge to Playwright, Browser Use, and Crawl4AI for `2276/F.ru`, so that one fixture came through the
+approved `r.jina.ai` fallback with the `.problem-statement` selector; it is **not a direct browser recording** and
+must be re-recorded directly when Codeforces permits it. No other proxy or page was used.
+
+| File | Source page | Recording method | Notes |
+|------|-------------|------------------|-------|
+| `codeforces/pages/contest/2276/problem/F.en.html` | `https://codeforces.com/problemset/problem/2276/F?locale=en` | Playwright | direct browser response |
+| `codeforces/pages/contest/2276/problem/F.ru.html` | `https://codeforces.com/problemset/problem/2276/F?locale=ru` | `r.jina.ai` fallback | not direct; re-record when possible |
+| `codeforces/pages/contest/2274/problem/A.en.html` | `https://codeforces.com/problemset/problem/2274/A?locale=en` | Playwright | direct browser response |
+| `codeforces/pages/contest/2274/problem/A.ru.html` | `https://codeforces.com/problemset/problem/2274/A?locale=ru` | Crawl4AI | direct browser response |
+| `codeforces/pages/contest/2273/problem/D.en.html` | `https://codeforces.com/problemset/problem/2273/D?locale=en` | Crawl4AI | direct browser response |
+| `codeforces/pages/contest/2273/problem/D.ru.html` | `https://codeforces.com/problemset/problem/2273/D?locale=ru` | Crawl4AI | direct browser response |
+| `codeforces/pages/error.cloudflare.html` | hand-written Cloudflare challenge | hand-written | challenge detector only; not a statement page |
