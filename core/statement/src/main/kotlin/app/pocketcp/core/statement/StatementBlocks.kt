@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package app.pocketcp.core.statement
 
 import android.content.Context
@@ -43,6 +45,8 @@ import coil.ImageLoader
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 
+private const val MILLIS_PER_SECOND = 1_000L
+
 internal fun LazyListScope.addSample(
     language: StatementLanguage,
     number: Int,
@@ -84,8 +88,22 @@ internal fun SampleBlock(
             color = PocketCpTheme.colors.onBackground,
             modifier = Modifier.semantics { heading() },
         )
-        SampleValue(language, number, sample.input, R.string.statement_input_label, R.string.statement_copy_input_description, textScale)
-        SampleValue(language, number, sample.output, R.string.statement_output_label, R.string.statement_copy_output_description, textScale)
+        SampleValue(
+            language,
+            number,
+            sample.input,
+            R.string.statement_input_label,
+            R.string.statement_copy_input_description,
+            textScale,
+        )
+        SampleValue(
+            language,
+            number,
+            sample.output,
+            R.string.statement_output_label,
+            R.string.statement_copy_output_description,
+            textScale,
+        )
     }
 }
 
@@ -173,7 +191,8 @@ internal fun StatementImage(
         },
         error = {
             Text(
-                text = block.description ?: context.getString(R.string.statement_image_unavailable),
+                text =
+                    block.description ?: context.getString(R.string.statement_image_unavailable),
                 style = PocketCpTheme.typography.bodySmall,
                 color = PocketCpTheme.colors.onSurfaceMuted,
                 modifier = Modifier.padding(vertical = PocketCpTheme.spacing.md),
@@ -212,7 +231,11 @@ private fun scaleTextUnit(
 ): TextUnit = if (value.isSp) value * scale else value
 
 internal fun formatTimeLimit(milliseconds: Long): String =
-    if (milliseconds % 1_000L == 0L) "${milliseconds / 1_000L} s" else "$milliseconds ms"
+    if (milliseconds % MILLIS_PER_SECOND == 0L) {
+        "${milliseconds / MILLIS_PER_SECOND} s"
+    } else {
+        "$milliseconds ms"
+    }
 
 internal fun standardInput(
     context: Context,

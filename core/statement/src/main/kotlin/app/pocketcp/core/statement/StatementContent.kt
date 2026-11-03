@@ -1,5 +1,8 @@
+@file:Suppress("TooManyFunctions")
+
 package app.pocketcp.core.statement
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -88,7 +90,11 @@ fun StatementContent(
             StatementHeader(statement, textScale, contentModifier)
         }
         statement.sections.forEachIndexed { sectionIndex, section ->
-            sectionItems(statement.language, section, sectionIndex, textScale, onOpenLink, contentModifier)
+            sectionItems(
+                section,
+                sectionIndex,
+                SectionContent(statement.language, textScale, onOpenLink, contentModifier),
+            )
         }
         statement.samples.forEachIndexed { sampleIndex, sample ->
             addSample(statement.language, sampleIndex + 1, sample, textScale, contentModifier)
@@ -97,20 +103,24 @@ fun StatementContent(
     }
 }
 
+private data class SectionContent(
+    val language: StatementLanguage,
+    val textScale: Float,
+    val onOpenLink: (String) -> Unit,
+    val modifier: Modifier,
+)
+
 private fun LazyListScope.sectionItems(
-    language: StatementLanguage,
     section: StatementSection,
     sectionIndex: Int,
-    textScale: Float,
-    onOpenLink: (String) -> Unit,
-    modifier: Modifier,
+    content: SectionContent,
 ) {
     item(key = "section_${sectionIndex}_title", contentType = "section_title") {
-        SectionTitle(language, section, textScale, modifier)
+        SectionTitle(content.language, section, content.textScale, content.modifier)
     }
     section.blocks.forEachIndexed { blockIndex, block ->
         item(key = "section_${sectionIndex}_block_$blockIndex", contentType = block::class) {
-            StatementBlockContent(block, textScale, onOpenLink, modifier)
+            StatementBlockContent(block, content.textScale, content.onOpenLink, content.modifier)
         }
     }
 }
@@ -237,19 +247,18 @@ private fun InlineText(
                         }
                     }
                 }
-            }.semantics {
-                if (links.size == 1) {
-                    onClick {
-                        onOpenLink(links.first().item)
-                        true
-                    }
-                }
             }
+    val clickableModifier =
+        if (links.size == 1) {
+            textModifier.clickable { onOpenLink(links.first().item) }
+        } else {
+            textModifier
+        }
     BasicText(
         text = annotated,
         style = style.copy(color = PocketCpTheme.colors.onSurface),
         inlineContent = inlineContent,
-        modifier = textModifier,
+        modifier = clickableModifier,
         onTextLayout = { layoutResult = it },
     )
 }
