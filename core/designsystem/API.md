@@ -20,7 +20,7 @@ PocketCpTheme(mode = ThemeMode.Dark, codeLigatures = true, density = UiDensity.C
 | `Rank` | Codeforces ranks `Newbie` … `LegendaryGrandmaster`, `Unrated`, with `minRating`. `Rank.ofRating(rating: Int?)`; `null` → `Unrated`. |
 | `RankColors` | One shade per rank colour for the theme: `of(rank)`, `ofRating(rating)`. Master = International Master; the three grandmaster ranks share one. |
 | `PocketCpTypography` | `display`, `headline`, `title`, `body`, `bodySmall`, `label` (platform sans-serif); `code`, `codeSmall` (JetBrains Mono, ligatures per `codeLigatures`). |
-| `PocketCpSpacing` | `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24, `xxl` 32 dp; `touchTarget` 48 dp. Density tokens (comfortable / compact): `listItemVertical` 8 / 4, `listItemHeight` 56 / 48, `listItemTwoLineHeight` 72 / 48, `cardVertical` 16 / 8 dp. `PocketCpSpacing.of(density)` outside composition. |
+| `PocketCpSpacing` | `xxs` 2, `xs` 4, `sm` 8, `md` 12, `lg` 16, `xl` 24, `xxl` 32 dp; `touchTarget` 48 dp. Density tokens (comfortable / compact): `listItemVertical` 8 / 4, `listItemHeight` 56 / 48, `listItemTwoLineHeight` 72 / 48, `cardVertical` 16 / 8 dp. Reading tokens: `readingWidthNarrow` 560, `readingWidthComfortable` 720 and `imagePlaceholderHeight` 160 dp. `PocketCpSpacing.of(density)` outside composition. |
 | `PocketCpShapes` | Rounded corners `small` 4, `medium` 8, `large` 12, `extraLarge` 16 dp. |
 
 All tokens are `@Immutable`. Every text token pair and every rank colour on `background`, `surface` and `surfaceRaised` has ≥ 4.5:1 contrast (`ContrastTest`).

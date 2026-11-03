@@ -25,6 +25,7 @@ room = "2.7.1"
 turbine = "1.2.0"
 datastore = "1.1.7"
 jsoup = "1.18.3"
+coil = "2.7.0"
 # Macrobenchmark libraries and the androidx.baselineprofile plugin share one version.
 androidxBenchmark = "1.3.4"
 androidxProfileinstaller = "1.4.1"
@@ -56,6 +57,8 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+coil = { module = "io.coil-kt:coil", version.ref = "coil" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }

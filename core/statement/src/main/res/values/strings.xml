@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="statement_time_limit">time limit per test: %1$s</string>
+    <string name="statement_memory_limit">memory limit per test: %1$s</string>
+    <string name="statement_input">input: %1$s</string>
+    <string name="statement_output">output: %1$s</string>
+    <string name="statement_standard_input">standard input</string>
+    <string name="statement_standard_output">standard output</string>
+    <string name="statement_example">Example %1$d</string>
+    <string name="statement_input_label">Input</string>
+    <string name="statement_output_label">Output</string>
+    <string name="statement_copy">Copy</string>
+    <string name="statement_copy_input_description">Copy input of example %1$d</string>
+    <string name="statement_copy_output_description">Copy output of example %1$d</string>
+    <string name="statement_image_unavailable">Image unavailable</string>
+    <string name="statement_section_legend">Legend</string>
+    <string name="statement_section_input">Input</string>
+    <string name="statement_section_output">Output</string>
+    <string name="statement_section_interaction">Interaction</string>
+    <string name="statement_section_scoring">Scoring</string>
+    <string name="statement_section_note">Note</string>
+    <string name="statement_section_other">Details</string>
+</resources>
