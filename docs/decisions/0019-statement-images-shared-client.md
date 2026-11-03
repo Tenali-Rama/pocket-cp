@@ -1,4 +1,4 @@
-# 0018 — Statement images use the shared client outside the request queue
+# 0019 — Statement images use the shared client outside the request queue
 
 - **Status**: accepted
 - **Context**: Statement images are binary bodies and need offline disk caching, while the API queue spaces and deduplicates judge requests.

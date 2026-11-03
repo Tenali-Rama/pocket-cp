@@ -49,5 +49,7 @@ Spec §2 wants native screens, not a wrapper. After this task, `core/statement` 
 ## Notes for next
 <!-- builder fills in -->
 - Added `core/statement` with lazy native rendering, localized metadata, samples, links, math slot and Coil image loading.
-- Statement images use a shared-client Coil loader and a separate disk cache; see ADR 0018.
+- Statement images use a shared-client Coil loader and a separate disk cache; see ADR 0019.
 - Added statement gallery and Robolectric Compose behaviour tests; CI must generate and accept fresh statement/theme-token goldens.
+- Reaccepted the intended statement gallery and design-token goldens after adding the reading-width and image-placeholder tokens.
+- Recovered the CI-generated goldens and fixed the renderer line-length failure from the previous verify run.

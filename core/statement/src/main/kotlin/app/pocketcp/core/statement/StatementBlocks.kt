@@ -119,6 +119,7 @@ private fun SampleValue(
     val context = contextForLanguage(LocalContext.current, language.key)
     val clipboard = LocalClipboardManager.current
     val description = context.getString(descriptionRes, number)
+    val copyKind = if (labelRes == R.string.statement_input_label) "input" else "output"
     Column(verticalArrangement = Arrangement.spacedBy(PocketCpTheme.spacing.xs)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
@@ -130,11 +131,10 @@ private fun SampleValue(
                 text = context.getString(R.string.statement_copy),
                 onClick = { clipboard.setText(AnnotatedString(value)) },
                 modifier =
-                    Modifier
-                        .sizeIn(minHeight = PocketCpTheme.spacing.touchTarget)
-                        .testTag(
-                            "sample_${number}_${if (labelRes == R.string.statement_input_label) "input" else "output"}_copy",
-                        ).semantics {
+                        Modifier
+                            .sizeIn(minHeight = PocketCpTheme.spacing.touchTarget)
+                        .testTag("sample_${number}_${copyKind}_copy")
+                        .semantics {
                             contentDescription = description
                             role = Role.Button
                         },
