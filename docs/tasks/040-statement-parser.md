@@ -37,6 +37,8 @@ Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Co
 - Custom Test, contest-materials pages or Gym parsing (later milestones extend this module).
 
 ## Notes for next
+- Record with `curl` from the builder VM, waiting ≥ 2 s between calls. If Cloudflare blocks the VM, stop and ask the owner to record the pages; never hand-write a page that pretends to be recorded.
+<!-- Owner-approved exception for this run: the owner approved direct-browser attempts first and then the r.jina.ai fallback for blocked listed pages, with exact disclosure in testdata/README.md and the PR body plus a direct re-record follow-up. -->
 - Five pages were captured through direct headless-browser tools; one page (`2276/F.ru`) used the approved `r.jina.ai` fallback after all three browser tools received Cloudflare.
 - The fallback fixture is disclosed in `testdata/README.md` and must be re-recorded directly when Codeforces permits it.
 - `core/parser` maps statement markup to `core/model`; parse failures fall back to the WebView.

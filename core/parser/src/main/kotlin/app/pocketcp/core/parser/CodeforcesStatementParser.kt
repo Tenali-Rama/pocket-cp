@@ -232,48 +232,54 @@ object CodeforcesStatementParser {
         style: InlineStyle,
     ): List<InlinePart> = element.childNodes().flatMap { parseInlineNode(it, style) }
 
-    @Suppress("CyclomaticComplexMethod")
     private fun parseInlineNode(
         node: Node,
         style: InlineStyle,
     ): List<InlinePart> =
         when (node) {
             is TextNode -> textParts(node.wholeText, style)
-            is Element ->
-                when {
-                    node.hasClass("MathJax_Preview") -> emptyList()
-                    node.tagName() == "script" && node.attr("type").lowercase(Locale.ROOT).contains("tex") -> {
-                        val tex = Entities.unescape(node.data().trim()).takeIf { it.isNotEmpty() }
-                        tex
-                            ?.let {
-                                if (node.previousElementSibling()?.hasClass("MathJax_Display") == true) {
-                                    listOf(InlinePart.Display(it))
-                                } else {
-                                    listOf(InlinePart.Value(Inline.Math(it)))
-                                }
-                            }.orEmpty()
-                    }
-                    node.tagName() == "br" -> listOf(InlinePart.Value(Inline.LineBreak))
-                    node.tagName() == "a" ->
-                        listOf(
-                            InlinePart.Value(
-                                Inline.Link(
-                                    text = linkText(parseInlineNodes(node, style)),
-                                    url = node.absoluteUrl("href").orEmpty(),
-                                ),
-                            ),
-                        )
-                    node.tagName() == "b" || node.tagName() == "strong" || node.hasClass("tex-font-style-bf") ->
-                        parseInlineNodes(node, style.copy(bold = true))
-                    node.tagName() == "i" || node.tagName() == "em" || node.hasClass("tex-font-style-it") ->
-                        parseInlineNodes(node, style.copy(italic = true))
-                    node.tagName() == "tt" || node.tagName() == "code" || node.hasClass("tex-font-style-tt") ->
-                        parseInlineNodes(node, style.copy(monospace = true))
-                    node.tagName() == "img" -> emptyList()
-                    else -> parseInlineNodes(node, style)
-                }
+            is Element -> parseElementInline(node, style)
             else -> emptyList()
         }
+
+    private fun parseElementInline(
+        node: Element,
+        style: InlineStyle,
+    ): List<InlinePart> =
+        when {
+            node.hasClass("MathJax_Preview") -> emptyList()
+            node.isTexScript() -> parseTexScript(node)
+            node.tagName() == "br" -> listOf(InlinePart.Value(Inline.LineBreak))
+            node.tagName() == "a" -> listOf(InlinePart.Value(node.toLink(style)))
+            node.isBold() -> parseInlineNodes(node, style.copy(bold = true))
+            node.isItalic() -> parseInlineNodes(node, style.copy(italic = true))
+            node.isMonospace() -> parseInlineNodes(node, style.copy(monospace = true))
+            node.tagName() == "img" -> emptyList()
+            else -> parseInlineNodes(node, style)
+        }
+
+    private fun Element.isTexScript(): Boolean = tagName() == "script" && attr("type").lowercase(Locale.ROOT).contains("tex")
+
+    private fun parseTexScript(node: Element): List<InlinePart> {
+        val tex = Entities.unescape(node.data().trim()).takeIf { it.isNotEmpty() } ?: return emptyList()
+        return if (node.previousElementSibling()?.hasClass("MathJax_Display") == true) {
+            listOf(InlinePart.Display(tex))
+        } else {
+            listOf(InlinePart.Value(Inline.Math(tex)))
+        }
+    }
+
+    private fun Element.toLink(style: InlineStyle): Inline.Link =
+        Inline.Link(
+            text = linkText(parseInlineNodes(this, style)),
+            url = absoluteUrl("href").orEmpty(),
+        )
+
+    private fun Element.isBold(): Boolean = tagName() == "b" || tagName() == "strong" || hasClass("tex-font-style-bf")
+
+    private fun Element.isItalic(): Boolean = tagName() == "i" || tagName() == "em" || hasClass("tex-font-style-it")
+
+    private fun Element.isMonospace(): Boolean = tagName() == "tt" || tagName() == "code" || hasClass("tex-font-style-tt")
 
     private fun textParts(
         raw: String,

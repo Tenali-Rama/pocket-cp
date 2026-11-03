@@ -56,11 +56,12 @@ class CodeforcesStatementParserTest {
     fun `interactive fixture contains display math and inline styles`() {
         val statement = parseFixture("2273", "D", "en")
         val blocks = statement.sections.flatMap { it.blocks }
+        val delimiter = "\$".repeat(6)
         val display =
             CodeforcesStatementParser.parse(
                 """
                 <div class="problem-statement"><div class="header"><div class="title">A. Display</div></div>
-                <div><p>$$$$$$x &lt; y$$$$$$</p></div></div>
+                <div><p>${delimiter}x &lt; y$delimiter</p></div></div>
                 """.trimIndent(),
                 ProblemId(1, "A"),
                 StatementLanguage.En,
