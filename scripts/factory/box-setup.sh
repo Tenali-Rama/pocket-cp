@@ -13,7 +13,7 @@ token_file="$main_checkout/.factory/gh_token"
 export DEBIAN_FRONTEND=noninteractive
 if ! command -v java >/dev/null || ! command -v jq >/dev/null || ! command -v curl >/dev/null; then
   apt-get update -qq
-  apt-get install -y -qq jq curl openjdk-17-jre-headless >/dev/null
+  apt-get install -y -qq jq curl python3 openjdk-17-jre-headless >/dev/null
 fi
 # The box's network drops connections now and then.
 fetch() { curl -fsSL --retry 5 --retry-all-errors --retry-delay 5 "$@"; }

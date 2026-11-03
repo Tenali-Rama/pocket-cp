@@ -28,7 +28,33 @@ Builders also get this:
 
 Planners and reviewers use `.factory/worktrees/plan-<milestone>` and `.factory/worktrees/review-<pr>` the same way (reviewers in detached mode), and never check out anything in the main checkout.
 
-Wait for CI by polling `scripts/factory/pr-ci.sh <pr>` every few minutes; a long `--wait` may outlive the shell tool's time limit.
+## Token rules
+Every model call re-sends the agent's whole context, so one step in a 200k context costs far more than one in a 50k context. These rules override the waiting and CI steps in `builder.md`. Don't weaken any quality gate to save tokens.
+
+**The watcher.** `scripts/factory/watch.py` runs outside the sandbox and does its waiting without using tokens. It messages the COO when an agent passes 100k context, when an agent stops on an error, and when CI finishes for an open PR. Start it next to the COO, from outside the sandbox:
+
+```
+tmux new -d -s coo-watch -c ~/projects/pocketcp scripts/factory/watch.py
+```
+
+Keep typed messages to the COO short while it runs: its messages are pasted into the same input box.
+
+**Builders.**
+- Never wait for CI: no `pr-ci.sh --wait`, `sleep` or repeated checks. After `verify.sh`, commit, push, open or update the draft PR, write handoff notes, and return `PUSHED PR #<n>`.
+- Handoff notes go under "Notes for next" in the task file: what is done, what is left, and any decision the next builder must not undo.
+- Before anything else on an alert or at 100k context: push your work, write the notes, and return `HANDOFF PR #<n>`.
+- Keep output short. Pipe anything long through `tail -n 80` or `head -n 80`, send install logs to a file, limit searches (`grep -l`, or `| head`), and read logs only through `scripts/factory/ci-digest.sh <pr>`. Read each screenshot once.
+
+**The COO.**
+- Never resume a builder after it returns, or after the watcher reports it over the limit. Start a fresh one with the task file, the PR number and the next step. Resume only an agent that died below the limit.
+- After `PUSHED`, wait for the watcher's message instead of checking CI.
+  - `failure` → a fresh builder gets the output of `scripts/factory/ci-digest.sh <pr>`.
+  - `success`, with screenshots or criteria still to check → a fresh builder does `builder.md` §5.4 onward, and returns `PUSHED` after any push.
+  - `success`, with nothing left → `gh pr ready <pr>`, then spawn the reviewer.
+- If a builder has returned `PUSHED` or `HANDOFF` 3 times without progress on the same CI failure, handle it like `BLOCKED`.
+- Check CI yourself only with the one-line `scripts/factory/pr-ci.sh <pr>`, never with JSON dumps.
+- After an agent error, retry with waits. Never go idle while tasks are in flight.
+- Restart your own session between milestones, once `.factory/state.md` is current. Other projects on this account spend the same tokens, so check `omnirush usage` then too.
 
 ## What is enforced differently
 Claude Code's guard hook (`scripts/factory/guard.sh`) doesn't run here. These checks replace it:
