@@ -158,12 +158,24 @@ private fun StatementHeader(
             )
         }
         Text(
-            text = localized(context, statement, R.string.statement_input, statement.inputFile ?: standardInput(context, statement)),
+            text =
+                localized(
+                    context,
+                    statement,
+                    R.string.statement_input,
+                    statement.inputFile ?: standardInput(context, statement),
+                ),
             style = bodyStyle,
             color = colors.onSurfaceMuted,
         )
         Text(
-            text = localized(context, statement, R.string.statement_output, statement.outputFile ?: standardOutput(context, statement)),
+            text =
+                localized(
+                    context,
+                    statement,
+                    R.string.statement_output,
+                    statement.outputFile ?: standardOutput(context, statement),
+                ),
             style = bodyStyle,
             color = colors.onSurfaceMuted,
         )

@@ -132,8 +132,9 @@ private fun SampleValue(
                 modifier =
                     Modifier
                         .sizeIn(minHeight = PocketCpTheme.spacing.touchTarget)
-                        .testTag("sample_${number}_${if (labelRes == R.string.statement_input_label) "input" else "output"}_copy")
-                        .semantics {
+                        .testTag(
+                            "sample_${number}_${if (labelRes == R.string.statement_input_label) "input" else "output"}_copy",
+                        ).semantics {
                             contentDescription = description
                             role = Role.Button
                         },
@@ -159,7 +160,11 @@ internal fun Materials(
                         color = PocketCpTheme.colors.primary,
                         textDecoration = TextDecoration.Underline,
                     ),
-                modifier = Modifier.fillMaxWidth().semantics { role = Role.Button }.clickable { onOpenLink(material.url) },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .semantics { role = Role.Button }
+                        .clickable { onOpenLink(material.url) },
             )
         }
     }
@@ -187,7 +192,11 @@ internal fun StatementImage(
             Spacer(Modifier.fillMaxWidth().height(PocketCpTheme.spacing.imagePlaceholderHeight))
         },
         success = { state ->
-            androidx.compose.foundation.Image(state.painter, contentDescription = block.description, contentScale = ContentScale.Fit)
+            androidx.compose.foundation.Image(
+                painter = state.painter,
+                contentDescription = block.description,
+                contentScale = ContentScale.Fit,
+            )
         },
         error = {
             Text(
@@ -282,6 +291,6 @@ internal fun contextForLanguage(
     language: String,
 ): Context {
     val configuration = Configuration(context.resources.configuration)
-    configuration.setLocale(java.util.Locale(language))
+    configuration.setLocale(java.util.Locale.forLanguageTag(language))
     return context.createConfigurationContext(configuration)
 }

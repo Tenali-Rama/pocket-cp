@@ -3,6 +3,7 @@ package app.pocketcp.core.statement
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -132,12 +133,12 @@ private class FakeFetcher(
             else -> DrawableResult(ColorDrawable(Color.DKGRAY), false, DataSource.MEMORY)
         }
 
-    class Factory : Fetcher.Factory<String> {
+    class Factory : Fetcher.Factory<Uri> {
         override fun create(
-            data: String,
+            data: Uri,
             options: Options,
             imageLoader: ImageLoader,
-        ): Fetcher? = if (data.startsWith("fake://")) FakeFetcher(data) else null
+        ): Fetcher? = if (data.scheme == "fake") FakeFetcher(data.toString()) else null
     }
 }
 
