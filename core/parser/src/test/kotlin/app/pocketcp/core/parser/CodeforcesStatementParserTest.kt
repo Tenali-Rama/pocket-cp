@@ -30,7 +30,17 @@ class CodeforcesStatementParserTest {
         val english = parseFixture("2273", "D", "en")
         val russian = parseFixture("2273", "D", "ru")
 
-        val expected = listOf(SectionKind.Legend, SectionKind.Input, SectionKind.Output, SectionKind.Interaction, SectionKind.Note)
+        val expected = listOf(SectionKind.Legend, SectionKind.Input, SectionKind.Interaction, SectionKind.Note)
+        assertEquals(expected, english.sections.map { it.kind })
+        assertEquals(expected, russian.sections.map { it.kind })
+    }
+
+    @Test
+    fun `output section class is stable across languages`() {
+        val english = parseFixture("2274", "A", "en")
+        val russian = parseFixture("2274", "A", "ru")
+
+        val expected = listOf(SectionKind.Legend, SectionKind.Input, SectionKind.Output)
         assertEquals(expected, english.sections.map { it.kind })
         assertEquals(expected, russian.sections.map { it.kind })
     }
@@ -94,7 +104,8 @@ class CodeforcesStatementParserTest {
                 """
                 <html><body>
                   <div class="problem-statement"><div class="header"><div class="title">A. Test</div></div></div>
-                  <div class="roundbox sidebox sidebar-menu"><div class="caption titled">Материалы конкурса</div>
+                  <div class="roundbox sidebox sidebar-menu">
+                    <div class="caption titled">Материалы конкурса</div>
                     <a href="/blog/entry/1">Разбор</a><a href="/blog/entry/2">Анонс</a>
                   </div>
                 </body></html>
@@ -158,7 +169,11 @@ class CodeforcesStatementParserTest {
             )
         }
         assertThrows<StatementParseError.UnknownMarkup> {
-            CodeforcesStatementParser.parse("<html><body><div>contest</div></body></html>", ProblemId(1, "A"), StatementLanguage.En)
+            CodeforcesStatementParser.parse(
+                "<html><body><div>contest</div></body></html>",
+                ProblemId(1, "A"),
+                StatementLanguage.En,
+            )
         }
         assertThrows<StatementParseError.UnknownMarkup> {
             CodeforcesStatementParser.parse(

@@ -43,3 +43,5 @@ Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Co
 - The fallback fixture is disclosed in `testdata/README.md` and must be re-recorded directly when Codeforces permits it.
 - `core/parser` maps statement markup to `core/model`; parse failures fall back to the WebView.
 - Fix round `a33680c` splits inline-element dispatch to satisfy `NestedBlockDepth` and builds the six-dollar test delimiter without interpolating `x`; local `scripts/verify.sh` passes.
+- Fix round `48ee6e8` corrects detekt line lengths and separates interactive-section coverage from output-class coverage.
+- Run 41634709551's phone UI job stopped during runner SDK installation before app flows; the parser changes were unrelated.

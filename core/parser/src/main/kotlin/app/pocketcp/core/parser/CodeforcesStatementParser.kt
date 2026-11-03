@@ -258,7 +258,9 @@ object CodeforcesStatementParser {
             else -> parseInlineNodes(node, style)
         }
 
-    private fun Element.isTexScript(): Boolean = tagName() == "script" && attr("type").lowercase(Locale.ROOT).contains("tex")
+    private fun Element.isTexScript(): Boolean = tagName() == "script" && hasTexType()
+
+    private fun Element.hasTexType(): Boolean = attr("type").lowercase(Locale.ROOT).contains("tex")
 
     private fun parseTexScript(node: Element): List<InlinePart> {
         val tex = Entities.unescape(node.data().trim()).takeIf { it.isNotEmpty() } ?: return emptyList()
@@ -279,7 +281,9 @@ object CodeforcesStatementParser {
 
     private fun Element.isItalic(): Boolean = tagName() == "i" || tagName() == "em" || hasClass("tex-font-style-it")
 
-    private fun Element.isMonospace(): Boolean = tagName() == "tt" || tagName() == "code" || hasClass("tex-font-style-tt")
+    private fun Element.isMonospace(): Boolean = tagName() == "tt" || tagName() == "code" || hasTexMonospaceClass()
+
+    private fun Element.hasTexMonospaceClass(): Boolean = hasClass("tex-font-style-tt")
 
     private fun textParts(
         raw: String,
