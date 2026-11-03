@@ -5,9 +5,12 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -15,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,12 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -40,6 +47,8 @@ import app.pocketcp.core.model.Statement
 import app.pocketcp.core.model.StatementBlock
 import app.pocketcp.core.model.StatementLanguage
 import app.pocketcp.core.model.StatementSection
+import app.pocketcp.core.model.TableCell
+import app.pocketcp.core.model.TableRow
 import app.pocketcp.core.statement.math.LocalMathRenderer
 
 private const val LINK_TAG = "statement_link"
@@ -195,7 +204,7 @@ private fun InlineText(
     modifier: Modifier,
     style: TextStyle = statementStyle(PocketCpTheme.typography.body, textScale),
 ) {
-    val annotated = remember(inlines) { annotatedText(inlines) }
+    val annotated = annotatedText(inlines)
     val inlineContent =
         inlines
             .mapIndexedNotNull { index, inline ->
@@ -230,7 +239,7 @@ private fun InlineText(
                 }
             }.semantics {
                 if (links.size == 1) {
-                    androidx.compose.ui.semantics.onClick {
+                    onClick {
                         onOpenLink(links.first().item)
                         true
                     }
@@ -245,6 +254,7 @@ private fun InlineText(
     )
 }
 
+@Composable
 private fun annotatedText(inlines: List<Inline>): AnnotatedString =
     buildAnnotatedString {
         inlines.forEachIndexed { index, inline ->

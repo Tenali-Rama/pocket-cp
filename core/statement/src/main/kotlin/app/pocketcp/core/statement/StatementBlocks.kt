@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +42,31 @@ import app.pocketcp.core.model.StatementSection
 import coil.ImageLoader
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+
+internal fun LazyListScope.addSample(
+    language: StatementLanguage,
+    number: Int,
+    sample: Sample,
+    textScale: Float,
+    modifier: Modifier,
+) {
+    item(key = "sample_$number", contentType = "sample") {
+        SampleBlock(language, number, sample, textScale, modifier)
+    }
+}
+
+internal fun LazyListScope.addMaterials(
+    statement: Statement,
+    textScale: Float,
+    onOpenLink: (String) -> Unit,
+    modifier: Modifier,
+) {
+    if (statement.materials.isNotEmpty()) {
+        item(key = "materials", contentType = "materials") {
+            Materials(statement, textScale, onOpenLink, modifier)
+        }
+    }
+}
 
 @Composable
 internal fun SampleBlock(
