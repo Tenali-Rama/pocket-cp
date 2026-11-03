@@ -5,6 +5,6 @@
   `core/datastore`; callers resolve preferences to plain values.
 - Statement text uses `PocketCpTheme` tokens. Images use the shared network `OkHttpClient` through the public image
   loader factory, with Coil's disk cache; binary image requests do not go through `RequestQueue`.
-- `math/` is the replacement slot for native TeX rendering. Keep the default renderer's source-text fallback stable
-  so the native typesetter can replace only that package.
+- `math/` contains the native TeX parser/layout and renderer. Keep its source-text fallback stable for malformed or
+  unsupported input; do not introduce a WebView or network-backed typesetter.
 - Tests use Compose/Robolectric and recorded, in-memory content. Screenshot tests use the required device matrix.

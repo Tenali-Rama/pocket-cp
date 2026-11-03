@@ -40,4 +40,12 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Any change outside `core/statement`'s math package, besides the module's build file, docs and R8 rules. Math in blogs or editorials (M9).
 
 ## Notes for next
-<!-- builder fills in -->
+- Native Kotlin parser/layout in `core/statement/math/` renders the Codeforces subset on the Android canvas; no new
+  dependency, WebView, native binary, or R8 keep rule is needed. See ADR 0020.
+- Source fallback is preserved for malformed or unknown TeX, and `NativeTexTypesetter` caches by TeX, pixel size and
+  colour; `MathRendererTest` covers the required syntax, fallback, cache hit and source content description.
+- Added `statementMath_*` screenshot captures and the invalid-source capture. CI must record/accept their goldens and
+  re-accept the existing `statementGallery_*` goldens after the native renderer changes them.
+- Local `scripts/verify.sh` passes. Do not replace the native parser with a WebView or network-backed renderer.
+- Handoff: implementation and static checks are complete; next builder must run the CI feedback, accept only the fresh
+  math/gallery goldens, and preserve the zero-dependency native-canvas decision.
