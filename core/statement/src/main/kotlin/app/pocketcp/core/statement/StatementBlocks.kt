@@ -131,8 +131,8 @@ private fun SampleValue(
                 text = context.getString(R.string.statement_copy),
                 onClick = { clipboard.setText(AnnotatedString(value)) },
                 modifier =
-                        Modifier
-                            .sizeIn(minHeight = PocketCpTheme.spacing.touchTarget)
+                    Modifier
+                        .sizeIn(minHeight = PocketCpTheme.spacing.touchTarget)
                         .testTag("sample_${number}_${copyKind}_copy")
                         .semantics {
                             contentDescription = description

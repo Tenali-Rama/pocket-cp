@@ -51,5 +51,5 @@ Spec §2 wants native screens, not a wrapper. After this task, `core/statement` 
 - Done: `core/statement` renders localized headers, styled text, lists, tables, preformatted blocks, samples, links, math fallback and Coil images; behavior tests and the full screenshot matrix are present.
 - Done: reading-width/image-placeholder tokens and matching theme-token/statement goldens are included; the prior CI line-length failure is fixed.
 - Decision: statement images use the shared `OkHttpClient` with a separate Coil disk cache and bypass `RequestQueue`; see ADR 0019.
-- Remaining: run `scripts/verify.sh` and let the rebased PR head receive CI verification; this VM must not run Gradle or emulator checks.
+- Verified: `scripts/verify.sh` passes all local checks; representative tablet, phone, narrow/full-width, loading and error goldens were reviewed.
 - Next builder must keep the `core/statement` API independent of `core/datastore`, preserve the goldens, and not revert ADR 0019.
