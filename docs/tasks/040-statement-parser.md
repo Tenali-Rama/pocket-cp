@@ -37,11 +37,8 @@ Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Co
 - Custom Test, contest-materials pages or Gym parsing (later milestones extend this module).
 
 ## Notes for next
-- Record with `curl` from the builder VM, waiting ≥ 2 s between calls. If Cloudflare blocks the VM, stop and ask the owner to record the pages; never hand-write a page that pretends to be recorded.
-<!-- Owner-approved exception for this run: the owner approved direct-browser attempts first and then the r.jina.ai fallback for blocked listed pages, with exact disclosure in testdata/README.md and the PR body plus a direct re-record follow-up. -->
-- Five pages were captured through direct headless-browser tools; one page (`2276/F.ru`) used the approved `r.jina.ai` fallback after all three browser tools received Cloudflare.
-- The fallback fixture is disclosed in `testdata/README.md` and must be re-recorded directly when Codeforces permits it.
+- Re-record `2276/F.ru` directly when Codeforces permits; it uses the owner-approved `r.jina.ai` fallback disclosed in `testdata/README.md`, while the other five pages were captured in browsers.
 - `core/parser` maps statement markup to `core/model`; parse failures fall back to the WebView.
-- Fix round `a33680c` splits inline-element dispatch to satisfy `NestedBlockDepth` and builds the six-dollar test delimiter without interpolating `x`; local `scripts/verify.sh` passes.
-- Fix round `48ee6e8` corrects detekt line lengths and separates interactive-section coverage from output-class coverage.
-- Run 41634709551's phone UI job stopped during runner SDK installation before app flows; the parser changes were unrelated.
+- Fix rounds `a33680c` and `48ee6e8` addressed inline dispatch, the six-dollar test delimiter, detekt line lengths, and structural section coverage.
+- Run 41634709551's `verify` failed on parser detekt/test issues; its phone UI job stopped during emulator SDK installation before app flows.
+- Recovery `scripts/verify.sh` passed after rebasing onto `origin/main`; PR #61 was pushed without waiting for CI per Omnirush.
