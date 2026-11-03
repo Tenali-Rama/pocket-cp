@@ -32,7 +32,7 @@ internal data class MathLayout(
     }
 }
 
-private sealed interface DrawCommand {
+internal sealed interface DrawCommand {
     fun draw(
         canvas: Canvas,
         paint: Paint,

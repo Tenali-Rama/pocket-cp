@@ -40,6 +40,12 @@ class StatementMathScreenshotTest : ScreenshotTest() {
         }
 
     @Test
+    fun statementMathFontScale() =
+        captureSingle("statementMath_font150", ScreenshotConfig(fontScale = 1.5f), PocketCpThemeWrapper) {
+            MathGallery()
+        }
+
+    @Test
     fun statementMathInvalid() =
         captureSingle("statementMath_invalid", ScreenshotConfig(), PocketCpThemeWrapper) {
             InvalidMathGallery()
