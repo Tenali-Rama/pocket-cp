@@ -2,7 +2,7 @@
 id: 040
 title: Isolated Codeforces statement parser in core/parser, with recorded pages
 milestone: M3
-status: todo
+status: done
 deps: [039]
 touches: [core/parser/, settings.gradle.kts+, gradle/libs.versions.toml, testdata/codeforces/pages/, testdata/README.md, docs/decisions/]
 spec: ["7.4 Problem View", "18. Known Risks", "4. Platform & Architecture"]
@@ -12,16 +12,16 @@ spec: ["7.4 Problem View", "18. Known Risks", "4. Platform & Architecture"]
 Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Codeforces changes its markup. After this task, the pure-JVM module `core/parser` turns a Codeforces problem page into a `Statement` (039), and it fails only with its own typed errors. Recorded pages under `testdata/` pin its behaviour.
 
 ## Acceptance criteria
-- [ ] New module `core/parser` (`pocketcp.jvm.library`, jsoup from the catalog, `api(project(":core:model"))`), with `CLAUDE.md` and `API.md`:
+- [x] New module `core/parser` (`pocketcp.jvm.library`, jsoup from the catalog, `api(project(":core:model"))`), with `CLAUDE.md` and `API.md`:
   - `CodeforcesStatementParser.parse(html: String, problem: ProblemId, language: StatementLanguage): Statement`
   - throws only `StatementParseError`, which is sealed: `Blocked` (a Cloudflare challenge page) or `UnknownMarkup(detail)` (no `.problem-statement`, or no title)
-- [ ] Recorded pages in `testdata/codeforces/pages/contest/<contestId>/problem/<index>.<en|ru>.html`:
+- [x] Recorded pages in `testdata/codeforces/pages/contest/<contestId>/problem/<index>.<en|ru>.html`:
   - the debug problemset's problems `2276F`, `2274A` and `2273D`, in both languages
   - pages that show an image, a table, a list, an interactive problem, and old-style `<pre>` samples with `<br>`
   - one hand-written Cloudflare challenge page, marked as hand-written in the README, like `error.call-limit.json`
 
   Each page is trimmed to the `html`/`body` wrapper, `.problem-statement` and the sidebar's contest-materials box (scripts and the rest removed, as `testdata/README.md` describes). The README's table lists every file.
-- [ ] `CodeforcesStatementParserTest` (fixtures via `core/testing`'s `Fixtures`) covers:
+- [x] `CodeforcesStatementParserTest` (fixtures via `core/testing`'s `Fixtures`) covers:
   - header: title without the `A. ` prefix; time limit in ms; memory in MB; standard I/O gives `null` files
   - section kinds come from the markup classes (`.input-specification`, `.output-specification`, `.note`, interaction), never from heading text, so the Russian pages map the same kinds
   - TeX: `$$$…$$$` gives `Inline.Math`, `$$$$$$…$$$$$$` gives `DisplayMath`, and entities are decoded inside TeX (`&lt;` becomes `<`)
@@ -30,12 +30,16 @@ Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Co
   - samples in both markups (per-line `div.test-example-line` and `<pre>` with `<br>`), each as newline-joined text in order
   - materials: title, absolute URL and kind (`Tutorial` for tutorial/editorial or "Разбор" links, `Announcement` for announcement/"Анонс", else `Other`) (default — owner may change)
   - the challenge page throws `Blocked`; a contest page without a statement throws `UnknownMarkup`; every fixture truncated at its midpoint throws only a `StatementParseError` (or parses), never another exception
-- [ ] A new ADR: the parser module boundary, the error types, and that a parse failure means "fall back to the WebView for that page" (spec §18).
+- [x] A new ADR: the parser module boundary, the error types, and that a parse failure means "fall back to the WebView for that page" (spec §18).
 
 ## Out of scope
 - Fetching pages, mapping errors to `JudgeError`, and the live canary: those are 041. Rendering, caching.
 - Custom Test, contest-materials pages or Gym parsing (later milestones extend this module).
 
 ## Notes for next
-- Record with `curl` from the builder VM, waiting ≥ 2 s between calls. If Cloudflare blocks the VM, stop and ask the owner to record the pages; never hand-write a page that pretends to be recorded.
-<!-- builder fills in -->
+- Re-record `2276/F.ru` directly when Codeforces permits; it uses the owner-approved `r.jina.ai` fallback disclosed in `testdata/README.md`, while the other five pages were captured in browsers.
+- `core/parser` maps statement markup to `core/model`; parse failures fall back to the WebView.
+- Fix rounds `a33680c` and `48ee6e8` addressed inline dispatch, the six-dollar delimiter, detekt line lengths, and structural section coverage; this round skips generated MathJax DOM and adds parser edge coverage.
+- CI run 41711643028 exposed a missing `.note` in the 2274 structural-section expectation; the focused test fix adds it. Run 41634709551's phone UI job stopped during emulator SDK installation before app flows.
+- `scripts/verify.sh` passes after rebasing onto `origin/main`; PR #61 is pushed without waiting for CI per Omnirush.
+- CI run 41721545021 exposed the Jsoup `Element.classes()` compile error; the MathJax helper now uses `classNames()`.
