@@ -77,6 +77,7 @@ class CodeforcesStatementParserTest {
                 StatementLanguage.En,
             )
         assertTrue(display.sections.flatMap { it.blocks }.any { it is StatementBlock.DisplayMath })
+        assertTrue(blocks.any { it is StatementBlock.DisplayMath })
         assertTrue(
             blocks
                 .flatMap { block ->
@@ -107,13 +108,17 @@ class CodeforcesStatementParserTest {
                   <div class="roundbox sidebox sidebar-menu">
                     <div class="caption titled">Материалы конкурса</div>
                     <a href="/blog/entry/1">Разбор</a><a href="/blog/entry/2">Анонс</a>
+                    <a href="/blog/entry/3">Rules</a>
                   </div>
                 </body></html>
                 """.trimIndent(),
                 ProblemId(1, "A"),
                 StatementLanguage.Ru,
             )
-        assertEquals(listOf(MaterialKind.Tutorial, MaterialKind.Announcement), localized.materials.map { it.kind })
+        assertEquals(
+            listOf(MaterialKind.Tutorial, MaterialKind.Announcement, MaterialKind.Other),
+            localized.materials.map { it.kind },
+        )
     }
 
     @Test
@@ -125,9 +130,11 @@ class CodeforcesStatementParserTest {
             <html><body><div class="problem-statement">
               <div class="header"><div class="title">A. Synthetic</div></div>
               <div class="legend">
-                <p>${inline}a &lt; b$inline <span class="tex-font-style-bf">bold</span></p>
+                <p>${inline}a &lt; b$inline <span class="tex-font-style-bf">bold</span>
+                  <span class="tex-font-style-tt">code</span></p>
                 <p>${display}x+y$display</p>
                 <img src="//example.com/diagram.png" alt="diagram">
+                <img src="images/relative.png" alt="relative">
                 <table><tr><th>Header</th><td>Value</td></tr></table>
                 <ol><li>first<ul><li>nested</li></ul></li></ol>
               </div>
@@ -140,7 +147,11 @@ class CodeforcesStatementParserTest {
 
         val statement = CodeforcesStatementParser.parse(html, ProblemId(1, "A"), StatementLanguage.En)
         val blocks = statement.sections.single().blocks
+        val inlines = blocks.filterIsInstance<StatementBlock.Paragraph>().flatMap { it.inlines }
         val table = blocks.filterIsInstance<StatementBlock.Table>().single()
+        assertEquals("a < b", inlines.filterIsInstance<Inline.Math>().single().tex)
+        assertTrue(inlines.any { it is Inline.Text && it.bold && it.text == "bold" })
+        assertTrue(inlines.any { it is Inline.Text && it.monospace && it.text == "code" })
         assertTrue(
             table.rows
                 .single()
@@ -148,7 +159,16 @@ class CodeforcesStatementParserTest {
                 .first()
                 .header,
         )
-        assertEquals("https://example.com/diagram.png", blocks.filterIsInstance<StatementBlock.Image>().single().url)
+        assertTrue(
+            blocks.any {
+                it is StatementBlock.Image && it.url == "https://example.com/diagram.png"
+            },
+        )
+        assertTrue(
+            blocks.any {
+                it is StatementBlock.Image && it.url == "https://codeforces.com/images/relative.png"
+            },
+        )
         assertTrue(
             blocks.filterIsInstance<StatementBlock.ListBlock>().single().items.single().any {
                 it is StatementBlock.ListBlock
@@ -157,6 +177,34 @@ class CodeforcesStatementParserTest {
         assertEquals("x+y", blocks.filterIsInstance<StatementBlock.DisplayMath>().single().tex)
         assertEquals("one\ntwo", statement.samples.single().input)
         assertEquals("ok", statement.samples.single().output)
+    }
+
+    @Test
+    fun `generated MathJax presentation is not parsed beside source math`() {
+        val html =
+            """
+            <div class="problem-statement"><div class="header"><div class="title">A. Math</div></div>
+              <div class="legend">
+                <p>before <span class="MathJax_Preview"></span>
+                  <span class="MathJax"><span>rendered inline</span></span>
+                  <script type="math/tex">x &lt; y</script> after</p>
+                <div class="MathJax_Display"><span class="MathJax"><span>rendered display</span></span></div>
+                <script type="math/tex; mode=display">x+y</script>
+              </div>
+            </div>
+            """.trimIndent()
+
+        val blocks =
+            CodeforcesStatementParser
+                .parse(html, ProblemId(1, "A"), StatementLanguage.En)
+                .sections
+                .single()
+                .blocks
+        val inlines = blocks.filterIsInstance<StatementBlock.Paragraph>().flatMap { it.inlines }
+
+        assertEquals(listOf("x < y"), inlines.filterIsInstance<Inline.Math>().map { it.tex })
+        assertTrue(inlines.filterIsInstance<Inline.Text>().none { "rendered" in it.text })
+        assertEquals(listOf("x+y"), blocks.filterIsInstance<StatementBlock.DisplayMath>().map { it.tex })
     }
 
     @Test

@@ -114,7 +114,7 @@ object CodeforcesStatementParser {
         }
 
     private fun parseBlocks(container: Element): List<StatementBlock> {
-        val children = container.children().filterNot { it.hasClass("section-title") }
+        val children = container.children().filterNot { it.hasClass("section-title") || it.isGeneratedMathJax() }
         return if (children.isNotEmpty()) {
             children.flatMap(::parseBlock)
         } else {
@@ -131,7 +131,16 @@ object CodeforcesStatementParser {
             "table" -> listOf(parseTable(element))
             "ul", "ol" -> listOf(parseList(element))
             "div" -> parseBlocks(element)
+            "script" -> element.takeIf { it.isTexScript() }?.let(::parseScriptBlock).orEmpty()
             else -> parseParagraphBlocks(element)
+        }
+
+    private fun parseScriptBlock(element: Element): List<StatementBlock> =
+        parseTexScript(element).map { part ->
+            when (part) {
+                is InlinePart.Display -> StatementBlock.DisplayMath(part.tex)
+                is InlinePart.Value -> StatementBlock.Paragraph(listOf(part.inline))
+            }
         }
 
     private fun parseCenter(element: Element): List<StatementBlock> {
@@ -247,7 +256,7 @@ object CodeforcesStatementParser {
         style: InlineStyle,
     ): List<InlinePart> =
         when {
-            node.hasClass("MathJax_Preview") -> emptyList()
+            node.isGeneratedMathJax() -> emptyList()
             node.isTexScript() -> parseTexScript(node)
             node.tagName() == "br" -> listOf(InlinePart.Value(Inline.LineBreak))
             node.tagName() == "a" -> listOf(InlinePart.Value(node.toLink(style)))
@@ -259,6 +268,8 @@ object CodeforcesStatementParser {
         }
 
     private fun Element.isTexScript(): Boolean = tagName() == "script" && hasTexType()
+
+    private fun Element.isGeneratedMathJax(): Boolean = classes().any { it.startsWith("MathJax") }
 
     private fun Element.hasTexType(): Boolean = attr("type").lowercase(Locale.ROOT).contains("tex")
 

@@ -39,7 +39,6 @@ Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Co
 ## Notes for next
 - Re-record `2276/F.ru` directly when Codeforces permits; it uses the owner-approved `r.jina.ai` fallback disclosed in `testdata/README.md`, while the other five pages were captured in browsers.
 - `core/parser` maps statement markup to `core/model`; parse failures fall back to the WebView.
-- Fix rounds `a33680c` and `48ee6e8` addressed inline dispatch, the six-dollar test delimiter, detekt line lengths, and structural section coverage.
-- Run 41634709551's `verify` failed on parser detekt/test issues; its phone UI job stopped during emulator SDK installation before app flows.
-- Recovery `scripts/verify.sh` passed after rebasing onto `origin/main`; PR #61 was pushed without waiting for CI per Omnirush.
-- CI run 41711643028 exposed a missing `.note` in the 2274 structural-section expectation; the focused test fix adds it.
+- Fix rounds `a33680c` and `48ee6e8` addressed inline dispatch, the six-dollar delimiter, detekt line lengths, and structural section coverage; this round skips generated MathJax DOM and adds parser edge coverage.
+- CI run 41711643028 exposed a missing `.note` in the 2274 structural-section expectation; the focused test fix adds it. Run 41634709551's phone UI job stopped during emulator SDK installation before app flows.
+- `scripts/verify.sh` passes after rebasing onto `origin/main`; PR #61 is pushed without waiting for CI per Omnirush.
