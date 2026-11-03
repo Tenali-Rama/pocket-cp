@@ -45,5 +45,5 @@ After this task the data layer can ask any judge for a statement, `JudgeSource.s
 - `JudgeSource.statement` and `problemUrl` are implemented by Codeforces and fixture sources; page requests use the shared queue and parser failures map to `JudgeError.Malformed`.
 - Debug and benchmark assets include both `testdata/codeforces/api` and `testdata/codeforces/pages`; release fixture checks reject `assets/contest/`.
 - The live canary parses Codeforces problem `1A` in English and Russian and reports parser failures as `PAGE BROKEN` or Cloudflare blocks.
-- `scripts/verify.sh` passed locally before this handoff; Android compilation, unit tests, and the live canary remain GitHub Actions/nightly checks.
-- Do not undo the separate API/page asset roots or the shared-queue `CodeforcesPages` constructor; finish only any CI/compiler fixes and update this note if behavior changes.
+- `scripts/verify.sh` passes after the CI compiler and fixture-binding fixes; Android compilation, unit tests, and the live canary remain GitHub Actions/nightly checks.
+- `checkFixtureBinding` searches merged benchmark assets recursively for the recorded page marker; keep the separate API/page roots and shared-queue `CodeforcesPages` constructor.

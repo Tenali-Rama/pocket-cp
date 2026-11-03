@@ -43,7 +43,7 @@ class CodeforcesPagesTest {
         }
 
     @Test
-    fun `problemUrl builds the same URL without I/O`() {
+    fun `problemUrl builds the same URL without network access`() {
         val scope = CoroutineScope(SupervisorJob())
         try {
             val pages = CodeforcesPages(RequestQueue(HttpTransport { error("not called") }, scope))

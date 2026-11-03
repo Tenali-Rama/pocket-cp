@@ -146,7 +146,8 @@ val checkFixtureBinding by tasks.registering {
             val merged = dir.get().asFile
             val found = merged.walk().any { it.isFile && it.name == fixtureMarker }
             if (!found) problems += "$type's merged assets lack $fixtureMarker: benchmarks must serve fixtures"
-            if (!merged.resolve(fixturePageMarker).isFile) {
+            val foundPage = merged.walk().any { it.isFile && it.invariantSeparatorsPath.endsWith(fixturePageMarker) }
+            if (!foundPage) {
                 problems += "$type's merged assets lack $fixturePageMarker: benchmarks must serve pages"
             }
         }

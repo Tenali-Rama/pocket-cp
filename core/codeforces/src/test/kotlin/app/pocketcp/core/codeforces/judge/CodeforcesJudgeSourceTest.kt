@@ -8,6 +8,7 @@ import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.ContestPhase
+import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.JudgeId
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
