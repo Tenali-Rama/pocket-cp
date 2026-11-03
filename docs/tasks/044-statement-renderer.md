@@ -51,5 +51,6 @@ Spec §2 wants native screens, not a wrapper. After this task, `core/statement` 
 - Done: `core/statement` renders localized headers, styled text, lists, tables, preformatted blocks, samples, links, math fallback and Coil images; behavior tests and the full screenshot matrix are present.
 - Done: fix round centers the filled lazy list, scales math/image errors, preserves table heading weights, and uses range-level `LinkAnnotation` actions with outside-link coverage.
 - Verified: `scripts/verify.sh` passes; inspected tablet, desktop, full-width, text-scale, font-scale, phone, image-loading and image-error goldens. A one-time `pr-ci.sh 60` check is still pending, and `shots.sh 60` has no artifact while that run is active.
+- CI fix: imported Compose's `click` test gesture extension so `StatementContentTest` compiles; no renderer behavior changed.
 - Decision: statement images use the shared `OkHttpClient` with a separate Coil disk cache and bypass `RequestQueue`; see ADR 0019.
 - Next builder must not undo the datastore-independent API, centered/capped layout, scaled `MathRenderer` methods, `LinkAnnotation` ranges, or ADR 0019 image-client decision.
