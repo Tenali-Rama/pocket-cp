@@ -33,6 +33,7 @@ dependencies {
     api(project(":core:network"))
     // CodeforcesJudgeSource is a JudgeSource and returns core/model types.
     api(project(":core:model"))
+    implementation(project(":core:parser"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx.serialization)

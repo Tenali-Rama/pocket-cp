@@ -2,7 +2,9 @@
 
 Recorded responses that tests serve instead of the network (`core/testing`: `Fixtures`, `FixtureServer`).
 Tests never make live calls; every response a test needs lives here.
-Debug builds and the benchmark / Baseline Profile build types also package `codeforces/api/` as their assets and serve it as the app's data (`app`'s `FixtureJudgeSource`, ADR 0015), so the Maestro flows and the `perf` benchmarks see these files: renaming or removing one changes what they show and measure. Only `release` is live.
+Debug builds and the benchmark / Baseline Profile build types also package `codeforces/api/` and `codeforces/pages/` as
+their assets and serve them as the app's data (`app`'s `FixtureJudgeSource`, ADR 0015), so the Maestro flows and the
+`perf` benchmarks see these files: renaming or removing one changes what they show and measure. Only `release` is live.
 
 ## Layout
 - `codeforces/api/<method>.json`: an API response, e.g. `contest.list.json`.
@@ -55,3 +57,4 @@ must be re-recorded directly when Codeforces permits it. No other proxy or page 
 | `codeforces/pages/contest/2273/problem/D.en.html` | `https://codeforces.com/problemset/problem/2273/D?locale=en` | Crawl4AI | direct browser response |
 | `codeforces/pages/contest/2273/problem/D.ru.html` | `https://codeforces.com/problemset/problem/2273/D?locale=ru` | Crawl4AI | direct browser response |
 | `codeforces/pages/error.cloudflare.html` | hand-written Cloudflare challenge | hand-written | challenge detector only; not a statement page |
+| `codeforces/pages/error.non-problem.html` | hand-written non-problem page | hand-written | parser rejection only; not a statement page |

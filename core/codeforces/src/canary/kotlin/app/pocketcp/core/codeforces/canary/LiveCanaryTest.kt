@@ -1,5 +1,7 @@
 package app.pocketcp.core.codeforces.canary
 
+import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.runBlocking
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
@@ -43,15 +45,14 @@ class LiveCanaryTest {
         }
 
     @Test
-    fun `problem page has a statement`() =
+    fun `stable problem statements parse in English and Russian`() =
         runBlocking {
-            live.page(PROBLEM_URL, STATEMENT_SELECTOR)
+            live.statement(ProblemId(1, "A"), StatementLanguage.En)
+            live.statement(ProblemId(1, "A"), StatementLanguage.Ru)
         }
 
     companion object {
         private const val HANDLE = "tourist"
-        private const val PROBLEM_URL = "https://codeforces.com/problemset/problem/4/A"
-        private const val STATEMENT_SELECTOR = "div.problem-statement"
 
         @get:ClassRule
         @JvmStatic

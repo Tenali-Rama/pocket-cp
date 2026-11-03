@@ -1,6 +1,7 @@
 package app.pocketcp.judge
 
 import app.pocketcp.core.codeforces.CodeforcesApi
+import app.pocketcp.core.codeforces.CodeforcesPages
 import app.pocketcp.core.codeforces.judge.CodeforcesJudgeSource
 import app.pocketcp.core.model.JudgeSource
 import dagger.Module
@@ -18,5 +19,8 @@ import javax.inject.Singleton
 object LiveJudgeSourceModule {
     @Provides
     @Singleton
-    fun provideJudgeSource(api: CodeforcesApi): JudgeSource = CodeforcesJudgeSource(api)
+    fun provideJudgeSource(
+        api: CodeforcesApi,
+        pages: CodeforcesPages,
+    ): JudgeSource = CodeforcesJudgeSource(api, pages)
 }

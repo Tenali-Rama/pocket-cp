@@ -2,12 +2,16 @@ package app.pocketcp.judge
 
 import app.pocketcp.core.codeforces.CodeforcesApi
 import app.pocketcp.core.codeforces.CodeforcesError
+import app.pocketcp.core.codeforces.CodeforcesPages
 import app.pocketcp.core.codeforces.judge.CodeforcesJudgeSource
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.JudgeId
 import app.pocketcp.core.model.JudgeSource
 import app.pocketcp.core.model.Problem
+import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.Statement
+import app.pocketcp.core.model.StatementLanguage
 import app.pocketcp.core.model.User
 import app.pocketcp.core.network.RequestQueue
 import kotlinx.coroutines.CoroutineDispatcher
@@ -32,8 +36,9 @@ class FixtureJudgeSource(
     dispatcher: CoroutineDispatcher,
 ) : JudgeSource {
     // Not under /api/, so the queue doesn't space these local reads like Codeforces calls.
-    private val api = CodeforcesApi(RequestQueue(AssetTransport(assets, dispatcher), scope), scope, FIXTURE_URL)
-    private val codeforces = CodeforcesJudgeSource(api)
+    private val queue = RequestQueue(AssetTransport(assets, dispatcher), scope)
+    private val api = CodeforcesApi(queue, scope, FIXTURE_URL)
+    private val codeforces = CodeforcesJudgeSource(api, CodeforcesPages(queue, FIXTURE_URL))
 
     @Volatile private var recordedAt: Instant? = null
 
@@ -47,6 +52,16 @@ class FixtureJudgeSource(
     override suspend fun problemset(): List<Problem> = codeforces.problemset()
 
     override suspend fun users(handles: List<String>): List<User> = codeforces.users(handles)
+
+    override suspend fun statement(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): Statement = codeforces.statement(problem, language)
+
+    override fun problemUrl(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): String = codeforces.problemUrl(problem, language)
 
     /** When `contest.list.json` was recorded: `startTimeSeconds + relativeTimeSeconds` of any of its contests. */
     private suspend fun recordedAt(): Instant =

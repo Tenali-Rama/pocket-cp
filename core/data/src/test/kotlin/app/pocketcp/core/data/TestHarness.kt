@@ -7,6 +7,9 @@ import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.JudgeId
 import app.pocketcp.core.model.JudgeSource
 import app.pocketcp.core.model.Problem
+import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.Statement
+import app.pocketcp.core.model.StatementLanguage
 import app.pocketcp.core.model.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -42,10 +45,13 @@ internal class FakeJudgeSource : JudgeSource {
 
     var onContests: suspend (gym: Boolean) -> List<Contest> = { error("unexpected contests call") }
     var onProblemset: suspend () -> List<Problem> = { error("unexpected problemset call") }
+    var onStatement: suspend (ProblemId, StatementLanguage) -> Statement = { _, _ -> error("unexpected statement call") }
 
     var contestCalls = 0
         private set
     var problemsetCalls = 0
+        private set
+    var statementCalls = 0
         private set
 
     override suspend fun contests(gym: Boolean): List<Contest> {
@@ -59,6 +65,19 @@ internal class FakeJudgeSource : JudgeSource {
     }
 
     override suspend fun users(handles: List<String>): List<User> = error("unexpected users call")
+
+    override suspend fun statement(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): Statement {
+        statementCalls++
+        return onStatement(problem, language)
+    }
+
+    override fun problemUrl(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): String = "https://judge.invalid/${problem.display}?${language.key}"
 }
 
 /** Skips items until one matches [predicate]; the Room write and the status change may land in either order. */

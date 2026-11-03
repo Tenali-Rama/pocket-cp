@@ -3,6 +3,8 @@ package app.pocketcp.judge
 import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.JudgeSource
+import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.StatementLanguage
 import app.pocketcp.core.testing.Fixtures
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -27,7 +29,7 @@ class FixtureJudgeSourceTest {
 
     private val now = Instant.parse("2026-10-31T12:00:00Z")
     private val clock = Clock.fixed(now, ZoneOffset.UTC)
-    private val recorded = File(Fixtures.root, "codeforces/api")
+    private val recorded = File(Fixtures.root, "codeforces")
 
     @Test
     fun `contests are shifted so the recording moment is now`() =
@@ -72,6 +74,31 @@ class FixtureJudgeSourceTest {
             assertTrue("got $failure", failure is JudgeError.Malformed)
         }
 
+    @Test
+    fun `problem pages are served in both languages and a missing page is malformed`() =
+        runTest {
+            withSource(recorded) { source ->
+                val english = source.statement(ProblemId(2274, "A"), StatementLanguage.En)
+                val russian = source.statement(ProblemId(2274, "A"), StatementLanguage.Ru)
+                assertEquals("The Projections of Paco", english.title)
+                assertEquals(StatementLanguage.En, english.language)
+                assertEquals(StatementLanguage.Ru, russian.language)
+                assertEquals(
+                    "https://fixtures.invalid/contest/2274/problem/A?locale=en",
+                    source.problemUrl(ProblemId(2274, "A"), StatementLanguage.En),
+                )
+
+                val missing =
+                    try {
+                        source.statement(ProblemId(1, "A"), StatementLanguage.En)
+                        null
+                    } catch (error: Throwable) {
+                        error
+                    }
+                assertTrue("got $missing", missing is JudgeError.Malformed)
+            }
+        }
+
     /** Runs [block] on a [FixtureJudgeSource] reading [dir], with its queue on the test scheduler. */
     private suspend fun <T> TestScope.withSource(
         dir: File,
@@ -80,9 +107,19 @@ class FixtureJudgeSourceTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val scope = CoroutineScope(SupervisorJob() + dispatcher)
         try {
-            return block(FixtureJudgeSource({ name -> File(dir, name).readText() }, clock, scope, dispatcher))
+            return block(FixtureJudgeSource({ name -> fixtureFile(dir, name).readText() }, clock, scope, dispatcher))
         } finally {
             scope.cancel()
         }
     }
+
+    private fun fixtureFile(
+        root: File,
+        name: String,
+    ): File =
+        if (name.startsWith("contest/") || name.startsWith("gym/")) {
+            File(root, "pages/$name")
+        } else {
+            File(root, "api/$name")
+        }
 }

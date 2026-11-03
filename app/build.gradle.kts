@@ -12,11 +12,12 @@ plugins {
 val appVersionName = "0.2.0"
 val appVersionCode = 3
 
-// The two JudgeSource bindings (ADR 0015): live Codeforces for release only; recorded responses, with
-// testdata/codeforces/api/ as assets, for debug and the benchmark / Baseline Profile build types.
+// The two JudgeSource bindings (ADR 0015): live Codeforces for release only; recorded API responses and pages as
+// assets, for debug and the benchmark / Baseline Profile build types.
 val liveSources = "src/live/kotlin"
 val fixtureSources = "src/fixture/kotlin"
-val fixtureAssets = rootProject.file("testdata/codeforces/api")
+val fixtureApiAssets = rootProject.file("testdata/codeforces/api")
+val fixturePageAssets = rootProject.file("testdata/codeforces/pages")
 
 // release.yml passes -Pkeystore=<path> plus the env vars below. Without it the release APK is unsigned.
 val releaseKeystore = providers.gradleProperty("keystore").orNull?.let { file(it) }
@@ -51,13 +52,14 @@ android {
     }
 
     // The JudgeSource binding is per build type (ADR 0015): live Codeforces from src/live/kotlin in release only;
-    // recorded responses from src/fixture/kotlin plus testdata/codeforces/api/ as assets in debug and, below, the
+    // recorded responses from src/fixture/kotlin plus testdata/codeforces/ as assets in debug and, below, the
     // benchmark types. A new build type adds one of the two explicitly (app/CLAUDE.md).
     sourceSets {
         getByName("release").kotlin.srcDir(liveSources)
         getByName("debug") {
             kotlin.srcDir(fixtureSources)
-            assets.srcDir(fixtureAssets)
+            assets.srcDir(fixtureApiAssets)
+            assets.srcDir(fixturePageAssets)
         }
     }
 }
@@ -74,7 +76,8 @@ androidComponents {
             val sources = android.sourceSets.maybeCreate(buildType.name)
             // The plugin copies release's source dirs, src/live/kotlin included, into these types: replace them.
             sources.kotlin.setSrcDirs(listOf(fixtureSources))
-            sources.assets.srcDir(fixtureAssets)
+            sources.assets.srcDir(fixtureApiAssets)
+            sources.assets.srcDir(fixturePageAssets)
         }
         val bound = derived.map { it.name } + "debug" + "release"
         val unbound = android.buildTypes.map { it.name } - bound.toSet()
@@ -118,6 +121,7 @@ val checkBaselineProfile by tasks.registering {
 val checkFixtureBinding by tasks.registering {
     description = "Fails when the release APK holds fixture assets or a benchmark build type lacks them."
     val fixtureMarker = "contest.list.json"
+    val fixturePageMarker = "contest/2274/problem/A.en.html"
     val benchmarkTypes = listOf("benchmarkRelease", "nonMinifiedRelease")
     dependsOn("assembleRelease")
     dependsOn(benchmarkTypes.map { "merge${it.replaceFirstChar(Char::uppercase)}Assets" })
@@ -133,12 +137,18 @@ val checkFixtureBinding by tasks.registering {
                 if (zip.getEntry("assets/$fixtureMarker") != null) {
                     problems += "${apk.name} ships the fixture asset assets/$fixtureMarker: release must bind live only"
                 }
+                if (zip.entries().asSequence().any { it.name.startsWith("assets/contest/") }) {
+                    problems += "${apk.name} ships problem-page fixture assets: release must bind live only"
+                }
             }
         }
         mergedDirs.forEach { (type, dir) ->
             val merged = dir.get().asFile
             val found = merged.walk().any { it.isFile && it.name == fixtureMarker }
             if (!found) problems += "$type's merged assets lack $fixtureMarker: benchmarks must serve fixtures"
+            if (!merged.resolve(fixturePageMarker).isFile) {
+                problems += "$type's merged assets lack $fixturePageMarker: benchmarks must serve pages"
+            }
         }
         check(problems.isEmpty()) { "Fixture binding (ADR 0015):\n" + problems.joinToString("\n") }
     }

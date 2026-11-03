@@ -2,6 +2,10 @@ package app.pocketcp.core.codeforces.canary
 
 import app.pocketcp.core.codeforces.CodeforcesApi
 import app.pocketcp.core.codeforces.CodeforcesError
+import app.pocketcp.core.codeforces.CodeforcesPages
+import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.Statement
+import app.pocketcp.core.model.StatementLanguage
 import app.pocketcp.core.network.HttpClients
 import app.pocketcp.core.network.HttpTransport
 import app.pocketcp.core.network.InMemoryCookieStore
@@ -10,6 +14,8 @@ import app.pocketcp.core.network.NetworkResponse
 import app.pocketcp.core.network.OkHttpTransport
 import app.pocketcp.core.network.RequestQueue
 import app.pocketcp.core.network.SharedCookieJar
+import app.pocketcp.core.parser.CodeforcesStatementParser
+import app.pocketcp.core.parser.StatementParseError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,6 +39,7 @@ class LiveCodeforces(
     private val transport = RecordingTransport(OkHttpTransport(client))
     private val queue = RequestQueue(transport, scope)
     private val api = CodeforcesApi(queue, scope)
+    private val pages = CodeforcesPages(queue)
 
     /** Runs [call] on the API; a failure throws an [AssertionError] naming [endpoint] or the Cloudflare block. */
     suspend fun <T> endpoint(
@@ -50,14 +57,42 @@ class LiveCodeforces(
         url: String,
         selector: String,
     ) {
-        val request = Request.Builder().url(url).build()
-        val response =
-            try {
-                queue.execute(request)
-            } catch (error: NetworkError) {
-                throw failure(request.url.encodedPath, error) { CanaryReport.pageBroken(url, it) }
-            }
+        val response = fetchPage(url)
         CanaryReport.checkPage(url, response, selector)?.let { throw AssertionError(it) }
+    }
+
+    /** Fetches and parses one statement, reporting parser failures in the canary's issue-friendly format. */
+    suspend fun statement(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): Statement {
+        val url = pages.problemUrl(problem, language)
+        val html = page(url)
+        return try {
+            CodeforcesStatementParser.parse(html, problem, language)
+        } catch (error: StatementParseError.Blocked) {
+            throw AssertionError(CanaryReport.blocked(url), error)
+        } catch (error: StatementParseError.UnknownMarkup) {
+            throw AssertionError(CanaryReport.pageBroken(url, error.message.orEmpty()), error)
+        }
+    }
+
+    /** Fetches one successful page body for the parser canary. */
+    private suspend fun page(url: String): String {
+        val response = fetchPage(url)
+        if (!response.isSuccessful) {
+            throw AssertionError(CanaryReport.checkPage(url, response, STATEMENT_SELECTOR))
+        }
+        return response.body
+    }
+
+    private suspend fun fetchPage(url: String): NetworkResponse {
+        val request = Request.Builder().url(url).build()
+        return try {
+            queue.execute(request)
+        } catch (error: NetworkError) {
+            throw failure(request.url.encodedPath, error) { CanaryReport.pageBroken(url, it) }
+        }
     }
 
     /** [error] on [path] as a check failure: a Cloudflare block when the last response there was a challenge. */
@@ -83,6 +118,7 @@ class LiveCodeforces(
 
     private companion object {
         const val API_PATH = "/api/"
+        const val STATEMENT_SELECTOR = "div.problem-statement"
     }
 }
 

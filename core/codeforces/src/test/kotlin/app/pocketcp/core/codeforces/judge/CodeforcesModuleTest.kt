@@ -2,6 +2,7 @@ package app.pocketcp.core.codeforces.judge
 
 import app.pocketcp.core.codeforces.CodeforcesApi
 import app.pocketcp.core.codeforces.CodeforcesModule
+import app.pocketcp.core.codeforces.CodeforcesPages
 import app.pocketcp.core.model.JudgeSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -14,6 +15,13 @@ class CodeforcesModuleTest {
     @Test
     fun `the module provides a singleton CodeforcesApi`() {
         val provider = providers.single { it.returnType == CodeforcesApi::class.java }
+
+        assertNotNull(provider.getAnnotation(Singleton::class.java))
+    }
+
+    @Test
+    fun `the module provides singleton CodeforcesPages`() {
+        val provider = providers.single { it.returnType == CodeforcesPages::class.java }
 
         assertNotNull(provider.getAnnotation(Singleton::class.java))
     }

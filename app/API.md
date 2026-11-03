@@ -8,9 +8,9 @@ The application module: `PocketCpApplication` (`@HiltAndroidApp`) and the single
 ## Judge binding (`app.pocketcp.judge`, ADR 0015)
 | Symbol | What it is |
 |--------|-----------|
-| `LiveJudgeSourceModule` (`src/live/`) | Binds `JudgeSource` to `CodeforcesJudgeSource` on the app's `CodeforcesApi` (singleton). `release` only. |
-| `FixtureJudgeSourceModule` (`src/fixture/`) | Binds `JudgeSource` to a `FixtureJudgeSource` over the assets, `testdata/codeforces/api/` (singleton). `debug`, `benchmarkRelease`, `nonMinifiedRelease`. |
-| `FixtureJudgeSource(assets: FixtureAssets, clock, scope, dispatcher)` (fixture) | The real `CodeforcesJudgeSource` mapping over `AssetTransport` (`<method>.json`, `<method>.gym.json` for `gym=true`; missing file → HTTP 404 → `JudgeError.Malformed`). Contest starts move by `now - (startTimeSeconds + relativeTimeSeconds)` of `contest.list.json`; phases stay as recorded. Judge id `codeforces`. |
+| `LiveJudgeSourceModule` (`src/live/`) | Binds `JudgeSource` to `CodeforcesJudgeSource` on the app's singleton `CodeforcesApi` and `CodeforcesPages`. `release` only. |
+| `FixtureJudgeSourceModule` (`src/fixture/`) | Binds `JudgeSource` to a `FixtureJudgeSource` over the recorded API and page assets (singleton). `debug`, `benchmarkRelease`, `nonMinifiedRelease`. |
+| `FixtureJudgeSource(assets: FixtureAssets, clock, scope, dispatcher)` (fixture) | The real `CodeforcesJudgeSource` mapping over `AssetTransport` (`<method>.json`, `<method>.gym.json` for `gym=true`; problem pages at `contest/<id>/problem/<index>.<lang>.html`; missing file → HTTP 404 → `JudgeError.Malformed`). Contest starts move by `now - (startTimeSeconds + relativeTimeSeconds)` of `contest.list.json`; phases stay as recorded. Judge id `codeforces`. |
 | `FixtureAssets` (fixture) | `fun read(name): String`, throwing `FileNotFoundException` when missing. |
 
 ## Shell (`app.pocketcp.shell`)

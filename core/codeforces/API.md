@@ -2,7 +2,7 @@
 
 Typed client for the public Codeforces API (`contest.list`, `problemset.problems`, `user.info`) on top of the shared `RequestQueue`, with `OK`/`FAILED` envelope handling.
 
-Package `app.pocketcp.core.codeforces`. Hilt: `CodeforcesModule` (singleton) provides `CodeforcesApi` on the app's `RequestQueue`. It binds no `JudgeSource`: `app` binds `CodeforcesJudgeSource` per build type (ADR 0015).
+Package `app.pocketcp.core.codeforces`. Hilt: `CodeforcesModule` (singleton) provides `CodeforcesApi` and `CodeforcesPages` on the app's `RequestQueue`. It binds no `JudgeSource`: `app` binds `CodeforcesJudgeSource` per build type (ADR 0015).
 
 ## `CodeforcesApi(queue, scope, baseUrl = BASE_URL)`
 Each method returns the envelope's `result` or throws `CodeforcesError`. Calls run in `scope` (app lifetime) through `queue`, so they are spaced 2 s apart, deduplicated and backed off.
@@ -26,7 +26,7 @@ Each method returns the envelope's `result` or throws `CodeforcesError`. Calls r
 ## DTOs
 `ContestDto`, `ProblemsetDto(problems, problemStatistics)`, `ProblemDto`, `ProblemStatisticsDto`, `UserDto`: the API's objects with its field names; optional fields are nullable, enum-like fields (`type`, `phase`) are strings.
 
-## `judge.CodeforcesJudgeSource(api) : JudgeSource`
+## `judge.CodeforcesJudgeSource(api, pages) : JudgeSource`
 Codeforces as the app's `JudgeSource` (ADR 0009): `judge` is `CodeforcesJudgeSource.ID` = `JudgeId("codeforces")`. DTOs and `CodeforcesError` never leave it.
 
 | Codeforces | Domain |
@@ -49,3 +49,13 @@ Codeforces as the app's `JudgeSource` (ADR 0009): `judge` is `CodeforcesJudgeSou
 | `Unavailable` | `Unavailable` |
 | `Api(comment)` | `Rejected(comment)` |
 | `Http`, `Malformed` | `Malformed` |
+
+## `CodeforcesPages(queue, baseUrl = BASE_URL)`
+Fetches HTML problem pages through the shared `RequestQueue`; page requests are not API calls and are not spaced by the
+API interval. `problem(problem, language)` uses `/contest/<id>/problem/<index>?locale=<en|ru>`, or `/gym/...` for
+contest ids at least 100000, and maps queue failures and non-2xx responses to `CodeforcesError`.
+
+## `judge.CodeforcesJudgeSource(api, pages)`
+`statement` fetches a page and parses it with `CodeforcesStatementParser`. `StatementParseError` becomes
+`JudgeError.Malformed` with the parser error as its cause, so the caller can fall back to the WebView. `problemUrl`
+builds the same page URL without I/O.

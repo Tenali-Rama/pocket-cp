@@ -1,6 +1,7 @@
 package app.pocketcp.feature.problemset
 
 import app.pocketcp.core.codeforces.CodeforcesApi
+import app.pocketcp.core.codeforces.CodeforcesPages
 import app.pocketcp.core.codeforces.judge.CodeforcesJudgeSource
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.network.RequestQueue
@@ -23,7 +24,8 @@ private fun loadFixtureProblems(): List<Problem> {
         val scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
         try {
             val server = FixtureServer().map("/api/problemset.problems", "codeforces/api/problemset.problems.json")
-            problems = CodeforcesJudgeSource(CodeforcesApi(RequestQueue(server, scope), scope)).problemset()
+            val queue = RequestQueue(server, scope)
+            problems = CodeforcesJudgeSource(CodeforcesApi(queue, scope), CodeforcesPages(queue)).problemset()
         } finally {
             scope.cancel()
         }

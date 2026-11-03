@@ -1,7 +1,9 @@
 package app.pocketcp.core.codeforces.judge
 
 import app.pocketcp.core.codeforces.ApiFixtures
-import app.pocketcp.core.codeforces.withApi
+import app.pocketcp.core.codeforces.CodeforcesApi
+import app.pocketcp.core.codeforces.CodeforcesPages
+import app.pocketcp.core.codeforces.failureOf
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.ContestKind
@@ -9,16 +11,24 @@ import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.JudgeId
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.StatementLanguage
 import app.pocketcp.core.model.User
 import app.pocketcp.core.network.HttpTransport
+import app.pocketcp.core.network.RequestQueue
+import app.pocketcp.core.parser.StatementParseError
 import app.pocketcp.core.testing.FixtureServer
 import app.pocketcp.core.testing.Fixtures
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.IOException
 import java.time.Duration
 import java.time.Instant
 
@@ -177,10 +187,68 @@ class CodeforcesJudgeSourceTest {
             assertEquals(expected, users)
         }
 
+    @Test
+    fun `a statement parses its title and samples`() =
+        runTest {
+            val server = FixtureServer().map("/contest/2274/problem/A?locale=en", PAGE_EN)
+
+            val statement = withSource(server) { it.statement(ProblemId(2274, "A"), StatementLanguage.En) }
+
+            assertEquals("The Projections of Paco", statement.title)
+            assertEquals(2, statement.samples.size)
+        }
+
+    @Test
+    fun `a challenge page and a non-problem page are malformed`() =
+        runTest {
+            val server =
+                FixtureServer()
+                    .map("/contest/2274/problem/A?locale=en", CHALLENGE)
+                    .map("/contest/2274/problem/A?locale=ru", NON_PROBLEM)
+
+            val challenge =
+                withSource(server) { failureOf { it.statement(ProblemId(2274, "A"), StatementLanguage.En) } }
+            val nonProblem =
+                withSource(server) { failureOf { it.statement(ProblemId(2274, "A"), StatementLanguage.Ru) } }
+
+            assertTrue(challenge is JudgeError.Malformed)
+            assertTrue((challenge as JudgeError.Malformed).cause is StatementParseError.Blocked)
+            assertTrue(nonProblem is JudgeError.Malformed)
+            assertTrue((nonProblem as JudgeError.Malformed).cause is StatementParseError.UnknownMarkup)
+        }
+
+    @Test
+    fun `offline statement fetch maps to JudgeError Offline`() =
+        runTest {
+            val error =
+                withSource(HttpTransport { throw IOException("offline") }) {
+                    failureOf { it.statement(ProblemId(2274, "A"), StatementLanguage.En) }
+                }
+
+            assertTrue("got $error", error is JudgeError.Offline)
+        }
+
+    @Test
+    fun `HTTP 503 statement fetch maps to JudgeError Unavailable`() =
+        runTest {
+            val server = FixtureServer().map("/contest/2274/problem/A?locale=en", PAGE_EN, code = 503)
+
+            val error =
+                withSource(server) {
+                    failureOf { it.statement(ProblemId(2274, "A"), StatementLanguage.En) }
+                }
+
+            assertTrue("got $error", error is JudgeError.Unavailable)
+            assertEquals(4, server.requests.size)
+        }
+
     private companion object {
         const val PHASES = "codeforces/api/contest.list.phases.json"
         const val MIXED = "codeforces/api/problemset.problems.mixed.json"
         const val UNRATED = "codeforces/api/user.info.unrated.json"
+        const val PAGE_EN = "codeforces/pages/contest/2274/problem/A.en.html"
+        const val CHALLENGE = "codeforces/pages/error.cloudflare.html"
+        const val NON_PROBLEM = "codeforces/pages/error.non-problem.html"
     }
 }
 
@@ -188,4 +256,13 @@ class CodeforcesJudgeSourceTest {
 internal suspend fun <T> TestScope.withSource(
     transport: HttpTransport,
     block: suspend TestScope.(CodeforcesJudgeSource) -> T,
-): T = withApi(transport) { api -> block(CodeforcesJudgeSource(api)) }
+): T {
+    val dispatcher = StandardTestDispatcher(testScheduler)
+    val scope = CoroutineScope(SupervisorJob() + dispatcher)
+    try {
+        val queue = RequestQueue(transport, scope)
+        return block(CodeforcesJudgeSource(CodeforcesApi(queue, scope), CodeforcesPages(queue)))
+    } finally {
+        scope.cancel()
+    }
+}

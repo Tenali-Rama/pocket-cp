@@ -15,4 +15,16 @@ interface JudgeSource {
 
     /** The users with these [handles]. */
     suspend fun users(handles: List<String>): List<User>
+
+    /** The [problem]'s native statement in [language]. */
+    suspend fun statement(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): Statement
+
+    /** The page URL for [problem]'s statement in [language], for the WebView fallback. */
+    fun problemUrl(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): String
 }
