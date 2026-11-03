@@ -44,8 +44,10 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
   dependency, WebView, native binary, or R8 keep rule is needed. See ADR 0020.
 - Source fallback is preserved for malformed or unknown TeX, and `NativeTexTypesetter` caches by TeX, pixel size and
   colour; `MathRendererTest` covers the required syntax, fallback, cache hit and source content description.
-- Added `statementMath_*` screenshot captures and the invalid-source capture. CI must record/accept their goldens and
-  re-accept the existing `statementGallery_*` goldens after the native renderer changes them.
-- Local `scripts/verify.sh` passes. Do not replace the native parser with a WebView or network-backed renderer.
-- Handoff: implementation and static checks are complete; next builder must run the CI feedback, accept only the fresh
-  math/gallery goldens, and preserve the zero-dependency native-canvas decision.
+- Added `statementMath_*` captures, including font150, textLargest and invalid-source variants. CI must record/accept
+  the fresh math goldens and re-accept existing `statementGallery_*` goldens after native rendering changes them.
+- Local `scripts/verify.sh` passes. CI run 41736231982 found and is addressed by the current worktree: missing
+  `nativeCanvas` import and an internal `DrawCommand` visibility error in the native renderer.
+- Remaining: a fresh CI-fix builder must push/recheck compilation, inspect at most eight fresh tablet/phone goldens,
+  accept only the changed math/gallery images, and preserve the zero-dependency native-canvas decision. The prior
+  tablet failure was emulator SDK-image download/ADB infrastructure, not a test assertion.
