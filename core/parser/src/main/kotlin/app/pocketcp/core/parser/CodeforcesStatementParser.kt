@@ -269,7 +269,7 @@ object CodeforcesStatementParser {
 
     private fun Element.isTexScript(): Boolean = tagName() == "script" && hasTexType()
 
-    private fun Element.isGeneratedMathJax(): Boolean = classes().any { it.startsWith("MathJax") }
+    private fun Element.isGeneratedMathJax(): Boolean = classNames().any { it.startsWith("MathJax") }
 
     private fun Element.hasTexType(): Boolean = attr("type").lowercase(Locale.ROOT).contains("tex")
 

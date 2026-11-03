@@ -42,3 +42,4 @@ Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Co
 - Fix rounds `a33680c` and `48ee6e8` addressed inline dispatch, the six-dollar delimiter, detekt line lengths, and structural section coverage; this round skips generated MathJax DOM and adds parser edge coverage.
 - CI run 41711643028 exposed a missing `.note` in the 2274 structural-section expectation; the focused test fix adds it. Run 41634709551's phone UI job stopped during emulator SDK installation before app flows.
 - `scripts/verify.sh` passes after rebasing onto `origin/main`; PR #61 is pushed without waiting for CI per Omnirush.
+- CI run 41721545021 exposed the Jsoup `Element.classes()` compile error; the MathJax helper now uses `classNames()`.
