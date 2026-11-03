@@ -35,7 +35,7 @@ elif sys.argv[2] == "higher":
     agent("high", 155_000)
 elif sys.argv[2].startswith(("failed:", "succeeded:")):
     outcome, sid = sys.argv[2].split(":")
-    agent(sid, 5_000)
+    agent(sid, 5_000, parent=None if sid == "coo" else "coo")
     data = {"outcome": outcome, "error": {"message": "upstream_error", "status": 502}}
     db.execute("insert into session_message values (?,?,?,?,?)", (sid, "idle", 1, now + 5000, json.dumps(data)))
 db.commit()
@@ -70,7 +70,8 @@ out=$(run)
 
 python3 "$tmp/db.py" "$db" failed:broken
 out=$(run)
-grep -q '"Title broken".*stopped with an error: upstream_error' <<<"$out" || fail "failed agent not reported: $out"
+grep -q '"Title broken".*stopped with an error: upstream_error.*resume this same agent' <<<"$out" ||
+  fail "failed agent not reported: $out"
 out=$(run)
 [ -z "$out" ] || fail "failed agent reported twice: $out"
 
@@ -79,6 +80,11 @@ out=$(gap=3600 run)
 [ -z "$out" ] || fail "failure reported inside the quiet gap: $out"
 out=$(run)
 grep -q '"Title broken2"' <<<"$out" || fail "failure lost after the quiet gap: $out"
+
+python3 "$tmp/db.py" "$db" failed:coo
+out=$(run)
+grep -q 'Your last request stopped with an error' <<<"$out" || fail "COO's own failure not reported: $out"
+grep -q 'resume this same agent' <<<"$out" && fail "COO told to resume itself: $out"
 
 cat >"$tmp/ci.json" <<'JSON'
 [{"pr":1,"sha":"aaaaaaaaaa","status":"completed","conclusion":"failure","run":10},

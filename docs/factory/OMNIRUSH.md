@@ -46,14 +46,15 @@ Keep typed messages to the COO short while it runs: its messages are pasted into
 - Keep output short. Pipe anything long through `tail -n 80` or `head -n 80`, send install logs to a file, limit searches (`grep -l`, or `| head`), and read logs only through `scripts/factory/ci-digest.sh <pr>`. Read each screenshot once.
 
 **The COO.**
-- Never resume a builder after it returns, or after the watcher reports it over the limit. Start a fresh one with the task file, the PR number and the next step. Resume only an agent that died below the limit.
+- Never resume a builder after it returns, or after the watcher reports it over the limit. Start a fresh one with the task file, the PR number and the next step.
+- An agent that died on an error below the limit still holds its work, so resume it. Start a fresh one only after 2 failed resumes.
 - After `PUSHED`, wait for the watcher's message instead of checking CI.
   - `failure` → a fresh builder gets the output of `scripts/factory/ci-digest.sh <pr>`.
   - `success`, with screenshots or criteria still to check → a fresh builder does `builder.md` §5.4 onward, and returns `PUSHED` after any push.
   - `success`, with nothing left → `gh pr ready <pr>`, then spawn the reviewer.
 - If a builder has returned `PUSHED` or `HANDOFF` 3 times without progress on the same CI failure, handle it like `BLOCKED`.
 - Check CI yourself only with the one-line `scripts/factory/pr-ci.sh <pr>`, never with JSON dumps.
-- After an agent error, retry with waits. Never go idle while tasks are in flight.
+- After an agent error, wait about 3 minutes before resuming, because these service errors last a few minutes. Never go idle while tasks are in flight.
 - Restart your own session between milestones, once `.factory/state.md` is current. Other projects on this account spend the same tokens, so check `omnirush usage` then too.
 
 ## What is enforced differently

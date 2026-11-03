@@ -57,7 +57,7 @@ def context_alerts(db, project, limit, step, seen, now_ms):
 def failure_alerts(db, project, started_ms, seen):
     """One line per agent whose latest message is a failed stop that we haven't reported."""
     lines = []
-    for sid, title, _parent, _idle, _updated in agent_rows(db, project):
+    for sid, title, parent, _idle, _updated in agent_rows(db, project):
         row = db.execute(
             "select type, seq, time_created, data from session_message where session_id = ? order by seq desc limit 1",
             (sid,),
@@ -69,10 +69,14 @@ def failure_alerts(db, project, started_ms, seen):
             continue
         seen[sid] = row[1]
         message = str((data.get("error") or {}).get("message"))[:120]
-        lines.append(
-            f'Agent "{title}" ({sid}) stopped with an error: {message}. Don\'t go idle. Retry with a fresh agent from '
-            "the task file and its PR; if the service error repeats, the watcher will report it again."
-        )
+        if parent:
+            lines.append(
+                f'Agent "{title}" ({sid}) stopped with an error: {message}. Don\'t go idle. Wait about 3 minutes, then '
+                "resume this same agent, because its context and worktree still hold its work. Start a fresh one only "
+                "if it is over the context limit or 2 resumes have failed."
+            )
+        else:
+            lines.append(f"Your last request stopped with an error: {message}. Continue where you left off.")
     return lines
 
 
