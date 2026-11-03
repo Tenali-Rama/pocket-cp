@@ -40,7 +40,7 @@ class CodeforcesStatementParserTest {
         val english = parseFixture("2274", "A", "en")
         val russian = parseFixture("2274", "A", "ru")
 
-        val expected = listOf(SectionKind.Legend, SectionKind.Input, SectionKind.Output)
+        val expected = listOf(SectionKind.Legend, SectionKind.Input, SectionKind.Output, SectionKind.Note)
         assertEquals(expected, english.sections.map { it.kind })
         assertEquals(expected, russian.sections.map { it.kind })
     }
