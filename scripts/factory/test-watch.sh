@@ -17,16 +17,17 @@ db = sqlite3.connect(sys.argv[1])
 db.executescript("""create table if not exists session_v2(id, title, parent_id, directory, time_idle, time_updated);
 create table if not exists session_message(session_id, type, seq, time_created, data);""")
 now = int(time.time() * 1000)
-def agent(sid, context, directory="/p", parent="coo", age=0, idle=None):
+def agent(sid, context, directory="/p", parent="coo", age=0, idle=None, cache_write=0):
     t = now - age
     db.execute("delete from session_v2 where id = ?", (sid,))
     db.execute("insert into session_v2 values (?,?,?,?,?,?)", (sid, "Title " + sid, parent, directory, idle, t))
     seq = db.execute("select count(*) from session_message where session_id = ?", (sid,)).fetchone()[0]
-    data = {"tokens": {"input": 1000, "cache": {"read": context - 1000}}}
+    data = {"tokens": {"input": 1000, "cache": {"read": context - 1000 - cache_write, "write": cache_write}}}
     db.execute("insert into session_message values (?,?,?,?,?)", (sid, "assistant", seq, t, json.dumps(data)))
 if sys.argv[2] == "seed":
     agent("low", 90_000)
     agent("high", 120_000)
+    agent("cache-write", 110_000, cache_write=20_000)
     agent("other-project", 300_000, directory="/other")
     agent("top-level", 300_000, parent=None)
     agent("old", 300_000, age=3_600_000)
@@ -52,6 +53,7 @@ run() {
 out=$(run)
 grep -q '"Title high"' <<<"$out" || fail "agent over the limit not reported: $out"
 grep -q '120k context' <<<"$out" || fail "context size missing: $out"
+grep -q '"Title cache-write".*110k context' <<<"$out" || fail "cache writes missing from context: $out"
 for quiet in low other-project top-level old finished; do
   grep -q "Title $quiet\"" <<<"$out" && fail "$quiet should not be reported: $out"
 done
@@ -98,6 +100,40 @@ grep -q 'PR #4 at ddddddd: success, run 40\.' <<<"$out" || fail "CI success not 
 grep -q 'PR #1' <<<"$out" && fail "already-known CI result repeated: $out"
 grep -q 'PR #2' <<<"$out" && fail "running CI reported as finished: $out"
 [ -z "$(run)" ] || fail "CI result reported twice"
+
+db_path=$(OPENCODE_DB="$tmp/override.db" XDG_DATA_HOME="$tmp/data" HOME="$tmp/home" python3 - "$root/scripts/factory/watch.py" <<'PY'
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("watch", sys.argv[1])
+watch = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(watch)
+print(watch.default_database())
+PY
+)
+[ "$db_path" = "$tmp/override.db" ] || fail "OPENCODE_DB was not preferred: $db_path"
+db_path=$(XDG_DATA_HOME="$tmp/data" HOME="$tmp/home" python3 - "$root/scripts/factory/watch.py" <<'PY'
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("watch", sys.argv[1])
+watch = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(watch)
+print(watch.default_database())
+PY
+)
+[ "$db_path" = "$tmp/data/omnirush/opencode.db" ] || fail "XDG_DATA_HOME was not used: $db_path"
+db_path=$(env -u OPENCODE_DB -u XDG_DATA_HOME HOME="$tmp/home" python3 - "$root/scripts/factory/watch.py" <<'PY'
+import importlib.util
+import sys
+
+spec = importlib.util.spec_from_file_location("watch", sys.argv[1])
+watch = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(watch)
+print(watch.default_database())
+PY
+)
+[ "$db_path" = "$tmp/home/.local/share/omnirush/opencode.db" ] || fail "HOME fallback was not used: $db_path"
 
 cat >"$tmp/gradle.log" <<'LOG'
 > Task :core:parser:compileKotlin

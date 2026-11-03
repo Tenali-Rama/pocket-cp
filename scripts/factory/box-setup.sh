@@ -11,9 +11,14 @@ main_checkout=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir
 token_file="$main_checkout/.factory/gh_token"
 
 export DEBIAN_FRONTEND=noninteractive
-if ! command -v java >/dev/null || ! command -v jq >/dev/null || ! command -v curl >/dev/null; then
+if ! command -v java >/dev/null || ! command -v jq >/dev/null || ! command -v curl >/dev/null || ! command -v python3 >/dev/null; then
   apt-get update -qq
-  apt-get install -y -qq jq curl python3 openjdk-17-jre-headless >/dev/null
+fi
+if ! command -v java >/dev/null || ! command -v jq >/dev/null || ! command -v curl >/dev/null; then
+  apt-get install -y -qq jq curl openjdk-17-jre-headless >/dev/null
+fi
+if ! command -v python3 >/dev/null; then
+  apt-get install -y -qq python3 >/dev/null
 fi
 # The box's network drops connections now and then.
 fetch() { curl -fsSL --retry 5 --retry-all-errors --retry-delay 5 "$@"; }

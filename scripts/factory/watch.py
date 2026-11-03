@@ -42,7 +42,8 @@ def context_alerts(db, project, limit, step, seen, now_ms):
         if not row or (idle and idle >= row[1]):
             continue
         tokens = json.loads(row[0]).get("tokens") or {}
-        context = tokens.get("input", 0) + (tokens.get("cache") or {}).get("read", 0)
+        cache = tokens.get("cache") or {}
+        context = tokens.get("input", 0) + cache.get("read", 0) + cache.get("write", 0)
         # Below the limit this is negative, so it never beats the -1 default.
         band = (context - limit) // step
         if band > seen.get(sid, -1):
@@ -146,6 +147,15 @@ def load_state(path, now):
     return {"started": now, "context": {}, "failures": {}, "ci": {}, "last_failure_note": 0}, True
 
 
+def default_database():
+    """Return the configured Omnirush database, or its standard data-directory location."""
+    configured = os.environ.get("OPENCODE_DB")
+    if configured:
+        return configured
+    data_home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    return os.path.join(data_home, "omnirush", "opencode.db")
+
+
 def tick(args, state, first_run):
     now = time.time()
     db = sqlite3.connect(f"file:{args.db}?mode=ro", uri=True)
@@ -176,7 +186,7 @@ def main():
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", default=root)
-    parser.add_argument("--db", default=os.path.expanduser("~/.local/share/omnirush/opencode.db"))
+    parser.add_argument("--db", default=default_database())
     parser.add_argument("--state", default=os.path.join(root, ".factory/watch-state.json"))
     parser.add_argument("--session", default="coo")
     parser.add_argument("--limit", type=int, default=100_000)
