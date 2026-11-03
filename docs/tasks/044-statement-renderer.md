@@ -48,8 +48,8 @@ Spec §2 wants native screens, not a wrapper. After this task, `core/statement` 
 
 ## Notes for next
 <!-- builder fills in -->
-- Added `core/statement` with lazy native rendering, localized metadata, samples, links, math slot and Coil image loading.
-- Statement images use a shared-client Coil loader and a separate disk cache; see ADR 0019.
-- Added statement gallery and Robolectric Compose behaviour tests; CI must generate and accept fresh statement/theme-token goldens.
-- Reaccepted the intended statement gallery and design-token goldens after adding the reading-width and image-placeholder tokens.
-- Recovered the CI-generated goldens and fixed the renderer line-length failure from the previous verify run.
+- Done: `core/statement` renders localized headers, styled text, lists, tables, preformatted blocks, samples, links, math fallback and Coil images; behavior tests and the full screenshot matrix are present.
+- Done: reading-width/image-placeholder tokens and matching theme-token/statement goldens are included; the prior CI line-length failure is fixed.
+- Decision: statement images use the shared `OkHttpClient` with a separate Coil disk cache and bypass `RequestQueue`; see ADR 0019.
+- Remaining: run `scripts/verify.sh` and let the rebased PR head receive CI verification; this VM must not run Gradle or emulator checks.
+- Next builder must keep the `core/statement` API independent of `core/datastore`, preserve the goldens, and not revert ADR 0019.
