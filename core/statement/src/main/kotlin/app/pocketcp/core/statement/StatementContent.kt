@@ -2,8 +2,6 @@
 
 package app.pocketcp.core.statement
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,22 +23,19 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import app.pocketcp.core.designsystem.PocketCpTheme
@@ -52,8 +47,6 @@ import app.pocketcp.core.model.StatementSection
 import app.pocketcp.core.model.TableCell
 import app.pocketcp.core.model.TableRow
 import app.pocketcp.core.statement.math.LocalMathRenderer
-
-private const val LINK_TAG = "statement_link"
 
 /**
  * Renders one problem statement as a lazy, native Compose reading view.
@@ -76,10 +69,10 @@ fun StatementContent(
         if (maxWidth == Dp.Infinity) {
             Modifier.fillMaxWidth()
         } else {
-            Modifier.widthIn(max = maxWidth)
+            Modifier.widthIn(max = maxWidth).fillMaxWidth()
         }
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         state = state,
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.lg),
@@ -209,9 +202,9 @@ private fun StatementBlockContent(
         is StatementBlock.Paragraph -> InlineText(block.inlines, textScale, onOpenLink, modifier)
         is StatementBlock.DisplayMath ->
             Box(modifier) {
-                LocalMathRenderer.current.Display(block.tex)
+                LocalMathRenderer.current.Display(block.tex, textScale)
             }
-        is StatementBlock.Image -> StatementImage(block, modifier)
+        is StatementBlock.Image -> StatementImage(block, textScale, modifier)
         is StatementBlock.Table -> StatementTable(block.rows, textScale, onOpenLink, modifier)
         is StatementBlock.ListBlock -> StatementList(block, textScale, onOpenLink, modifier)
         is StatementBlock.Preformatted -> Preformatted(block.text, textScale, modifier)
@@ -226,7 +219,7 @@ private fun InlineText(
     modifier: Modifier,
     style: TextStyle = statementStyle(PocketCpTheme.typography.body, textScale),
 ) {
-    val annotated = annotatedText(inlines)
+    val annotated = annotatedText(inlines, onOpenLink)
     val inlineContent =
         inlines
             .mapIndexedNotNull { index, inline ->
@@ -240,53 +233,35 @@ private fun InlineText(
                                     placeholderVerticalAlign = androidx.compose.ui.text.PlaceholderVerticalAlign.Center,
                                 ),
                         ) {
-                            LocalMathRenderer.current.Inline(inline.tex)
+                            LocalMathRenderer.current.Inline(inline.tex, textScale)
                         }
                 } else {
                     null
                 }
             }.toMap()
-    val links = annotated.getStringAnnotations(LINK_TAG, 0, annotated.length)
-    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-    val textModifier =
-        modifier
-            .padding(vertical = PocketCpTheme.spacing.xs)
-            .pointerInput(annotated) {
-                detectTapGestures { position ->
-                    layoutResult?.getOffsetForPosition(position)?.let { offset ->
-                        annotated.getStringAnnotations(LINK_TAG, offset, offset).firstOrNull()?.let { annotation ->
-                            onOpenLink(annotation.item)
-                        }
-                    }
-                }
-            }
-    val clickableModifier =
-        if (links.size == 1) {
-            textModifier.clickable { onOpenLink(links.first().item) }
-        } else {
-            textModifier
-        }
     BasicText(
         text = annotated,
         style = style.copy(color = PocketCpTheme.colors.onSurface),
         inlineContent = inlineContent,
-        modifier = clickableModifier,
-        onTextLayout = { layoutResult = it },
+        modifier = modifier.padding(vertical = PocketCpTheme.spacing.xs),
     )
 }
 
 @Composable
-private fun annotatedText(inlines: List<Inline>): AnnotatedString =
+private fun annotatedText(
+    inlines: List<Inline>,
+    onOpenLink: (String) -> Unit,
+): AnnotatedString =
     buildAnnotatedString {
         inlines.forEachIndexed { index, inline ->
             when (inline) {
                 is Inline.Text -> {
-                    val weight = if (inline.bold) FontWeight.Bold else FontWeight.Normal
+                    val weight = if (inline.bold) FontWeight.Bold else null
                     val style =
                         if (inline.italic) {
                             androidx.compose.ui.text.font.FontStyle.Italic
                         } else {
-                            androidx.compose.ui.text.font.FontStyle.Normal
+                            null
                         }
                     withStyle(
                         SpanStyle(
@@ -298,14 +273,22 @@ private fun annotatedText(inlines: List<Inline>): AnnotatedString =
                 }
                 is Inline.Math -> appendInlineContent("math_$index", inline.tex)
                 is Inline.Link -> {
-                    pushStringAnnotation(LINK_TAG, inline.url)
-                    withStyle(
-                        SpanStyle(
-                            color = PocketCpTheme.colors.primary,
-                            textDecoration = TextDecoration.Underline,
+                    withLink(
+                        LinkAnnotation.Url(
+                            url = inline.url,
+                            styles =
+                                TextLinkStyles(
+                                    style =
+                                        SpanStyle(
+                                            color = PocketCpTheme.colors.primary,
+                                            textDecoration = TextDecoration.Underline,
+                                        ),
+                                ),
+                            linkInteractionListener = { link ->
+                                onOpenLink((link as LinkAnnotation.Url).url)
+                            },
                         ),
                     ) { append(inline.text) }
-                    pop()
                 }
                 Inline.LineBreak -> append('\n')
             }

@@ -52,4 +52,4 @@ Spec §2 wants native screens, not a wrapper. After this task, `core/statement` 
 - Done: reading-width/image-placeholder tokens and matching theme-token/statement goldens are included; the prior CI line-length failure is fixed.
 - Decision: statement images use the shared `OkHttpClient` with a separate Coil disk cache and bypass `RequestQueue`; see ADR 0019.
 - Verified: `scripts/verify.sh` passes all local checks; representative tablet, phone, narrow/full-width, loading and error goldens were reviewed.
-- Next builder must keep the `core/statement` API independent of `core/datastore`, preserve the goldens, and not revert ADR 0019.
+- Fix round: the reading list now fills and centers its capped column, scales math/image errors, preserves table headings, and uses range-level `LinkAnnotation` actions.

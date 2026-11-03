@@ -4,13 +4,17 @@ import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.getFirstLinkBounds
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performFirstLinkClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
@@ -27,6 +31,7 @@ import app.pocketcp.core.model.StatementBlock
 import app.pocketcp.core.model.StatementLanguage
 import app.pocketcp.core.model.StatementSection
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -73,9 +78,39 @@ class StatementContentTest {
             ),
         ) { opened = it }
 
-        rule.onNodeWithText("editorial").performClick()
+        rule.onNodeWithText("editorial").performFirstLinkClick()
 
         assertEquals("https://codeforces.com/blog/1", opened)
+    }
+
+    @Test
+    fun tappingParagraphTextOutsideLinkDoesNotOpenItsUrl() {
+        var opened: String? = null
+        setContent(
+            statement(
+                sections =
+                    listOf(
+                        StatementSection(
+                            SectionKind.Legend,
+                            "Legend",
+                            listOf(
+                                StatementBlock.Paragraph(
+                                    listOf(
+                                        Inline.Text("prefix "),
+                                        Inline.Link("editorial", "https://codeforces.com/blog/1"),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+            ),
+        ) { opened = it }
+
+        val paragraph = rule.onNodeWithText("prefix editorial")
+        val linkBounds = paragraph.getFirstLinkBounds()
+        paragraph.performTouchInput { click(Offset(1f, linkBounds!!.center.y)) }
+
+        assertNull(opened)
     }
 
     @Test

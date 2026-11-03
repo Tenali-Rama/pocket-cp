@@ -173,6 +173,7 @@ internal fun Materials(
 @Composable
 internal fun StatementImage(
     block: StatementBlock.Image,
+    textScale: Float,
     modifier: Modifier,
 ) {
     val context = LocalContext.current
@@ -202,7 +203,7 @@ internal fun StatementImage(
             Text(
                 text =
                     block.description ?: context.getString(R.string.statement_image_unavailable),
-                style = PocketCpTheme.typography.bodySmall,
+                style = statementStyle(PocketCpTheme.typography.bodySmall, textScale),
                 color = PocketCpTheme.colors.onSurfaceMuted,
                 modifier = Modifier.padding(vertical = PocketCpTheme.spacing.md),
             )
