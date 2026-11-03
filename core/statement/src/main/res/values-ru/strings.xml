@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="statement_time_limit">ограничение по времени на тест: %1$s</string>
+    <string name="statement_memory_limit">ограничение по памяти на тест: %1$s</string>
+    <string name="statement_input">ввод: %1$s</string>
+    <string name="statement_output">вывод: %1$s</string>
+    <string name="statement_standard_input">стандартный ввод</string>
+    <string name="statement_standard_output">стандартный вывод</string>
+    <string name="statement_example">Пример %1$d</string>
+    <string name="statement_input_label">Входные данные</string>
+    <string name="statement_output_label">Выходные данные</string>
+    <string name="statement_copy">Копировать</string>
+    <string name="statement_copy_input_description">Скопировать входные данные примера %1$d</string>
+    <string name="statement_copy_output_description">Скопировать выходные данные примера %1$d</string>
+    <string name="statement_image_unavailable">Изображение недоступно</string>
+    <string name="statement_section_legend">Описание</string>
+    <string name="statement_section_input">Входные данные</string>
+    <string name="statement_section_output">Выходные данные</string>
+    <string name="statement_section_interaction">Протокол взаимодействия</string>
+    <string name="statement_section_scoring">Система оценки</string>
+    <string name="statement_section_note">Примечание</string>
+    <string name="statement_section_other">Дополнительная информация</string>
+</resources>

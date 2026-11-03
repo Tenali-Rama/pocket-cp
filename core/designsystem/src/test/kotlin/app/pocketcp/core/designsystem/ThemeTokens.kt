@@ -40,6 +40,7 @@ internal fun ThemeTokens(mode: ThemeMode) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(spacing.lg)) {
                     Palette()
                     RankColours()
+                    ReadingSpacing()
                 }
                 Column(Modifier.weight(1f)) { TypeScale(mode) }
             }
@@ -47,9 +48,20 @@ internal fun ThemeTokens(mode: ThemeMode) {
             Column(verticalArrangement = Arrangement.spacedBy(spacing.md)) {
                 Palette()
                 RankColours()
+                ReadingSpacing()
                 TypeScale(mode)
             }
         }
+    }
+}
+
+@Composable
+private fun ReadingSpacing() {
+    val spacing = PocketCpTheme.spacing
+    Section("Statement reading") {
+        Text("Narrow width: ${spacing.readingWidthNarrow}", style = PocketCpTheme.typography.bodySmall)
+        Text("Comfortable width: ${spacing.readingWidthComfortable}", style = PocketCpTheme.typography.bodySmall)
+        Text("Image placeholder: ${spacing.imagePlaceholderHeight}", style = PocketCpTheme.typography.bodySmall)
     }
 }
 

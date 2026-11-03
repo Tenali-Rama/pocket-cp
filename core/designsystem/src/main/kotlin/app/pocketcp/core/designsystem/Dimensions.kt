@@ -20,6 +20,9 @@ enum class UiDensity { Comfortable, Compact }
  * @property listItemHeight minimum height of a one-line row; never below [touchTarget].
  * @property listItemTwoLineHeight minimum height of a row with a supporting line; never below [touchTarget].
  * @property cardVertical top and bottom inset of text placed directly in a card (rows pad themselves).
+ * @property readingWidthNarrow maximum width for a narrow statement reading column.
+ * @property readingWidthComfortable maximum width for a comfortable statement reading column.
+ * @property imagePlaceholderHeight height of a statement image while it is loading.
  */
 @Immutable
 data class PocketCpSpacing(
@@ -35,6 +38,9 @@ data class PocketCpSpacing(
     val listItemHeight: Dp = 56.dp,
     val listItemTwoLineHeight: Dp = 72.dp,
     val cardVertical: Dp = 16.dp,
+    val readingWidthNarrow: Dp = 560.dp,
+    val readingWidthComfortable: Dp = 720.dp,
+    val imagePlaceholderHeight: Dp = 160.dp,
 ) {
     companion object {
         /** The spacing for [density]: [UiDensity.Compact] trims the vertical padding of rows and cards. */
