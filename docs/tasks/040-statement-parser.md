@@ -42,3 +42,4 @@ Spec §4 and §18 want HTML parsing isolated, so it can be fixed quickly when Co
 - Five pages were captured through direct headless-browser tools; one page (`2276/F.ru`) used the approved `r.jina.ai` fallback after all three browser tools received Cloudflare.
 - The fallback fixture is disclosed in `testdata/README.md` and must be re-recorded directly when Codeforces permits it.
 - `core/parser` maps statement markup to `core/model`; parse failures fall back to the WebView.
+- Fix round `a33680c` splits inline-element dispatch to satisfy `NestedBlockDepth` and builds the six-dollar test delimiter without interpolating `x`; local `scripts/verify.sh` passes.
