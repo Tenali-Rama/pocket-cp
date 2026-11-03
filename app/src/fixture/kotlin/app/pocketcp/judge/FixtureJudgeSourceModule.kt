@@ -16,8 +16,7 @@ import javax.inject.Singleton
 
 /**
  * Debug and the benchmark build types bind recorded Codeforces responses as the app's [JudgeSource] (ADR 0015).
- * The API and page files are their assets, from `testdata/codeforces/api/` and `testdata/codeforces/pages/`. Only
- * `release` binds the live source (`src/live/`).
+ * The files are their assets, i.e. `testdata/codeforces/api/`. Only `release` binds the live source (`src/live/`).
  */
 @Module
 @InstallIn(SingletonComponent::class)
