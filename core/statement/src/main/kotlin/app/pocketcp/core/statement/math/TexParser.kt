@@ -261,10 +261,13 @@ private fun TexCursor.parseCell(): TexNode {
 
 private fun TexCursor.hasCellContent(): Boolean {
     skipWhitespace()
-    return position < source.length &&
-        source[position] != '&' &&
-        !source.startsWith("\\\\", position) &&
-        !source.startsWith("\\end", position)
+    return when {
+        position >= source.length -> false
+        source[position] == '&' -> false
+        source.startsWith("\\\\", position) -> false
+        source.startsWith("\\end", position) -> false
+        else -> true
+    }
 }
 
 private fun TexCursor.parseRequiredArgument(): TexNode {

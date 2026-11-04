@@ -44,3 +44,4 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Preserved ADR 0020's zero-dependency native-canvas renderer, source fallback, cache behavior, and GPL-3.0 coverage.
 - Accepted native math and refreshed statement gallery goldens from run 41744389674 after inspecting every changed/new statement image across the device and theme matrix.
 - Local `scripts/verify.sh` passes; Android/Roborazzi verification remains CI-owned.
+- Fixed the remaining Detekt `ComplexCondition` in `TexParser.hasCellContent` with ordered boundary checks; `scripts/verify.sh` passes.
