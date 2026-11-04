@@ -196,7 +196,7 @@ class CodeforcesJudgeSourceTest {
             val statement = withSource(server) { it.statement(ProblemId(2274, "A"), StatementLanguage.En) }
 
             assertEquals("The Projections of Paco", statement.title)
-            assertEquals(2, statement.samples.size)
+            assertEquals(1, statement.samples.size)
         }
 
     @Test

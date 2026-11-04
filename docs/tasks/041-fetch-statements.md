@@ -46,4 +46,4 @@ After this task the data layer can ask any judge for a statement, `JudgeSource.s
 - Debug and benchmark assets include both `testdata/codeforces/api` and `testdata/codeforces/pages`; release fixture checks reject `assets/contest/`.
 - The live canary parses Codeforces problem `1A` in English and Russian and reports parser failures as `PAGE BROKEN` or Cloudflare blocks.
 - `scripts/verify.sh` passes after the CI compiler and fixture-binding fixes; Android compilation, unit tests, and the live canary remain GitHub Actions/nightly checks.
-- `checkFixtureBinding` searches merged benchmark assets recursively for the recorded page marker; keep the separate API/page roots and shared-queue `CodeforcesPages` constructor.
+- `checkFixtureBinding` searches merged benchmark assets recursively for the recorded page marker; keep the separate API/page roots and shared-queue `CodeforcesPages` constructor. The 2274A recording has one `.sample-test` block containing five cases, so the focused source test asserts one sample block.
