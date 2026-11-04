@@ -1,7 +1,6 @@
 package app.pocketcp.core.statement.math
 
-import androidx.compose.ui.test.assertExists
-import androidx.compose.ui.test.createComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -44,7 +43,7 @@ class MathRendererTest {
     fun invalidTexFallsBackToItsSource() {
         val unbalanced = "\\frac{"
         val unknown = "\\unknown{x}"
-        setContent {
+        rule.setContent {
             PocketCpTheme {
                 LocalMathRenderer.current.Inline(unbalanced, 1f)
                 LocalMathRenderer.current.Inline(unknown, 1f)
@@ -69,7 +68,7 @@ class MathRendererTest {
     @Test
     fun contentDescriptionIsTheOriginalTexSource() {
         val formula = "\\sqrt{x}"
-        setContent {
+        rule.setContent {
             PocketCpTheme {
                 LocalMathRenderer.current.Display(formula, 1f)
             }

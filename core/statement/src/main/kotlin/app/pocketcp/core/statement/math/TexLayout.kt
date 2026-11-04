@@ -7,6 +7,22 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 
+private const val MIN_GLYPH_WIDTH_RATIO = 0.12f
+private const val SEQUENCE_GAP_RATIO = 0.045f
+private const val FRACTION_FONT_SCALE = 0.78f
+private const val FRACTION_PADDING_RATIO = 0.18f
+private const val FRACTION_GAP_RATIO = 0.16f
+private const val RULE_THICKNESS_RATIO = 0.06f
+private const val RADICAL_FONT_SCALE = 1.12f
+private const val RADICAL_GAP_RATIO = 0.08f
+private const val RADICAL_OVERLAP_RATIO = 0.03f
+private const val DELIMITER_FONT_SCALE = 1.25f
+private const val MATRIX_FONT_SCALE = 0.82f
+private const val MATRIX_CELL_GAP_RATIO = 0.3f
+private const val MATRIX_ROW_GAP_RATIO = 0.2f
+private const val MATRIX_DELIMITER_SCALE = 1.6f
+private const val MATRIX_BASELINE_OFFSET_RATIO = 0.45f
+
 internal sealed interface TexRenderResult {
     data class Ready(
         val layout: MathLayout,
@@ -110,7 +126,7 @@ internal object NativeTexTypesetter {
     internal fun typesetCountForTests(): Int = typesetCount.get()
 }
 
-private data class LayoutBox(
+internal data class LayoutBox(
     val width: Float,
     val height: Float,
     val baseline: Float,
@@ -137,7 +153,7 @@ private class TexLayoutEngine(
             is TexNode.Text -> glyph(node.value, fontSize, SymbolStyle.Text)
             is TexNode.Fraction -> fraction(node.numerator, node.denominator, fontSize)
             is TexNode.Sqrt -> squareRoot(node.body, fontSize)
-            is TexNode.Scripts -> scripts(node, fontSize)
+            is TexNode.Scripts -> layoutScripts(node, fontSize, ::layoutNode)
             is TexNode.Delimited -> delimited(node, fontSize)
             is TexNode.Binomial -> binomial(node, fontSize)
             is TexNode.Matrix -> matrix(node, fontSize)
@@ -157,7 +173,7 @@ private class TexLayoutEngine(
             }
         val metrics = measurePaint.fontMetrics
         return LayoutBox(
-            width = max(measurePaint.measureText(value), fontSize * 0.12f),
+            width = max(measurePaint.measureText(value), fontSize * MIN_GLYPH_WIDTH_RATIO),
             height = metrics.descent - metrics.ascent,
             baseline = -metrics.ascent,
             commands = listOf(DrawCommand.Text(value, 0f, -metrics.ascent, fontSize, style)),
@@ -170,7 +186,7 @@ private class TexLayoutEngine(
     ): LayoutBox {
         if (children.isEmpty()) return glyph("", fontSize, SymbolStyle.Normal)
         val boxes = children.map { layoutNode(it, fontSize) }
-        val gap = fontSize * 0.045f
+        val gap = fontSize * SEQUENCE_GAP_RATIO
         val baseline = boxes.maxOf { it.baseline }
         val bottom = boxes.maxOf { it.height - it.baseline }
         var x = 0f
@@ -188,11 +204,11 @@ private class TexLayoutEngine(
         denominator: TexNode,
         fontSize: Float,
     ): LayoutBox {
-        val num = layoutNode(numerator, fontSize * 0.78f)
-        val den = layoutNode(denominator, fontSize * 0.78f)
-        val horizontalPadding = fontSize * 0.18f
-        val gap = fontSize * 0.16f
-        val rule = fontSize * 0.06f
+        val num = layoutNode(numerator, fontSize * FRACTION_FONT_SCALE)
+        val den = layoutNode(denominator, fontSize * FRACTION_FONT_SCALE)
+        val horizontalPadding = fontSize * FRACTION_PADDING_RATIO
+        val gap = fontSize * FRACTION_GAP_RATIO
+        val rule = fontSize * RULE_THICKNESS_RATIO
         val width = max(num.width, den.width) + horizontalPadding * 2
         val top = num.height
         val denominatorTop = top + gap + rule + gap
@@ -212,9 +228,9 @@ private class TexLayoutEngine(
         fontSize: Float,
     ): LayoutBox {
         val content = layoutNode(body, fontSize)
-        val radical = glyph("√", fontSize * 1.12f, SymbolStyle.Normal)
-        val gap = fontSize * 0.08f
-        val top = max(0f, radical.baseline - content.baseline - fontSize * 0.03f)
+        val radical = glyph("√", fontSize * RADICAL_FONT_SCALE, SymbolStyle.Normal)
+        val gap = fontSize * RADICAL_GAP_RATIO
+        val top = max(0f, radical.baseline - content.baseline - fontSize * RADICAL_OVERLAP_RATIO)
         val baseline = top + content.baseline
         val width = radical.width + gap + content.width
         return LayoutBox(
@@ -223,50 +239,8 @@ private class TexLayoutEngine(
             baseline,
             translated(radical.commands, 0f, baseline - radical.baseline) +
                 translated(content.commands, radical.width + gap, top) +
-                listOf(DrawCommand.Rule(radical.width + gap, top, width, fontSize * 0.06f)),
+                listOf(DrawCommand.Rule(radical.width + gap, top, width, fontSize * RULE_THICKNESS_RATIO)),
         )
-    }
-
-    private fun scripts(
-        node: TexNode.Scripts,
-        fontSize: Float,
-    ): LayoutBox {
-        val base = layoutNode(node.base, fontSize)
-        val sub = node.subscript?.let { layoutNode(it, fontSize * 0.62f) }
-        val sup = node.superscript?.let { layoutNode(it, fontSize * 0.62f) }
-        val gap = fontSize * 0.1f
-        val isBigOperator = node.base is TexNode.Symbol && (node.base.value == "∑" || node.base.value == "∏")
-        return if (isBigOperator && sub != null && sup != null) {
-            val width = max(base.width, max(sub.width, sup.width))
-            val top = sup.height + gap
-            val baseTop = top + base.height
-            val subTop = baseTop + gap
-            LayoutBox(
-                width,
-                subTop + sub.height,
-                baseTop + base.baseline,
-                translated(sup.commands, (width - sup.width) / 2, 0f) +
-                    translated(base.commands, (width - base.width) / 2, top) +
-                    translated(sub.commands, (width - sub.width) / 2, subTop),
-            )
-        } else {
-            val top = max(0f, base.baseline - (sup?.height ?: 0f) + gap)
-            val baseTop = top
-            val subTop = baseTop + base.baseline + gap
-            val bottom = max(baseTop + base.height, sub?.let { subTop + it.height } ?: 0f)
-            val width = base.width + gap + max(sup?.width ?: 0f, sub?.width ?: 0f)
-            LayoutBox(
-                width,
-                bottom,
-                baseTop + base.baseline,
-                translated(base.commands, 0f, baseTop) +
-                    (
-                        sup?.let { translated(it.commands, base.width + gap, max(0f, baseTop + base.baseline - it.height)) }
-                            ?: emptyList()
-                    ) +
-                    (sub?.let { translated(it.commands, base.width + gap, subTop) } ?: emptyList()),
-            )
-        }
     }
 
     private fun delimited(
@@ -274,10 +248,13 @@ private class TexLayoutEngine(
         fontSize: Float,
     ): LayoutBox {
         val body = layoutNode(node.body, fontSize)
-        val left = glyph(node.left, fontSize * 1.25f, SymbolStyle.Normal)
-        val right = glyph(node.right, fontSize * 1.25f, SymbolStyle.Normal)
+        val left = glyph(node.left, fontSize * DELIMITER_FONT_SCALE, SymbolStyle.Normal)
+        val right = glyph(node.right, fontSize * DELIMITER_FONT_SCALE, SymbolStyle.Normal)
         val baseline = max(body.baseline, max(left.baseline, right.baseline))
-        val bottom = max(body.height - body.baseline, max(left.height - left.baseline, right.height - right.baseline))
+        val bodyBottom = body.height - body.baseline
+        val leftBottom = left.height - left.baseline
+        val rightBottom = right.height - right.baseline
+        val bottom = max(bodyBottom, max(leftBottom, rightBottom))
         val rightX = left.width + body.width
         return LayoutBox(
             left.width + body.width + right.width,
@@ -293,13 +270,12 @@ private class TexLayoutEngine(
         node: TexNode.Binomial,
         fontSize: Float,
     ): LayoutBox {
-        val top = layoutNode(node.top, fontSize * 0.78f)
-        val bottom = layoutNode(node.bottom, fontSize * 0.78f)
+        val top = layoutNode(node.top, fontSize * FRACTION_FONT_SCALE)
+        val bottom = layoutNode(node.bottom, fontSize * FRACTION_FONT_SCALE)
         val width = max(top.width, bottom.width)
-        val gap = fontSize * 0.12f
-        val left = glyph("(", fontSize * 1.25f, SymbolStyle.Normal)
-        val right = glyph(")", fontSize * 1.25f, SymbolStyle.Normal)
-        val topY = 0f
+        val gap = fontSize * MIN_GLYPH_WIDTH_RATIO
+        val left = glyph("(", fontSize * DELIMITER_FONT_SCALE, SymbolStyle.Normal)
+        val right = glyph(")", fontSize * DELIMITER_FONT_SCALE, SymbolStyle.Normal)
         val bottomY = top.height + gap
         val baseline = bottomY + bottom.baseline
         val contentX = left.width
@@ -307,7 +283,7 @@ private class TexLayoutEngine(
             contentX + width + right.width,
             bottomY + bottom.height,
             baseline,
-            translated(top.commands, contentX + (width - top.width) / 2, topY) +
+            translated(top.commands, contentX + (width - top.width) / 2, 0f) +
                 translated(bottom.commands, contentX + (width - bottom.width) / 2, bottomY) +
                 translated(left.commands, 0f, baseline - left.baseline) +
                 translated(right.commands, contentX + width, baseline - right.baseline),
@@ -318,16 +294,20 @@ private class TexLayoutEngine(
         node: TexNode.Matrix,
         fontSize: Float,
     ): LayoutBox {
-        val rows = node.rows.map { row -> row.map { layoutNode(it, fontSize * 0.82f) } }
+        val rows = node.rows.map { row -> row.map { layoutNode(it, fontSize * MATRIX_FONT_SCALE) } }
         val columnCount = rows.maxOfOrNull { it.size } ?: 1
-        val columnWidths = (0 until columnCount).map { column -> rows.maxOfOrNull { it.getOrNull(column)?.width ?: 0f } ?: 0f }
+        val columnWidths =
+            (0 until columnCount).map { column ->
+                rows.maxOfOrNull { it.getOrNull(column)?.width ?: 0f } ?: 0f
+            }
         val rowHeights = rows.map { row -> row.maxOfOrNull { it.height } ?: fontSize }
-        val cellGap = fontSize * 0.3f
+        val cellGap = fontSize * MATRIX_CELL_GAP_RATIO
         val innerWidth = columnWidths.sum() + cellGap * max(0, columnCount - 1)
-        val innerHeight = rowHeights.sum() + fontSize * 0.2f * max(0, rows.size - 1)
-        val left = glyph(if (node.cases) "{" else "(", fontSize * 1.6f, SymbolStyle.Normal)
-        val right = glyph(if (node.cases) "" else ")", fontSize * 1.6f, SymbolStyle.Normal)
-        val baseline = innerHeight / 2 + fontSize * 0.45f
+        val innerHeight = rowHeights.sum() + fontSize * MATRIX_ROW_GAP_RATIO * max(0, rows.size - 1)
+        val delimiterSize = fontSize * MATRIX_DELIMITER_SCALE
+        val left = glyph(if (node.cases) "{" else "(", delimiterSize, SymbolStyle.Normal)
+        val right = glyph(if (node.cases) "" else ")", delimiterSize, SymbolStyle.Normal)
+        val baseline = innerHeight / 2 + fontSize * MATRIX_BASELINE_OFFSET_RATIO
         val commands = mutableListOf<DrawCommand>()
         var y = 0f
         rows.forEachIndexed { rowIndex, row ->
@@ -335,23 +315,11 @@ private class TexLayoutEngine(
                 val x = columnWidths.take(column).sum() + cellGap * column
                 commands += translated(cell.commands, left.width + x + (columnWidths[column] - cell.width) / 2, y)
             }
-            y += rowHeights[rowIndex] + fontSize * 0.2f
+            y += rowHeights[rowIndex] + fontSize * MATRIX_ROW_GAP_RATIO
         }
         commands += translated(left.commands, 0f, baseline - left.baseline)
         if (!node.cases) commands += translated(right.commands, left.width + innerWidth, baseline - right.baseline)
         val width = left.width + innerWidth + if (node.cases) 0f else right.width
         return LayoutBox(width, innerHeight, baseline, commands)
     }
-
-    private fun translated(
-        commands: List<DrawCommand>,
-        x: Float,
-        y: Float,
-    ): List<DrawCommand> =
-        commands.map { command ->
-            when (command) {
-                is DrawCommand.Text -> command.copy(x = command.x + x, baseline = command.baseline + y)
-                is DrawCommand.Rule -> command.copy(startX = command.startX + x, endX = command.endX + x, y = command.y + y)
-            }
-        }
 }
