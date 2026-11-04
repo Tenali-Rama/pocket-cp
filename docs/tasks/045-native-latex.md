@@ -45,4 +45,5 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Fixed `MathRendererTest` to use the Compose JUnit4 rule import and `rule.setContent`; `scripts/verify.sh` passes.
 - The zero-dependency native-canvas decision in ADR 0020, source fallback, cache behavior, and screenshot goldens must
   not be undone.
-- Remaining: CI must compile/run detekt and tests; then inspect and accept only changed math/gallery screenshots.
+- ADR 0020 explicitly records the in-repository implementation as GPL-3.0-covered.
+- Remaining: CI run 41743663565 must compile/run detekt and tests; then inspect and accept only changed math/gallery screenshots.
