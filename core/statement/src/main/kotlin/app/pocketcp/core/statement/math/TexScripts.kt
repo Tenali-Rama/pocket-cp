@@ -39,8 +39,9 @@ private fun bigOperatorScriptsOrNull(
     boxes: ScriptBoxes,
     fontSize: Float,
 ): LayoutBox? {
-    val sub = boxes.subscript ?: return null
-    val sup = boxes.superscript ?: return null
+    val sub = boxes.subscript
+    val sup = boxes.superscript
+    if (sub == null || sup == null) return null
     val gap = fontSize * SCRIPT_GAP_RATIO
     val width = max(boxes.base.width, max(sub.width, sup.width))
     val top = sup.height + gap

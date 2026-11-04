@@ -2,7 +2,7 @@
 id: 045
 title: Native LaTeX typesetting for statement math
 milestone: M3
-status: todo
+status: done
 deps: [044]
 touches: [core/statement/src/main/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/screenshots/, core/statement/build.gradle.kts, core/statement/API.md, core/statement/CLAUDE.md, app/proguard-rules.pro, gradle/libs.versions.toml, config/perf-budgets.json, docs/decisions/]
 spec: ["7.4 Problem View", "3. Performance Budgets"]
@@ -40,10 +40,7 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Any change outside `core/statement`'s math package, besides the module's build file, docs and R8 rules. Math in blogs or editorials (M9).
 
 ## Notes for next
-- Refactored the native parser/layout to address the reported detekt findings: cursor-based parsing, named layout
-  constants, shallow script layout helpers, and split command/script support files; native canvas behavior is kept.
-- Fixed `MathRendererTest` to use the Compose JUnit4 rule import and `rule.setContent`; `scripts/verify.sh` passes.
-- The zero-dependency native-canvas decision in ADR 0020, source fallback, cache behavior, and screenshot goldens must
-  not be undone.
-- ADR 0020 explicitly records the in-repository implementation as GPL-3.0-covered.
-- Remaining: CI run 41743663565 must compile/run detekt and tests; then inspect and accept only changed math/gallery screenshots.
+- Fixed the reported detekt ReturnCount and MaxLineLength findings in `TexParser` and `TexScripts` without weakening checks.
+- Preserved ADR 0020's zero-dependency native-canvas renderer, source fallback, cache behavior, and GPL-3.0 coverage.
+- Accepted native math and refreshed statement gallery goldens from run 41744389674 after inspecting every changed/new statement image across the device and theme matrix.
+- Local `scripts/verify.sh` passes; Android/Roborazzi verification remains CI-owned.

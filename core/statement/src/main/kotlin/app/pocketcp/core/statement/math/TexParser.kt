@@ -92,12 +92,11 @@ private fun TexCursor.parseSequence(stop: Char?): TexNode {
 
 private fun TexCursor.canParseSequence(stop: Char?): Boolean {
     skipWhitespace()
-    if (position >= source.length) return false
-    if (source[position] == '}') {
-        if (stop == '}') return false
-        fail("unbalanced group")
+    return when {
+        position >= source.length -> false
+        source[position] == '}' && stop != '}' -> fail("unbalanced group")
+        else -> source[position] != stop && !source.startsWith("\\right", position)
     }
-    return source[position] != stop && !source.startsWith("\\right", position)
 }
 
 private fun TexCursor.atStop(stop: Char): Boolean = position < source.length && source[position] == stop
@@ -125,7 +124,9 @@ private fun TexCursor.parseScripts(): ScriptPair? {
     return if (subscript == null && superscript == null) null else ScriptPair(subscript, superscript)
 }
 
-private fun TexCursor.hasScript(): Boolean = position < source.length && (source[position] == '_' || source[position] == '^')
+private fun TexCursor.hasScript(): Boolean =
+    position < source.length &&
+        (source[position] == '_' || source[position] == '^')
 
 private fun TexCursor.parseAtom(): TexNode {
     skipWhitespace()
@@ -205,13 +206,19 @@ private fun TexCursor.parseDelimited(): TexNode {
 private fun TexCursor.parseDelimiter(): String {
     skipWhitespace()
     if (position >= source.length) fail("missing delimiter")
-    if (source[position] != '\\') return source[position++].toString()
-    position++
-    if (position < source.length && !source[position].isLetter()) return source[position++].toString()
-    val start = position
-    while (position < source.length && source[position].isLetter()) position++
-    val name = source.substring(start, position)
-    return DELIMITERS[name] ?: fail("unknown delimiter \\$name")
+    return if (source[position] != '\\') {
+        source[position++].toString()
+    } else {
+        position++
+        if (position < source.length && !source[position].isLetter()) {
+            source[position++].toString()
+        } else {
+            val start = position
+            while (position < source.length && source[position].isLetter()) position++
+            val name = source.substring(start, position)
+            DELIMITERS[name] ?: fail("unknown delimiter \\$name")
+        }
+    }
 }
 
 private fun TexCursor.parseEnvironment(name: String): TexNode {
@@ -254,10 +261,10 @@ private fun TexCursor.parseCell(): TexNode {
 
 private fun TexCursor.hasCellContent(): Boolean {
     skipWhitespace()
-    if (position >= source.length) return false
-    if (source[position] == '&') return false
-    if (source.startsWith("\\\\", position)) return false
-    return !source.startsWith("\\end", position)
+    return position < source.length &&
+        source[position] != '&' &&
+        !source.startsWith("\\\\", position) &&
+        !source.startsWith("\\end", position)
 }
 
 private fun TexCursor.parseRequiredArgument(): TexNode {
