@@ -47,3 +47,4 @@ After this task the data layer can ask any judge for a statement, `JudgeSource.s
 - The live canary parses Codeforces problem `1A` in English and Russian and reports parser failures as `PAGE BROKEN` or Cloudflare blocks.
 - `scripts/verify.sh` passes after the CI compiler and fixture-binding fixes; Android compilation, unit tests, and the live canary remain GitHub Actions/nightly checks.
 - `checkFixtureBinding` searches merged benchmark assets recursively for the recorded page marker; keep the separate API/page roots and shared-queue `CodeforcesPages` constructor. The 2274A recording has one `.sample-test` block containing five cases, so the focused source test asserts one sample block.
+- CI run 41743959317 failed in `ui (phone)` while installing Android Emulator (`Error reading Zip content from a SeekableByteChannel`) before emulator startup; no repository test or UI assertion ran, so no repository fix is warranted.
