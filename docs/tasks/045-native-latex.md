@@ -40,14 +40,9 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Any change outside `core/statement`'s math package, besides the module's build file, docs and R8 rules. Math in blogs or editorials (M9).
 
 ## Notes for next
-- Native Kotlin parser/layout in `core/statement/math/` renders the Codeforces subset on the Android canvas; no new
-  dependency, WebView, native binary, or R8 keep rule is needed. See ADR 0020.
-- Source fallback is preserved for malformed or unknown TeX, and `NativeTexTypesetter` caches by TeX, pixel size and
-  colour; `MathRendererTest` covers the required syntax, fallback, cache hit and source content description.
-- Added `statementMath_*` captures, including font150, textLargest and invalid-source variants. CI must record/accept
-  the fresh math goldens and re-accept existing `statementGallery_*` goldens after native rendering changes them.
-- Local `scripts/verify.sh` passes. CI run 41736231982 found and is addressed by the current worktree: missing
-  `nativeCanvas` import and an internal `DrawCommand` visibility error in the native renderer.
-- Remaining: a fresh CI-fix builder must push/recheck compilation, inspect at most eight fresh tablet/phone goldens,
-  accept only the changed math/gallery images, and preserve the zero-dependency native-canvas decision. The prior
-  tablet failure was emulator SDK-image download/ADB infrastructure, not a test assertion.
+- Refactored the native parser/layout to address the reported detekt findings: cursor-based parsing, named layout
+  constants, shallow script layout helpers, and split command/script support files; native canvas behavior is kept.
+- Fixed `MathRendererTest` to use the Compose JUnit4 rule import and `rule.setContent`; `scripts/verify.sh` passes.
+- The zero-dependency native-canvas decision in ADR 0020, source fallback, cache behavior, and screenshot goldens must
+  not be undone.
+- Remaining: CI must compile/run detekt and tests; then inspect and accept only changed math/gallery screenshots.
