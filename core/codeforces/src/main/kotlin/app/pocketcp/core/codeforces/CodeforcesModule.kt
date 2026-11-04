@@ -22,6 +22,10 @@ object CodeforcesModule {
     @Singleton
     fun provideCodeforcesApi(queue: RequestQueue): CodeforcesApi = CodeforcesApi(queue, callScope())
 
+    @Provides
+    @Singleton
+    fun provideCodeforcesPages(queue: RequestQueue): CodeforcesPages = CodeforcesPages(queue)
+
     /**
      * The app-lifetime scope queued calls run in. Responses are decoded there, so it is off the main thread.
      * The dispatcher is a defaulted parameter, as detekt's InjectDispatcher asks.

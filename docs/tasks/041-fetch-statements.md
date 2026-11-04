@@ -2,9 +2,9 @@
 id: 041
 title: Fetch statements through JudgeSource; fixture builds serve recorded pages; canary parses a live page
 milestone: M3
-status: todo
+status: done
 deps: [038, 040]
-touches: [core/model/src/main/kotlin/app/pocketcp/core/model/JudgeSource.kt, core/model/API.md, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/CodeforcesPages.kt, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/CodeforcesModule.kt, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesJudgeSource.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/CodeforcesPagesTest.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesJudgeSourceTest.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesModuleTest.kt, core/codeforces/src/canary/kotlin/app/pocketcp/core/codeforces/canary/, core/codeforces/build.gradle.kts, core/codeforces/API.md, core/codeforces/CLAUDE.md, core/data/src/test/kotlin/app/pocketcp/core/data/TestHarness.kt, app/src/fixture/kotlin/app/pocketcp/judge/FixtureJudgeSource.kt, app/src/fixture/kotlin/app/pocketcp/judge/AssetTransport.kt, app/src/live/kotlin/app/pocketcp/judge/LiveJudgeSourceModule.kt, app/src/testDebug/kotlin/app/pocketcp/judge/FixtureJudgeSourceTest.kt, app/build.gradle.kts, app/API.md, feature/problemset/src/test/kotlin/app/pocketcp/feature/problemset/FixtureProblems.kt, feature/contests/src/test/kotlin/app/pocketcp/feature/contests/FixtureContests.kt, testdata/README.md]
+touches: [core/model/src/main/kotlin/app/pocketcp/core/model/JudgeSource.kt, core/model/API.md, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/CodeforcesPages.kt, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/CodeforcesModule.kt, core/codeforces/src/main/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesJudgeSource.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/CodeforcesPagesTest.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesJudgeSourceTest.kt, core/codeforces/src/test/kotlin/app/pocketcp/core/codeforces/judge/CodeforcesModuleTest.kt, core/codeforces/src/canary/kotlin/app/pocketcp/core/codeforces/canary/, core/codeforces/build.gradle.kts, core/codeforces/API.md, core/codeforces/CLAUDE.md, core/data/src/test/kotlin/app/pocketcp/core/data/TestHarness.kt, app/src/fixture/kotlin/app/pocketcp/judge/FixtureJudgeSource.kt, app/src/fixture/kotlin/app/pocketcp/judge/AssetTransport.kt, app/src/live/kotlin/app/pocketcp/judge/LiveJudgeSourceModule.kt, app/src/testDebug/kotlin/app/pocketcp/judge/FixtureJudgeSourceTest.kt, app/build.gradle.kts, app/API.md, feature/problemset/src/test/kotlin/app/pocketcp/feature/problemset/FixtureProblems.kt, feature/contests/src/test/kotlin/app/pocketcp/feature/contests/FixtureContests.kt, testdata/codeforces/pages/, testdata/README.md]
 spec: ["7.4 Problem View", "18. Known Risks", "16. Non-Functional"]
 ---
 
@@ -42,4 +42,9 @@ After this task the data layer can ask any judge for a statement, `JudgeSource.s
 - Spacing HTML page requests in the queue: `core/network` stays unchanged, and 043's prefetch is sequential instead.
 
 ## Notes for next
-<!-- builder fills in -->
+- `JudgeSource.statement` and `problemUrl` are implemented by Codeforces and fixture sources; page requests use the shared queue and parser failures map to `JudgeError.Malformed`.
+- Debug and benchmark assets include both `testdata/codeforces/api` and `testdata/codeforces/pages`; release fixture checks reject `assets/contest/`.
+- The live canary parses Codeforces problem `1A` in English and Russian and reports parser failures as `PAGE BROKEN` or Cloudflare blocks.
+- `scripts/verify.sh` passes after the CI compiler and fixture-binding fixes; Android compilation, unit tests, and the live canary remain GitHub Actions/nightly checks.
+- `checkFixtureBinding` searches merged benchmark assets recursively for the recorded page marker; keep the separate API/page roots and shared-queue `CodeforcesPages` constructor. The 2274A recording has one `.sample-test` block containing five cases, so the focused source test asserts one sample block.
+- CI run 41743959317 failed in `ui (phone)` while installing Android Emulator (`Error reading Zip content from a SeekableByteChannel`) before emulator startup; no repository test or UI assertion ran, so no repository fix is warranted.

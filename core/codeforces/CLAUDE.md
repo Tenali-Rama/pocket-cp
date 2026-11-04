@@ -6,6 +6,8 @@
 - "Call limit exceeded" retries are the queue's job, via `CallLimitClassifier`. Don't sleep or retry here, and don't edit `core/network/` for Codeforces needs.
 - DTOs mirror the API's field names and decode with `ignoreUnknownKeys`. Enum-like fields stay strings; the domain layer (M1) maps them. Nothing outside the data layer should see a DTO.
 - Errors leave as `CodeforcesError`; a queue `NetworkError` never escapes `CodeforcesApi`.
+- `CodeforcesPages` owns HTML page URLs and fetches through the same `RequestQueue`; it does not use OkHttp directly.
+- `CodeforcesJudgeSource` maps parser failures to `JudgeError.Malformed` so callers can fall back to the WebView.
 - Tests: `FixtureServer` + recorded fixtures in `testdata/codeforces/api/` (see `testdata/README.md`), a real `RequestQueue`, and virtual time (`withApi` in the tests). No live network.
 
 ## Live canary

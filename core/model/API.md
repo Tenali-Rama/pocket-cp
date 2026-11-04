@@ -10,6 +10,8 @@ The only way the data layer reaches a judge (ADR 0009). Every method throws only
 - `suspend fun contests(gym: Boolean): List<Contest>`: all contests, or all gyms.
 - `suspend fun problemset(): List<Problem>`
 - `suspend fun users(handles: List<String>): List<User>`
+- `suspend fun statement(problem: ProblemId, language: StatementLanguage): Statement`: the native statement; only `JudgeError` escapes.
+- `fun problemUrl(problem: ProblemId, language: StatementLanguage): String`: the statement page URL for WebView fallback.
 
 ## Types
 - `JudgeId(value: String)`: value class, stable and persisted (e.g. `codeforces`).

@@ -1,6 +1,7 @@
 package app.pocketcp.feature.contests
 
 import app.pocketcp.core.codeforces.CodeforcesApi
+import app.pocketcp.core.codeforces.CodeforcesPages
 import app.pocketcp.core.codeforces.judge.CodeforcesJudgeSource
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.JudgeSource
@@ -48,7 +49,8 @@ private fun <T> loadFixture(
         val scope = CoroutineScope(SupervisorJob() + StandardTestDispatcher(testScheduler))
         try {
             val server = FixtureServer().map(path, fixture)
-            result = call(CodeforcesJudgeSource(CodeforcesApi(RequestQueue(server, scope), scope)))
+            val queue = RequestQueue(server, scope)
+            result = call(CodeforcesJudgeSource(CodeforcesApi(queue, scope), CodeforcesPages(queue)))
         } finally {
             scope.cancel()
         }
