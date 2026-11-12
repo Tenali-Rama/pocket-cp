@@ -40,8 +40,8 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Any change outside `core/statement`'s math package, besides the module's build file, docs and R8 rules. Math in blogs or editorials (M9).
 
 ## Notes for next
-- Inline math now reserves its measured size: `MathRenderer.inlinePlaceholder` returns a `TextCenter` placeholder made tall enough on both sides of the text centre for the formula baseline to land on the text baseline (`InlineMath.kt`).
-- Placeholder sp are computed linearly (`density * fontScale`) because Compose's `PlaceholderSpan` converts that way; `toSp()` follows Android 14's nonlinear scaling and misplaced math at 1.5x font.
-- Fraction bars now sit on the math axis (0.25 em above the baseline), as in TeX, rather than the denominator resting on the baseline.
-- `StatementContent.kt` and `StatementMathScreenshotTest.kt` were added to `touches` in fix round 1; the first is the only caller of the inline placeholder.
-- ADR 0020's zero-dependency native renderer and source fallback are unchanged; goldens re-accepted from run 43246390047.
+- Inline math reserves its measured size: `inlinePlaceholder` returns a `TextCenter` placeholder whose formula baseline lands on the text baseline; placeholder sp convert linearly (`density * fontScale`), as `PlaceholderSpan` does.
+- Scripts use TeX-like shifts (`TexScripts.kt`): superscript +0.4 em, subscript -0.2 em (-0.25 em with a superscript), plus however far a taller or deeper base exceeds a plain letter. Fraction bars sit on the math axis.
+- `matrix` has no delimiters; `pmatrix`/`bmatrix`/`cases` carry theirs via `MatrixStyle`, and `cases` left-aligns. `\sqrt[n]` typesets its index (`TexRadicals.kt`); `\mathbf` is serif bold.
+- `NativeTexTypesetter` is an `LruCache` of `MATH_CACHE_ENTRIES` (256) formulas. Display style (bigger `\sum`, full-size fractions) is still text style.
+- APK delta is 0 bytes until an app module depends on `core/statement` (ADR 0020); re-measure when the Problem screen lands.
