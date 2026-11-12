@@ -21,12 +21,12 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 
-/** Where a [CachedResource] reads and writes one dataset. */
+/** Where a [CachedResource] reads and writes one dataset: a whole table, or one keyed row. */
 internal interface CachedDataset<T> {
-    /** The Room cache, re-emitting on every write. */
-    fun cached(): Flow<T>
+    /** The Room cache, re-emitting on every write; `null` while a keyed row is missing or unreadable. */
+    fun cached(): Flow<T?>
 
-    /** The dataset's `cache_meta` time, or null if never fetched. */
+    /** When the cache was last written (`cache_meta`, or the row's own time); null if never, or unreadable. */
     suspend fun fetchedAtMillis(): Long?
 
     /** Reads the judge and swaps the cache. Throws a `JudgeError` from the judge, or the cache's write error. */
@@ -60,7 +60,7 @@ internal class CachedResource<T>(
      * Like [stream], over [cached]: another Room view of the same dataset (e.g. a bounded query), re-emitting on
      * its writes. It shares this resource's fetch time, refresh status and in-flight refresh.
      */
-    fun <R> stream(cached: Flow<R>): Flow<Cached<R>> =
+    fun <R> stream(cached: Flow<R?>): Flow<Cached<R>> =
         flow {
             start(force = false)
             val snapshots =
@@ -74,7 +74,14 @@ internal class CachedResource<T>(
 
     /** Refreshes when stale, or always when [force]; joins a refresh already running. Failures go to [stream]. */
     suspend fun refresh(force: Boolean) {
-        start(force)?.join()
+        refreshForError(force)
+    }
+
+    /** Like [refresh], and returns the error that refresh ended with: null if it succeeded or wasn't needed. */
+    suspend fun refreshForError(force: Boolean): JudgeError? {
+        val job = start(force) ?: return null
+        job.join()
+        return status.value.error
     }
 
     private suspend fun start(force: Boolean): Job? =

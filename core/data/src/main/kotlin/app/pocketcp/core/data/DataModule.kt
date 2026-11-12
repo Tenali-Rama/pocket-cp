@@ -3,6 +3,7 @@ package app.pocketcp.core.data
 import app.pocketcp.core.database.CacheMetaDao
 import app.pocketcp.core.database.ContestDao
 import app.pocketcp.core.database.ProblemDao
+import app.pocketcp.core.database.StatementDao
 import app.pocketcp.core.model.JudgeSource
 import dagger.Module
 import dagger.Provides
@@ -34,6 +35,13 @@ object DataModule {
         dao: ProblemDao,
         meta: CacheMetaDao,
     ): ProblemRepository = CachedProblemRepository(source, dao, meta, Clock.systemUTC(), refreshScope())
+
+    @Provides
+    @Singleton
+    fun provideStatementRepository(
+        source: JudgeSource,
+        dao: StatementDao,
+    ): StatementRepository = CachedStatementRepository(source, dao, Clock.systemUTC(), refreshScope())
 
     /**
      * The app-lifetime scope refreshes run in, so leaving a screen doesn't cancel a fetch others wait for.

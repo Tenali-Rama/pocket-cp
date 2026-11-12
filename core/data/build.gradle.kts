@@ -14,6 +14,8 @@ dependencies {
     implementation(project(":core:database"))
     // CacheWarmer watches the connection; core/network has no judge in it (ADR 0009 holds).
     implementation(project(":core:network"))
+    // Statements are cached as JSON (ADR 0017); core/model ships only the serializers.
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
