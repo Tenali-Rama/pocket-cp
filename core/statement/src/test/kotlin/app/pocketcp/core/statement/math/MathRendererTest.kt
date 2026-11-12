@@ -1,10 +1,15 @@
 package app.pocketcp.core.statement.math
 
+import android.content.res.Configuration
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.unit.Density
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.screenshot.SCREENSHOT_SDK
@@ -110,6 +115,30 @@ class MathRendererTest {
         val fractionHeight = placeholders.getValue(fraction).height.value
         assertTrue("fraction is taller than a letter", fractionHeight > short.height.value)
         assertEquals(PlaceholderVerticalAlign.TextCenter, short.placeholderVerticalAlign)
+    }
+
+    @Test
+    fun inlinePlaceholderMatchesTheFormulaAtLargeFontScale() {
+        val formula = "x^2 + y^2"
+        var placeholderPx = 0f
+        var formulaPx = 0f
+        rule.setContent {
+            val context = LocalContext.current
+            val config = Configuration(context.resources.configuration).apply { fontScale = 1.5f }
+            // Density(context) follows the platform's nonlinear font scaling, as the app's density does.
+            CompositionLocalProvider(LocalDensity provides Density(context.createConfigurationContext(config))) {
+                PocketCpTheme {
+                    val density = LocalDensity.current
+                    val placeholder = LocalMathRenderer.current.inlinePlaceholder(formula, 1f)
+                    // PlaceholderSpan converts sp to px linearly.
+                    placeholderPx = placeholder.width.value * density.density * density.fontScale
+                    formulaPx = rememberInlineMath(formula, 1f).metrics.width
+                }
+            }
+        }
+        rule.waitForIdle()
+
+        assertEquals(formulaPx, placeholderPx, 0.5f)
     }
 
     @Test

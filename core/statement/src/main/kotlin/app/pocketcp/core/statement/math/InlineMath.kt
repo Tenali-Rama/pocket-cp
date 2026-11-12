@@ -22,6 +22,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.sp
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.statement.statementStyle
 import kotlin.math.ceil
@@ -103,16 +104,22 @@ internal fun rememberInlineMath(
     }
 }
 
-/** The text placeholder that reserves exactly the room this formula needs. */
+/**
+ * The text placeholder that reserves exactly the room this formula needs.
+ *
+ * Compose turns placeholder sp into px linearly (`density * fontScale`), unlike `toSp()`, which follows Android 14's
+ * nonlinear font scaling, so the pixels are converted with that same linear factor.
+ */
 @Composable
-internal fun InlineMath.placeholder(): Placeholder =
-    with(LocalDensity.current) {
-        Placeholder(
-            width = metrics.width.toSp(),
-            height = metrics.height.toSp(),
-            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-        )
-    }
+internal fun InlineMath.placeholder(): Placeholder {
+    val density = LocalDensity.current
+    val pxPerSp = density.density * density.fontScale
+    return Placeholder(
+        width = (metrics.width / pxPerSp).sp,
+        height = (metrics.height / pxPerSp).sp,
+        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+    )
+}
 
 /** Draws [math] inside its placeholder with the content baseline on the text baseline. */
 @Composable
