@@ -9,6 +9,7 @@ import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.screenshot.Device
 import app.pocketcp.core.screenshot.ScreenshotConfig
 import app.pocketcp.core.screenshot.ScreenshotTest
 import app.pocketcp.core.screenshot.ThemeWrapper
@@ -45,6 +46,10 @@ private object NoActions : ProblemsetActions {
     override fun pickRandom() = Unit
 
     override fun refresh() = Unit
+
+    override fun open(id: ProblemId) = Unit
+
+    override fun close() = Unit
 }
 
 private fun sample(
@@ -78,21 +83,25 @@ private fun state(
     error: JudgeError? = null,
     refreshing: Boolean = false,
     pick: RandomPick = RandomPick(),
+    opened: ProblemId? = null,
 ) = problemsetUiState(
     Cached(data, fetchedAt = null, refreshing = refreshing, error = error),
     options,
     userRefreshing = false,
     pick = pick,
-)
+).copy(opened = opened)
 
 /**
  * `problemset_<device>_<theme>`: `problemset.problems.json` (phone: search and sort chips above the list; wider:
- * search pane | list). Phone dark variants: `problemset_search` (contest id `2274`: the fixture has no contest
- * 1900), `problemset_hiddenSpoilers` (tags and ratings hidden), `problemset_empty` (a query that matches nothing),
+ * that list column | the first problem's statement). Phone dark variants: `problemset_search` (contest id `2274`:
+ * the fixture has no contest 1900), `problemset_hiddenSpoilers` (tags and ratings hidden), `problemset_empty` (a query that matches nothing),
  * `problemset_error` (no cache, offline), `problemset_staleError` (cache plus a failed refresh),
  * `problemset_loading` (no cache yet), `problemset_font150` and `problemset_random` (2274A picked and highlighted).
- * `problemsetFilters_<device>_<theme>`: [SampleFilter] over [FilterSample], in the open sheet (phone, foldable) or
- * the panel beside the list (tablet, desktop); `problemsetFilters_font150` the sheet at 1.5x.
+ * `problemsetFilters_<device>_<theme>`: [SampleFilter] over [FilterSample], in the open sheet;
+ * `problemsetFilters_font150` the sheet at 1.5x.
+ * `problemsetDetail_<device>_<theme>`: 2274A opened (phone: its page with a back arrow; wider: list | statement
+ * with its row highlighted). `problemsetDetail_default_tablet_dark`: none opened, so the first problem (2276F) is
+ * shown; `problemsetDetail_empty_tablet_dark`: a search without matches, so "Select a problem".
  */
 class ProblemsetScreenshotTest : ScreenshotTest() {
     @Test
@@ -135,16 +144,33 @@ class ProblemsetScreenshotTest : ScreenshotTest() {
     fun random() = phoneDark("problemset_random") { state(pick = RandomPick("2274A", count = 1)) }
 
     @Test
+    fun detail() =
+        captureMatrix("problemsetDetail", themeWrapper = PocketCpThemeWrapper) {
+            Screen(state(opened = ProblemId(2274, "A")))
+        }
+
+    @Test
+    fun detailDefault() = tabletDark("problemsetDetail_default") { state() }
+
+    @Test
+    fun detailEmpty() = tabletDark("problemsetDetail_empty") { state(options = ProblemsetOptions(query = "dijkstra")) }
+
+    @Test
     fun largeFont() = captureSingle("problemset_font150", LargeFont, PocketCpThemeWrapper) { Screen(state()) }
 
     private fun phoneDark(
         name: String,
         state: () -> ProblemsetUiState,
     ) = captureSingle(name, ScreenshotConfig(), PocketCpThemeWrapper) { Screen(state()) }
+
+    private fun tabletDark(
+        name: String,
+        state: () -> ProblemsetUiState,
+    ) = captureSingle(name, ScreenshotConfig(Device.Tablet), PocketCpThemeWrapper) { Screen(state()) }
 }
 
 @Composable
 private fun Screen(
     state: ProblemsetUiState,
     filtersOpen: Boolean = false,
-) = ProblemsetScreen(state, state.options.query, NoActions, filtersOpen = filtersOpen)
+) = ProblemsetScreen(state, state.options.query, NoActions, TestProblemPane, filtersOpen = filtersOpen)

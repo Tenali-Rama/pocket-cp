@@ -1,5 +1,6 @@
 package app.pocketcp.feature.problemset
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -37,102 +39,133 @@ import app.pocketcp.core.designsystem.component.PcpSecondaryButton
 import app.pocketcp.core.designsystem.component.PcpTextButton
 import app.pocketcp.core.designsystem.component.PcpTopAppBar
 import app.pocketcp.core.model.JudgeError
+import app.pocketcp.core.model.ProblemId
 import app.pocketcp.core.ui.ProblemRow
 import app.pocketcp.core.ui.RefreshErrorBanner
 
-/** Shares of the width on wide windows: search 1 : list 2, plus filters 1 on expanded width. */
-private const val SEARCH_PANE_WEIGHT = 1f
-private const val LIST_PANE_WEIGHT = 2f
-private const val FILTER_PANE_WEIGHT = 1f
+/** Shares of the width on wide windows: list 44 : statement 56, so the statement keeps at least 55 %. */
+private const val LIST_PANE_WEIGHT = 0.44f
+private const val DETAIL_PANE_WEIGHT = 0.56f
 
 /**
- * Problemset: a title bar with refresh and the spoiler toggles, the search field, "Filters", "Random" and sort
- * (above the list on compact width, a side pane on wider windows), the list area for [state]'s status, and the
- * filters: a sheet over the screen on compact and medium width ([filtersOpen] at first), a panel right of the list
- * on expanded width. [searchText] is the field's text, which leads [state]'s query by the time a search takes.
- * Stateless, so screenshots pass a state.
+ * The problem view for an id: `ProblemPane` on its own view model in the app, a fixed state in screenshots. The
+ * `onBack` argument shows a back arrow (the compact page); `null` in the detail pane.
+ */
+internal typealias ProblemPaneSlot = @Composable (id: ProblemId, onBack: (() -> Unit)?, modifier: Modifier) -> Unit
+
+/**
+ * Problemset: the list column (a title bar with refresh and the spoiler toggles, the search field, "Filters",
+ * "Random", the sort chips and the list area for [state]'s status) and the opened problem from [problemPane].
+ * Compact width shows the opened problem as a page instead of the list (back arrow and Back close it); medium and
+ * wider show list | statement with [ProblemsetUiState.shown] highlighted, or "Select a problem" with nothing to
+ * show. The filters are a sheet over the screen ([filtersOpen] at first). [searchText] is the field's text, which
+ * leads [state]'s query by the time a search takes. Stateless, so screenshots pass a state.
  */
 @Composable
 internal fun ProblemsetScreen(
     state: ProblemsetUiState,
     searchText: String,
     actions: ProblemsetActions,
+    problemPane: ProblemPaneSlot,
     modifier: Modifier = Modifier,
     filtersOpen: Boolean = false,
 ) {
-    val spacing = PocketCpTheme.spacing
-    val widthClass = LocalWindowLayout.current.widthClass
+    val compact = LocalWindowLayout.current.widthClass == WindowWidthClass.Compact
     var sheetOpen by rememberSaveable { mutableStateOf(filtersOpen) }
     val openFilters = { sheetOpen = true }
+    // Hoisted, so the list keeps its position while a compact page covers it.
+    val listState = rememberLazyListState()
+    val opened = state.opened
     Box(modifier.fillMaxSize().background(PocketCpTheme.colors.background)) {
-        Column(Modifier.fillMaxSize()) {
-            PcpTopAppBar(
-                title = stringResource(R.string.problemset_label),
-                actions = {
-                    PcpIconButton(
-                        icon = Icons.Filled.Refresh,
-                        contentDescription = stringResource(R.string.problemset_refresh),
-                        onClick = actions::refresh,
-                    )
-                    SpoilerMenu(state.options, actions)
-                },
-            )
-            if (widthClass == WindowWidthClass.Compact) {
-                SearchField(searchText, actions, Modifier.fillMaxWidth().padding(horizontal = spacing.lg))
-                FilterAndRandomButtons(
-                    state,
-                    actions,
-                    openFilters,
-                    Modifier.padding(start = spacing.lg, end = spacing.lg, top = spacing.sm),
-                )
-                SortChips(state.options, actions, Modifier.padding(vertical = spacing.xs))
-                ListArea(state, actions, openFilters, Modifier.weight(1f))
+        if (compact && opened != null) {
+            BackHandler(onBack = actions::close)
+            problemPane(opened, actions::close, Modifier.fillMaxSize())
+        } else {
+            if (compact) {
+                ListColumn(state, searchText, actions, listState, openFilters, null, Modifier.fillMaxSize())
             } else {
-                WidePanes(state, searchText, actions, openFilters, Modifier.weight(1f))
+                WidePanes(state, searchText, actions, listState, openFilters, problemPane)
             }
-        }
-        if (sheetOpen && widthClass != WindowWidthClass.Expanded) {
-            FilterSheet(state, actions, onDismiss = { sheetOpen = false })
+            if (sheetOpen) FilterSheet(state, actions, onDismiss = { sheetOpen = false })
         }
     }
 }
 
-/** Medium: search pane | list. Expanded: search pane | list | filter panel. */
+/**
+ * Medium and wider: the list column | the shown problem (at least 55 % of the width), or "Select a problem" when
+ * there is none to show. No back arrow: the list is already visible (ADR 0016).
+ */
 @Composable
 private fun WidePanes(
     state: ProblemsetUiState,
     searchText: String,
     actions: ProblemsetActions,
+    listState: LazyListState,
     onOpenFilters: () -> Unit,
-    modifier: Modifier = Modifier,
+    problemPane: ProblemPaneSlot,
 ) {
-    val expanded = LocalWindowLayout.current.widthClass == WindowWidthClass.Expanded
-    Row(modifier) {
-        SearchPane(searchText, state.options, actions, Modifier.weight(SEARCH_PANE_WEIGHT).fillMaxHeight()) {
-            if (expanded) RandomButton(state, actions) else FilterAndRandomButtons(state, actions, onOpenFilters)
-        }
+    val shown = state.shown
+    Row(Modifier.fillMaxSize()) {
+        val list = Modifier.weight(LIST_PANE_WEIGHT).fillMaxHeight()
+        ListColumn(state, searchText, actions, listState, onOpenFilters, shown, list)
         VerticalDivider(color = PocketCpTheme.colors.outline)
-        // Expanded width has no sheet to open: the panel is already beside the list.
-        ListArea(
-            state,
-            actions,
-            onOpenFilters.takeUnless { expanded },
-            Modifier.weight(LIST_PANE_WEIGHT).fillMaxHeight(),
-        )
-        if (expanded) {
-            VerticalDivider(color = PocketCpTheme.colors.outline)
-            FilterPanel(state, actions, Modifier.weight(FILTER_PANE_WEIGHT).fillMaxHeight())
+        val detail = Modifier.weight(DETAIL_PANE_WEIGHT).fillMaxHeight()
+        if (shown != null) {
+            problemPane(shown, null, detail)
+        } else {
+            EmptyState(title = stringResource(R.string.problemset_select_problem), modifier = detail)
         }
     }
 }
 
-/** The status-dependent part: skeleton, full error, empty state or the problems. */
+/** The title bar, the search field, "Filters" and "Random", the sort chips and the list area. */
+@Composable
+private fun ListColumn(
+    state: ProblemsetUiState,
+    searchText: String,
+    actions: ProblemsetActions,
+    listState: LazyListState,
+    onOpenFilters: () -> Unit,
+    highlighted: ProblemId?,
+    modifier: Modifier = Modifier,
+) {
+    val spacing = PocketCpTheme.spacing
+    Column(modifier) {
+        PcpTopAppBar(
+            title = stringResource(R.string.problemset_label),
+            actions = {
+                PcpIconButton(
+                    icon = Icons.Filled.Refresh,
+                    contentDescription = stringResource(R.string.problemset_refresh),
+                    onClick = actions::refresh,
+                )
+                SpoilerMenu(state.options, actions)
+            },
+        )
+        SearchField(searchText, actions, Modifier.fillMaxWidth().padding(horizontal = spacing.lg))
+        FilterAndRandomButtons(
+            state,
+            actions,
+            onOpenFilters,
+            Modifier.padding(start = spacing.lg, end = spacing.lg, top = spacing.sm),
+        )
+        SortChips(state.options, actions, Modifier.padding(vertical = spacing.xs))
+        ListArea(state, actions, listState, onOpenFilters, highlighted, Modifier.weight(1f))
+    }
+}
+
+/**
+ * The status-dependent part: skeleton, full error, empty state or the problems in [listState]. A tapped row opens
+ * its problem; the [highlighted] row is the one shown beside the list.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ListArea(
     state: ProblemsetUiState,
     actions: ProblemsetActions,
-    onOpenFilters: (() -> Unit)?,
+    listState: LazyListState,
+    onOpenFilters: () -> Unit,
+    highlighted: ProblemId?,
     modifier: Modifier = Modifier,
 ) {
     when (state.status) {
@@ -156,15 +189,19 @@ private fun ListArea(
                     onRefresh = actions::refresh,
                     modifier = Modifier.weight(1f),
                 ) {
-                    ProblemList(state)
+                    ProblemList(state, actions, listState, highlighted)
                 }
             }
     }
 }
 
 @Composable
-private fun ProblemList(state: ProblemsetUiState) {
-    val listState = rememberLazyListState()
+private fun ProblemList(
+    state: ProblemsetUiState,
+    actions: ProblemsetActions,
+    listState: LazyListState,
+    highlighted: ProblemId?,
+) {
     val options = state.options
     // A new search, filter or order starts at its first result; recreating the screen (rotation) keeps the
     // position. A new random pick scrolls to its problem.
@@ -187,13 +224,12 @@ private fun ProblemList(state: ProblemsetUiState) {
     }
     LazyColumn(Modifier.fillMaxSize(), state = listState) {
         items(state.problems, key = { it.id.display }, contentType = { "problem" }) { problem ->
-            // Opening a problem is M3.
             ProblemRow(
                 problem = problem,
                 hideTags = options.hideTags,
                 hideRating = options.hideRatings,
-                highlighted = problem.id.display == pick.display,
-                onClick = {},
+                highlighted = problem.id == highlighted || problem.id.display == pick.display,
+                onClick = { actions.open(problem.id) },
             )
         }
     }
@@ -213,14 +249,14 @@ private fun Banner(
 }
 
 /**
- * Nothing matches: the search's message first, then the filters' (with "Filters" when [onOpenFilters] opens the
- * sheet); with neither, "No problems".
+ * Nothing matches: the search's message first, then the filters' (with "Filters", which calls [onOpenFilters]);
+ * with neither, "No problems".
  */
 @Composable
 private fun EmptyProblems(
     options: ProblemsetOptions,
     actions: ProblemsetActions,
-    onOpenFilters: (() -> Unit)?,
+    onOpenFilters: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when {
@@ -247,9 +283,7 @@ private fun EmptyProblems(
                             text = stringResource(R.string.problemset_clear_filters),
                             onClick = actions::clearFilters,
                         )
-                        if (onOpenFilters != null) {
-                            PcpTextButton(text = stringResource(R.string.problemset_filters), onClick = onOpenFilters)
-                        }
+                        PcpTextButton(text = stringResource(R.string.problemset_filters), onClick = onOpenFilters)
                     }
                 },
             )

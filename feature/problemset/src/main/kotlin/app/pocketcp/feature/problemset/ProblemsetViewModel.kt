@@ -12,6 +12,7 @@ import app.pocketcp.core.data.ProblemRepository
 import app.pocketcp.core.datastore.SettingsRepository
 import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.Problem
+import app.pocketcp.core.model.ProblemId
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +45,17 @@ internal const val KEY_RATING = "problemset_rating"
 internal const val KEY_PICK = "problemset_pick"
 internal const val KEY_PICK_COUNT = "problemset_pick_count"
 
+/** The opened problem's display (`2274A`), or `null` once closed (ADR 0016). */
+internal const val KEY_OPENED = "problemset_opened"
+
+/** The `problemset/{id}` route's argument: the display of the problem to open once (ADR 0016). */
+internal const val ARG_ID = "id"
+
+/** A problem display: contest id, then the index (`A`, `B1`). */
+private val DisplayPattern = Regex("""^(\d+)([A-Za-z]\d*)$""")
+
 /** What the Problemset screen asks for. */
+@Suppress("TooManyFunctions") // Every control of the screen, as SettingsRepository has every setting.
 interface ProblemsetActions {
     fun search(text: String)
 
@@ -72,14 +83,22 @@ interface ProblemsetActions {
 
     /** A refresh the user asked for (pull, the refresh button or Retry): always fetches. */
     fun refresh()
+
+    /** Opens [id]'s statement: a page on compact width, the detail pane beside the list on wider windows. */
+    fun open(id: ProblemId)
+
+    /** Closes the opened problem; wide windows then show the list's first problem again. */
+    fun close()
 }
 
 /**
  * The Problemset screen's state: the problemset from [problems], searched, filtered and sorted per the options kept
  * in [savedState], with the spoiler toggles of [settings]. Divisions come from [contests]' regular contests by
  * contest id. Searching and filtering run on [computeDispatcher], off the main thread; random picks draw from
- * [random]. Built by [ProblemsetEntry] for its back stack entry (ADR 0012).
+ * [random]. The opened problem is kept in [savedState] too, seeded once from the `problemset/{id}` route's [ARG_ID]
+ * (ADR 0016). Built by [ProblemsetEntry] for its back stack entry (ADR 0012).
  */
+@Suppress("TooManyFunctions") // One override per [ProblemsetActions] function.
 class ProblemsetViewModel(
     private val problems: ProblemRepository,
     contests: ContestRepository,
@@ -90,6 +109,11 @@ class ProblemsetViewModel(
 ) : ViewModel(),
     ProblemsetActions {
     private val userRefreshing = MutableStateFlow(false)
+
+    init {
+        // The route's id opens its problem once; afterwards the saved selection (also "closed") wins.
+        if (!savedState.contains(KEY_OPENED)) savedState[KEY_OPENED] = savedState.get<String>(ARG_ID)
+    }
 
     /**
      * The search box's text, as Compose state updated synchronously on each keystroke: a text field fed from the
@@ -143,12 +167,21 @@ class ProblemsetViewModel(
             ::RandomPick,
         )
 
+    private val opened: Flow<ProblemId?> = savedState.getStateFlow<String?>(KEY_OPENED, null).map(::problemIdOf)
+
+    /** Opening a problem only sets [ProblemsetUiState.opened]: the list is not searched again. */
     @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<ProblemsetUiState> =
         combine(problems.problemset(), options, userRefreshing, divisions, pick, ::Inputs)
             .mapLatest { problemsetUiState(it.cached, it.options, it.refreshing, it.divisions, it.pick) }
             .flowOn(computeDispatcher)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ProblemsetUiState())
+            .combine(opened) { state, opened -> state.copy(opened = opened) }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
+                // A seeded or restored problem shows from the first frame, without the list flashing first.
+                ProblemsetUiState(opened = problemIdOf(savedState.get<String>(KEY_OPENED))),
+            )
 
     override fun search(text: String) {
         searchText = text
@@ -204,6 +237,14 @@ class ProblemsetViewModel(
         }
     }
 
+    override fun open(id: ProblemId) {
+        savedState[KEY_OPENED] = id.display
+    }
+
+    override fun close() {
+        savedState.set<String>(KEY_OPENED, null)
+    }
+
     /** The values [state] is computed from. */
     private data class Inputs(
         val cached: Cached<List<Problem>>,
@@ -213,6 +254,12 @@ class ProblemsetViewModel(
         val pick: RandomPick,
     )
 }
+
+/** [display] (`2274A`) as a problem id; `null` for anything else. */
+internal fun problemIdOf(display: String?): ProblemId? =
+    display?.let(DisplayPattern::matchEntire)?.let { match ->
+        match.groupValues[1].toIntOrNull()?.let { ProblemId(it, match.groupValues[2]) }
+    }
 
 /** The unfiltered rating range, as kept under [KEY_RATING]. */
 private val FullRange: ArrayList<Int> get() = arrayListOf(ProblemFilter.MIN_RATING, ProblemFilter.MAX_RATING)

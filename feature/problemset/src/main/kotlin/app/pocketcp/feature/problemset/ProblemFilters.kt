@@ -50,7 +50,7 @@ private const val SHEET_MAX_HEIGHT_FRACTION = 0.85f
 private const val SCRIM_ALPHA = 0.6f
 
 /**
- * Compact and medium width: "Filters" (with the active-filter count; opens the sheet), tagged
+ * Above the list: "Filters" (with the active-filter count; opens the sheet), tagged
  * `problemset_filters`, and "Random".
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -63,7 +63,7 @@ internal fun FilterAndRandomButtons(
 ) {
     val count = state.options.filter.activeCount
     val spacing = PocketCpTheme.spacing
-    // Wraps in a narrow search pane (medium width).
+    // Wraps in a narrow list column (beside a statement).
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(spacing.sm),
@@ -99,7 +99,7 @@ internal fun RandomButton(
 }
 
 /**
- * Compact and medium width: the filters as a sheet from the bottom over a scrim, inside this window. Tapping the
+ * The filters as a sheet from the bottom over a scrim, inside this window. Tapping the
  * scrim, Back or "Done" calls [onDismiss]; filters apply as they change.
  */
 @Composable
@@ -141,7 +141,7 @@ internal fun FilterSheet(
 
 /**
  * The filters: a header with "Clear" (and "Done" in the sheet), then rating range, divisions and tags. While tags
- * are hidden the tag chips sit behind "Show tag filter". Expanded width shows it as a side panel.
+ * are hidden the tag chips sit behind "Show tag filter". Shown in [FilterSheet].
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
