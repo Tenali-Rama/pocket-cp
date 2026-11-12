@@ -1,16 +1,22 @@
 package app.pocketcp.core.statement.math
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.screenshot.SCREENSHOT_SDK
@@ -71,6 +77,50 @@ class MathRendererTest {
         NativeTexTypesetter.typeset(formula, 28f, 0xFFFFFFFF.toInt())
 
         assertEquals(1, NativeTexTypesetter.typesetCountForTests())
+    }
+
+    @Test
+    fun theCacheEvictsTheLeastRecentlyUsedFormula() {
+        NativeTexTypesetter.clearForTests()
+        val white = 0xFFFFFFFF.toInt()
+
+        (0..MATH_CACHE_ENTRIES).forEach { NativeTexTypesetter.typeset("x_{$it}", 24f, white) }
+        NativeTexTypesetter.typeset("x_{$MATH_CACHE_ENTRIES}", 24f, white)
+        val afterFill = NativeTexTypesetter.typesetCountForTests()
+        NativeTexTypesetter.typeset("x_{0}", 24f, white)
+
+        assertEquals("the newest entry is still cached", MATH_CACHE_ENTRIES + 1, afterFill)
+        assertEquals("the oldest entry was evicted", afterFill + 1, NativeTexTypesetter.typesetCountForTests())
+    }
+
+    @Test
+    fun scriptsAreShiftedLikeTex() {
+        val fontSize = 24f
+        val sup = texts("x^2", fontSize)
+        val sub = texts("x_i", fontSize)
+
+        val raise = sup.getValue("x").baseline - sup.getValue("2").baseline
+        val drop = sub.getValue("i").baseline - sub.getValue("x").baseline
+        assertTrue("superscript raised by $raise", raise >= fontSize * 0.3f)
+        assertTrue("subscript dropped by $drop", drop >= fontSize * 0.15f)
+    }
+
+    @Test
+    fun wideDisplayMathScrollsHorizontallyFromTheLeftEdge() {
+        val wide = (1..40).joinToString(" + ") { "x_{$it}" }
+        rule.setContent {
+            PocketCpTheme {
+                Box(Modifier.width(120.dp)) { LocalMathRenderer.current.Display(wide, 1f) }
+            }
+        }
+
+        val range =
+            rule
+                .onNode(SemanticsMatcher.keyIsDefined(SemanticsProperties.HorizontalScrollAxisRange))
+                .fetchSemanticsNode()
+                .config[SemanticsProperties.HorizontalScrollAxisRange]
+        assertTrue("formula wider than the column scrolls", range.maxValue() > 0f)
+        assertEquals("starts at the left edge", 0f, range.value(), 0f)
     }
 
     @Test
@@ -152,5 +202,13 @@ class MathRendererTest {
         }
 
         rule.onNodeWithContentDescription(formula).assertExists()
+    }
+
+    private fun texts(
+        tex: String,
+        fontSize: Float,
+    ): Map<String, DrawCommand.Text> {
+        val layout = (NativeTexTypesetter.typeset(tex, fontSize, 0xFFFFFFFF.toInt()) as TexRenderResult.Ready).layout
+        return layout.commands.filterIsInstance<DrawCommand.Text>().associateBy { it.value }
     }
 }

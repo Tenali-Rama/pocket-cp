@@ -21,12 +21,12 @@ internal fun TexCursor.parseArgumentCommand(name: String): TexNode? =
         "frac" -> TexNode.Fraction(parseRequiredArgument(), parseRequiredArgument())
         "binom" -> TexNode.Binomial(parseRequiredArgument(), parseRequiredArgument())
         "sqrt" -> {
-            if (peek() == '[') skipOptionalArgument()
-            TexNode.Sqrt(parseRequiredArgument())
+            val index = if (peek() == '[') parseOptionalArgument() else null
+            TexNode.Sqrt(parseRequiredArgument(), index)
         }
         "text", "textrm", "mathrm" -> TexNode.Text(parseTextArgument())
         "mathcal" -> TexNode.Symbol(parseTextArgument(), SymbolStyle.Calligraphic)
-        "mathbf" -> TexNode.Symbol(parseTextArgument(), SymbolStyle.Normal)
+        "mathbf" -> TexNode.Symbol(parseTextArgument(), SymbolStyle.Bold)
         else -> null
     }
 
@@ -86,16 +86,9 @@ internal fun TexCursor.parseTextArgument(): String {
     return source.substring(start, position - 1).replace(Regex("\\\\([{}])"), "$1")
 }
 
-internal fun TexCursor.skipOptionalArgument() {
-    var depth = 0
-    while (position < source.length) {
-        when (source[position++]) {
-            '[' -> depth++
-            ']' -> {
-                depth--
-                if (depth == 0) return
-            }
-        }
-    }
-    fail("unbalanced optional argument")
+internal fun TexCursor.parseOptionalArgument(): TexNode {
+    position++
+    val argument = parseSequence(']')
+    position++
+    return argument
 }

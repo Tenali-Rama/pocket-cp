@@ -1,8 +1,15 @@
 package app.pocketcp.core.statement.math
 
+private val ENVIRONMENTS =
+    mapOf(
+        "matrix" to MatrixStyle.Plain,
+        "pmatrix" to MatrixStyle.Paren,
+        "bmatrix" to MatrixStyle.Bracket,
+        "cases" to MatrixStyle.Cases,
+    )
+
 internal fun TexCursor.parseEnvironment(name: String): TexNode {
-    val cases = name == "cases"
-    if (name != "matrix" && !cases) fail("unknown environment $name")
+    val style = ENVIRONMENTS[name] ?: fail("unknown environment $name")
     val rows = mutableListOf<List<TexNode>>()
     var row = emptyList<TexNode>()
     while (position < source.length) {
@@ -12,7 +19,7 @@ internal fun TexCursor.parseEnvironment(name: String): TexNode {
                 val endName = parseTextArgument()
                 if (endName != name) fail("environment mismatch")
                 rows += row
-                return TexNode.Matrix(rows, cases)
+                return TexNode.Matrix(rows, style)
             }
             source.startsWith("\\\\", position) -> {
                 position += 2

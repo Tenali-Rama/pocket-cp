@@ -3,7 +3,7 @@ package app.pocketcp.core.statement.math
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
-import java.util.concurrent.ConcurrentHashMap
+import android.util.LruCache
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.max
 
@@ -26,6 +26,22 @@ private const val MATRIX_ROW_GAP_RATIO = 0.2f
 private const val MATRIX_DELIMITER_SCALE = 1.6f
 private const val MATRIX_BASELINE_OFFSET_RATIO = 0.45f
 
+/** Typeset formulas kept in memory: enough for a long statement at a couple of sizes and themes. */
+internal const val MATH_CACHE_ENTRIES = 256
+
+private val TextTypeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
+private val CalligraphicTypeface = Typeface.create(Typeface.SERIF, Typeface.ITALIC)
+private val BoldTypeface = Typeface.create(Typeface.SERIF, Typeface.BOLD)
+private val NormalTypeface = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
+
+private fun typefaceFor(style: SymbolStyle): Typeface =
+    when (style) {
+        SymbolStyle.Text -> TextTypeface
+        SymbolStyle.Calligraphic -> CalligraphicTypeface
+        SymbolStyle.Bold -> BoldTypeface
+        SymbolStyle.Normal -> NormalTypeface
+    }
+
 internal sealed interface TexRenderResult {
     data class Ready(
         val layout: MathLayout,
@@ -40,7 +56,7 @@ internal data class MathLayout(
     val width: Float,
     val height: Float,
     val baseline: Float,
-    private val commands: List<DrawCommand>,
+    val commands: List<DrawCommand>,
 ) {
     fun draw(
         canvas: Canvas,
@@ -69,12 +85,7 @@ internal sealed interface DrawCommand {
             paint: Paint,
         ) {
             paint.textSize = size
-            paint.typeface =
-                when (style) {
-                    SymbolStyle.Text -> Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
-                    SymbolStyle.Calligraphic -> Typeface.create(Typeface.SERIF, Typeface.ITALIC)
-                    SymbolStyle.Normal -> Typeface.create(Typeface.SERIF, Typeface.NORMAL)
-                }
+            paint.typeface = typefaceFor(style)
             canvas.drawText(value, x, baseline, paint)
         }
     }
@@ -102,7 +113,7 @@ internal data class MathCacheKey(
 )
 
 internal object NativeTexTypesetter {
-    private val cache = ConcurrentHashMap<MathCacheKey, TexRenderResult>()
+    private val cache = LruCache<MathCacheKey, TexRenderResult>(MATH_CACHE_ENTRIES)
     private val typesetCount = AtomicInteger()
 
     fun typeset(
@@ -111,18 +122,20 @@ internal object NativeTexTypesetter {
         color: Int,
     ): TexRenderResult {
         val key = MathCacheKey(tex, size, color)
-        return cache.getOrPut(key) {
-            typesetCount.incrementAndGet()
+        cache.get(key)?.let { return it }
+        typesetCount.incrementAndGet()
+        val result =
             runCatching { TexLayoutEngine(size).layout(TexParser(tex).parse()) }
                 .fold(
                     onSuccess = { TexRenderResult.Ready(it) },
                     onFailure = { TexRenderResult.Fallback(tex) },
                 )
-        }
+        cache.put(key, result)
+        return result
     }
 
     internal fun clearForTests() {
-        cache.clear()
+        cache.evictAll()
         typesetCount.set(0)
     }
 
@@ -155,7 +168,7 @@ private class TexLayoutEngine(
             is TexNode.Symbol -> glyph(node.value, fontSize, node.style)
             is TexNode.Text -> glyph(node.value, fontSize, SymbolStyle.Text)
             is TexNode.Fraction -> fraction(node.numerator, node.denominator, fontSize)
-            is TexNode.Sqrt -> squareRoot(node.body, fontSize)
+            is TexNode.Sqrt -> squareRoot(node, fontSize)
             is TexNode.Scripts -> layoutScripts(node, fontSize, ::layoutNode)
             is TexNode.Delimited -> delimited(node, fontSize)
             is TexNode.Binomial -> binomial(node, fontSize)
@@ -168,12 +181,7 @@ private class TexLayoutEngine(
         style: SymbolStyle,
     ): LayoutBox {
         measurePaint.textSize = fontSize
-        measurePaint.typeface =
-            when (style) {
-                SymbolStyle.Text -> Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
-                SymbolStyle.Calligraphic -> Typeface.create(Typeface.SERIF, Typeface.ITALIC)
-                SymbolStyle.Normal -> Typeface.create(Typeface.SERIF, Typeface.NORMAL)
-            }
+        measurePaint.typeface = typefaceFor(style)
         val metrics = measurePaint.fontMetrics
         return LayoutBox(
             width = max(measurePaint.measureText(value), fontSize * MIN_GLYPH_WIDTH_RATIO),
@@ -227,23 +235,26 @@ private class TexLayoutEngine(
     }
 
     private fun squareRoot(
-        body: TexNode,
+        node: TexNode.Sqrt,
         fontSize: Float,
     ): LayoutBox {
-        val content = layoutNode(body, fontSize)
+        val content = layoutNode(node.body, fontSize)
         val radical = glyph("√", fontSize * RADICAL_FONT_SCALE, SymbolStyle.Normal)
         val gap = fontSize * RADICAL_GAP_RATIO
         val top = max(0f, radical.baseline - content.baseline - fontSize * RADICAL_OVERLAP_RATIO)
         val baseline = top + content.baseline
         val width = radical.width + gap + content.width
-        return LayoutBox(
-            width,
-            max(radical.height, top + content.height),
-            baseline,
-            translated(radical.commands, 0f, baseline - radical.baseline) +
-                translated(content.commands, radical.width + gap, top) +
-                listOf(DrawCommand.Rule(radical.width + gap, top, width, fontSize * RULE_THICKNESS_RATIO)),
-        )
+        val root =
+            LayoutBox(
+                width,
+                max(radical.height, top + content.height),
+                baseline,
+                translated(radical.commands, 0f, baseline - radical.baseline) +
+                    translated(content.commands, radical.width + gap, top) +
+                    listOf(DrawCommand.Rule(radical.width + gap, top, width, fontSize * RULE_THICKNESS_RATIO)),
+            )
+        val index = node.index ?: return root
+        return withRootIndex(root, layoutNode(index, fontSize * ROOT_INDEX_FONT_SCALE), radical.width, fontSize)
     }
 
     private fun delimited(
@@ -308,21 +319,27 @@ private class TexLayoutEngine(
         val innerWidth = columnWidths.sum() + cellGap * max(0, columnCount - 1)
         val innerHeight = rowHeights.sum() + fontSize * MATRIX_ROW_GAP_RATIO * max(0, rows.size - 1)
         val delimiterSize = fontSize * MATRIX_DELIMITER_SCALE
-        val left = glyph(if (node.cases) "{" else "(", delimiterSize, SymbolStyle.Normal)
-        val right = glyph(if (node.cases) "" else ")", delimiterSize, SymbolStyle.Normal)
+        val left = delimiterOrNull(node.style.left, delimiterSize)
+        val right = delimiterOrNull(node.style.right, delimiterSize)
+        val leftWidth = left?.width ?: 0f
         val baseline = innerHeight / 2 + fontSize * MATRIX_BASELINE_OFFSET_RATIO
         val commands = mutableListOf<DrawCommand>()
         var y = 0f
         rows.forEachIndexed { rowIndex, row ->
             row.forEachIndexed { column, cell ->
+                val slack = if (node.style.leftAligned) 0f else (columnWidths[column] - cell.width) / 2
                 val x = columnWidths.take(column).sum() + cellGap * column
-                commands += translated(cell.commands, left.width + x + (columnWidths[column] - cell.width) / 2, y)
+                commands += translated(cell.commands, leftWidth + x + slack, y)
             }
             y += rowHeights[rowIndex] + fontSize * MATRIX_ROW_GAP_RATIO
         }
-        commands += translated(left.commands, 0f, baseline - left.baseline)
-        if (!node.cases) commands += translated(right.commands, left.width + innerWidth, baseline - right.baseline)
-        val width = left.width + innerWidth + if (node.cases) 0f else right.width
-        return LayoutBox(width, innerHeight, baseline, commands)
+        left?.let { commands += translated(it.commands, 0f, baseline - it.baseline) }
+        right?.let { commands += translated(it.commands, leftWidth + innerWidth, baseline - it.baseline) }
+        return LayoutBox(leftWidth + innerWidth + (right?.width ?: 0f), innerHeight, baseline, commands)
     }
+
+    private fun delimiterOrNull(
+        value: String,
+        fontSize: Float,
+    ): LayoutBox? = if (value.isEmpty()) null else glyph(value, fontSize, SymbolStyle.Normal)
 }

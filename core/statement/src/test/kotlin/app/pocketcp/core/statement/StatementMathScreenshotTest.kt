@@ -28,7 +28,10 @@ private val PocketCpThemeWrapper: ThemeWrapper = { dark, content ->
     PocketCpTheme(mode = if (dark) ThemeMode.Dark else ThemeMode.Light, content = content)
 }
 
-/** Native math captures: inline baseline flow, display limits/fractions/cases and invalid source fallback. */
+/**
+ * Native math captures: inline baseline flow, display limits/fractions/cases, a wide scrolling formula and the
+ * invalid source fallback.
+ */
 class StatementMathScreenshotTest : ScreenshotTest() {
     @Test
     fun statementMath() = captureMatrix("statementMath", PocketCpThemeWrapper) { MathGallery() }
@@ -113,6 +116,11 @@ private fun mathStatement() =
                         ),
                         StatementBlock.DisplayMath(
                             "\\sum_{i=1}^{n} \\frac{i}{2} = \\begin{cases} n(n+1)/4 & n \\ge 1 \\\\ 0 & \\text{otherwise} \\end{cases}",
+                        ),
+                        // Wider than a phone column: it starts at the left edge and scrolls instead of clipping.
+                        StatementBlock.DisplayMath(
+                            "f(x) = \\sqrt[3]{x} + a_0 + a_1 x + a_2 x^2 + a_3 x^3 + a_4 x^4 + a_5 x^5 + " +
+                                "a_6 x^6 + a_7 x^7 + a_8 x^8 + a_9 x^9 + a_{10} x^{10}",
                         ),
                     ),
                 ),

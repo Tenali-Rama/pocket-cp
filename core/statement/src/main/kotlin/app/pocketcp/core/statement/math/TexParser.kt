@@ -18,6 +18,7 @@ internal sealed interface TexNode {
 
     data class Sqrt(
         val body: TexNode,
+        val index: TexNode? = null,
     ) : TexNode
 
     data class Scripts(
@@ -39,7 +40,7 @@ internal sealed interface TexNode {
 
     data class Matrix(
         val rows: List<List<TexNode>>,
-        val cases: Boolean,
+        val style: MatrixStyle,
     ) : TexNode
 
     data class Text(
@@ -50,7 +51,20 @@ internal sealed interface TexNode {
 internal enum class SymbolStyle {
     Normal,
     Calligraphic,
+    Bold,
     Text,
+}
+
+/** A TeX matrix environment: its delimiters and how its columns align. */
+internal enum class MatrixStyle(
+    val left: String,
+    val right: String,
+    val leftAligned: Boolean = false,
+) {
+    Plain("", ""),
+    Paren("(", ")"),
+    Bracket("[", "]"),
+    Cases("{", "", leftAligned = true),
 }
 
 /**
