@@ -18,6 +18,10 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:statement"))
     implementation(project(":core:ui"))
+    // The unparsable-statement fallback and contest materials open in the Codeforces-only WebView (ADR 0021).
+    implementation(project(":core:webview"))
+    // `BackHandler` closes a Codeforces page open over the statement.
+    implementation(libs.androidx.activity.compose)
 
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)

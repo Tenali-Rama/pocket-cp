@@ -27,7 +27,7 @@ class ProblemViewModelFactory
             return ProblemViewModel(problem, statements, settings, openUrl)
         }
 
-        /** Opens [url] in the system browser (047 keeps Codeforces links in the app). */
+        /** Opens [url] in the system browser: the view model sends only `http(s)` links off Codeforces here. */
         @Suppress("SwallowedException")
         private fun openInBrowser(url: String) {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

@@ -21,13 +21,15 @@ enum class ProblemStatus {
     /** No cached statement and the refresh failed (offline, rate limited, unavailable or rejected): Retry. */
     Error,
 
-    /** No cached statement and the page could not be parsed (`JudgeError.Malformed`). */
+    /** No cached statement and the page could not be parsed (`JudgeError.Malformed`): [ProblemUiState.pageUrl]. */
     Unparsable,
 }
 
 /**
  * The problem view of [problem]: its [statement] in [language] when cached, the last refresh's [error], and the
- * reading settings [textSize] and [width].
+ * reading settings [textSize] and [width]. [pageUrl] is the statement's page on Codeforces, shown in the WebView when
+ * it is [ProblemStatus.Unparsable]; [webPage] is a Codeforces page open over the statement (a contest material or
+ * a statement link), `null` when none is.
  */
 @Immutable
 data class ProblemUiState(
@@ -38,6 +40,8 @@ data class ProblemUiState(
     val language: StatementLanguage = StatementLanguage.En,
     val textSize: TextSizePreference = TextSizePreference.Default,
     val width: StatementWidthPreference = StatementWidthPreference.Comfortable,
+    val pageUrl: String? = null,
+    val webPage: String? = null,
 )
 
 /** The state of [problem] for its cached statement in [language] and the reading settings in [settings]. */
