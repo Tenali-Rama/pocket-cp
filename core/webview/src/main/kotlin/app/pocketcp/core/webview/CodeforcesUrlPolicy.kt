@@ -9,8 +9,9 @@ object CodeforcesUrlPolicy {
     /** Whether [url] is `https` and its host is `codeforces.com` or ends in `.codeforces.com`. */
     fun isAllowed(url: String): Boolean {
         // Not parsable as a URI: not a Codeforces URL either.
-        val uri = runCatching { URI(url) }.getOrNull() ?: return false
-        val host = uri.host?.lowercase() ?: return false
-        return uri.scheme.equals("https", ignoreCase = true) && (host == DOMAIN || host.endsWith(".$DOMAIN"))
+        val uri = runCatching { URI(url) }.getOrNull()
+        val host = uri?.host?.lowercase().orEmpty()
+        val https = uri?.scheme.equals("https", ignoreCase = true)
+        return https && (host == DOMAIN || host.endsWith(".$DOMAIN"))
     }
 }
