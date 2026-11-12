@@ -317,7 +317,10 @@ class ContestDetailViewModelTest {
             viewModel.state.test {
                 viewModel.openProblem(ProblemId(3, "B"))
                 viewModel.open(finished.id) // its own contest: the problem stays open
-                assertEquals(ProblemId(3, "B"), awaitUntil { it.status == DetailStatus.Loaded }.problem)
+                val opened = awaitUntil { it.problem != null }
+                assertEquals(ProblemId(3, "B"), opened.problem)
+                assertEquals(finished.id, opened.selected)
+                expectNoEvents()
 
                 viewModel.open(running.id)
                 val other = awaitUntil { it.contest?.id == running.id }
