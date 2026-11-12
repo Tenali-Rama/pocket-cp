@@ -26,6 +26,8 @@ private object NoProblemActions : ProblemActions {
     override fun retry() = Unit
 
     override fun openLink(url: String) = Unit
+
+    override fun closeWebPage() = Unit
 }
 
 /**
