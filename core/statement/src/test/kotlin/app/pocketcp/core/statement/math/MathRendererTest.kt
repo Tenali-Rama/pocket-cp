@@ -81,6 +81,16 @@ class MathRendererTest {
     }
 
     @Test
+    fun fractionBarSitsOnTheMathAxisNotTheBaseline() {
+        val fontSize = 24f
+        val result = NativeTexTypesetter.typeset("\\frac{n}{2}", fontSize, 0xFFFFFFFF.toInt())
+        val layout = (result as TexRenderResult.Ready).layout
+
+        // The denominator hangs below the text baseline instead of resting on it.
+        assertTrue(layout.height - layout.baseline > fontSize * 0.4f)
+    }
+
+    @Test
     fun inlinePlaceholderIsSizedFromTheTypesetFormula() {
         val placeholders = mutableMapOf<String, Placeholder>()
         val letter = "x"
