@@ -2,6 +2,7 @@ package app.pocketcp.feature.problemset
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -29,6 +31,8 @@ import app.pocketcp.core.designsystem.ThemeMode
 import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
+import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.problemview.PROBLEM_VIEW_TAG
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -85,6 +89,14 @@ class ProblemsetScreenTest {
             override fun refresh() {
                 calls += "refresh"
             }
+
+            override fun open(id: ProblemId) {
+                calls += "open ${id.display}"
+            }
+
+            override fun close() {
+                calls += "close"
+            }
         }
 
     @Test
@@ -113,7 +125,7 @@ class ProblemsetScreenTest {
     fun sortChips_sort() = sorts(WindowWidthClass.Compact)
 
     @Test
-    fun sortPane_sorts() = sorts(WindowWidthClass.Expanded)
+    fun sortChips_sortBesideTheStatement() = sorts(WindowWidthClass.Expanded)
 
     @Test
     fun hiddenRatings_offerNoRatingSort() {
@@ -170,10 +182,11 @@ class ProblemsetScreenTest {
     }
 
     @Test
-    fun expandedWidth_showsTheFilterPanel_withoutAFilterButton() {
+    fun expandedWidth_opensTheFiltersInTheSheet_besideTheStatement() {
         show(WindowWidthClass.Expanded)
-        rule.onNodeWithTag("problemset_filters").assertDoesNotExist()
-        rule.onNodeWithTag("problemset_filters_done").assertDoesNotExist()
+        rule.onNodeWithTag(PROBLEM_VIEW_TAG).assertExists()
+        rule.onNodeWithTag("problemset_filter_sheet").assertDoesNotExist()
+        rule.onNodeWithTag("problemset_filters").performClick()
         rule.onNodeWithTag(tagTestTag("brute force")).performScrollTo().performClick()
         assertEquals(listOf("tag brute force"), calls)
     }
@@ -181,6 +194,7 @@ class ProblemsetScreenTest {
     @Test
     fun hiddenTags_collapseTheTagFilter_untilShown() {
         show(WindowWidthClass.Expanded, options = ProblemsetOptions(hideTags = true))
+        rule.onNodeWithTag("problemset_filters").performClick()
         rule.onNodeWithTag(tagTestTag("dsu")).assertDoesNotExist()
         rule.onNodeWithTag("problemset_show_tags").performScrollTo().performClick()
         rule.onNodeWithTag(tagTestTag("dsu")).assertExists()
@@ -209,6 +223,56 @@ class ProblemsetScreenTest {
         rule.onNodeWithTag("problem_2276F").assertIsNotSelected()
     }
 
+    @Test
+    fun compact_tappingARow_opensIt() {
+        show(WindowWidthClass.Compact)
+        rule.onNodeWithTag("problem_2274A").performClick()
+        assertEquals(listOf("open 2274A"), calls)
+    }
+
+    @Test
+    fun compact_openedProblem_isAPage_whoseBackArrowAndBackClose() {
+        show(WindowWidthClass.Compact, opened = ProblemId(2273, "D"))
+        rule.onNodeWithTag(PROBLEM_VIEW_TAG).assertExists()
+        rule.onNodeWithTag("problem_2273D").assertDoesNotExist()
+        rule.onNodeWithContentDescription("Navigate back").performClick()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        assertEquals(listOf("close", "close"), calls)
+    }
+
+    @Test
+    fun medium_highlightsTheShownRow_withoutABackArrow() = besideTheList(WindowWidthClass.Medium)
+
+    @Test
+    fun expanded_highlightsTheShownRow_withoutABackArrow() = besideTheList(WindowWidthClass.Expanded)
+
+    @Test
+    fun wide_withNoneOpened_showsTheFirstProblem() {
+        show(WindowWidthClass.Medium)
+        rule.onNodeWithTag("problem_2276F").assertIsSelected()
+        rule.onNodeWithTag("problem_2274A").assertIsNotSelected()
+        // The highlighted row and the statement's top bar.
+        rule.onAllNodesWithText("2276F · Permutation Coloring Game", substring = true).assertCountEquals(2)
+    }
+
+    @Test
+    fun wide_withAnEmptyList_asksToSelectAProblem() {
+        show(WindowWidthClass.Expanded, options = ProblemsetOptions(query = "zzz"))
+        rule.onNodeWithTag(PROBLEM_VIEW_TAG).assertDoesNotExist()
+        rule.onNodeWithText("Select a problem").assertExists()
+    }
+
+    /** 2273D opened: the statement beside the list, its row highlighted, no back arrow; rows still open. */
+    private fun besideTheList(width: WindowWidthClass) {
+        show(width, opened = ProblemId(2273, "D"))
+        rule.onNodeWithTag(PROBLEM_VIEW_TAG).assertExists()
+        rule.onNodeWithTag("problem_2273D").assertIsSelected()
+        rule.onNodeWithTag("problem_2276F").assertIsNotSelected()
+        rule.onNodeWithContentDescription("Navigate back").assertDoesNotExist()
+        rule.onNodeWithTag("problem_2274A").performClick()
+        assertEquals(listOf("open 2274A"), calls)
+    }
+
     private fun sorts(width: WindowWidthClass) {
         show(width)
         rule.onNodeWithTag(ProblemSort.MostSolved.testTag).performScrollTo().performClick()
@@ -222,14 +286,15 @@ class ProblemsetScreenTest {
         error: JudgeError? = null,
         options: ProblemsetOptions = ProblemsetOptions(),
         pick: RandomPick = RandomPick(),
+        opened: ProblemId? = null,
     ) {
         val cached = Cached(data, fetchedAt = null, refreshing = false, error = error)
-        val state = problemsetUiState(cached, options, userRefreshing = false, pick = pick)
+        val state = problemsetUiState(cached, options, userRefreshing = false, pick = pick).copy(opened = opened)
         val layout = WindowLayout(width, WindowHeightClass.Medium, DevicePosture.Flat, navigationTypeOf(width))
         rule.setContent {
             PocketCpTheme(ThemeMode.Dark) {
                 CompositionLocalProvider(LocalWindowLayout provides layout) {
-                    ProblemsetScreen(state, options.query, actions)
+                    ProblemsetScreen(state, options.query, actions, TestProblemPane)
                 }
             }
         }

@@ -5,6 +5,7 @@ import app.pocketcp.core.data.Cached
 import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
+import app.pocketcp.core.model.ProblemId
 
 /** What the list area shows (ADR 0011). */
 enum class ProblemsetStatus {
@@ -51,9 +52,9 @@ data class RandomPick(
 /**
  * The Problemset screen. [problems] match [options]' query and filter, in its effective order. [tags] are every
  * tag in the cached problemset (and every selected one), sorted, for the tag filter. [pick] is the highlighted
- * random problem. [error] is the last refresh's failure: a banner over the list when there is data, the full
- * error state otherwise. [userRefreshing] is a refresh the user asked for; a background refresh never shows an
- * indicator.
+ * random problem. [opened] is the problem the user opened, in [problems] or not. [error] is the last refresh's
+ * failure: a banner over the list when there is data, the full error state otherwise. [userRefreshing] is a refresh
+ * the user asked for; a background refresh never shows an indicator.
  */
 @Immutable
 data class ProblemsetUiState(
@@ -64,9 +65,13 @@ data class ProblemsetUiState(
     val userRefreshing: Boolean = false,
     val tags: List<String> = emptyList(),
     val pick: RandomPick = RandomPick(),
+    val opened: ProblemId? = null,
 ) {
     /** "Random" needs at least one problem to pick from. */
     val canPickRandom: Boolean get() = problems.isNotEmpty()
+
+    /** The problem beside the list on wide windows: the opened one, else the list's first (ADR 0016). */
+    val shown: ProblemId? get() = opened ?: problems.firstOrNull()?.id
 }
 
 /**

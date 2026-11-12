@@ -14,7 +14,6 @@
     <string name="problemset_clear_search">Clear search</string>
 
     <!-- Sort. Rating orders read as difficulty. -->
-    <string name="problemset_sort_title">Sort by</string>
     <string name="problemset_sort_newest">Newest</string>
     <string name="problemset_sort_rating_ascending">Easiest first</string>
     <string name="problemset_sort_rating_descending">Hardest first</string>
@@ -44,6 +43,9 @@
 
     <!-- A random problem from the filtered list. -->
     <string name="problemset_random">Random</string>
+
+    <!-- The detail pane on wide windows when the list has no problem to show. -->
+    <string name="problemset_select_problem">Select a problem</string>
 
     <!-- Empty states. -->
     <string name="problemset_empty_title">No problems</string>
