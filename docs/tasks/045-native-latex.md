@@ -40,8 +40,8 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Any change outside `core/statement`'s math package, besides the module's build file, docs and R8 rules. Math in blogs or editorials (M9).
 
 ## Notes for next
-- Fixed the reported detekt ReturnCount and MaxLineLength findings in `TexParser` and `TexScripts` without weakening checks.
-- Preserved ADR 0020's zero-dependency native-canvas renderer, source fallback, cache behavior, and GPL-3.0 coverage.
-- Accepted native math and refreshed statement gallery goldens from run 41744389674 after inspecting every changed/new statement image across the device and theme matrix.
-- Local `scripts/verify.sh` passes; Android/Roborazzi verification remains CI-owned.
-- Fixed the remaining Detekt findings by splitting `TexParser` helpers across focused package-internal files; `scripts/verify.sh` passes.
+- Inline math now reserves its measured size: `MathRenderer.inlinePlaceholder` returns a `TextCenter` placeholder made tall enough on both sides of the text centre for the formula baseline to land on the text baseline (`InlineMath.kt`).
+- Placeholder sp are computed linearly (`density * fontScale`) because Compose's `PlaceholderSpan` converts that way; `toSp()` follows Android 14's nonlinear scaling and misplaced math at 1.5x font.
+- Fraction bars now sit on the math axis (0.25 em above the baseline), as in TeX, rather than the denominator resting on the baseline.
+- `StatementContent.kt` and `StatementMathScreenshotTest.kt` were added to `touches` in fix round 1; the first is the only caller of the inline placeholder.
+- ADR 0020's zero-dependency native renderer and source fallback are unchanged; goldens re-accepted from run 43246390047.
