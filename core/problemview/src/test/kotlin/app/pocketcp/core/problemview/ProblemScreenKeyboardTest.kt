@@ -78,7 +78,7 @@ class ProblemScreenKeyboardTest {
         tabUntilFocused("sample_1_input_copy")
         rule.onNodeWithTag("sample_1_input_copy").performKeyInput { pressKey(Key.Enter) }
 
-        rule.runOnIdle { assertEquals("2\n1 2\n", clipboard.text?.text) }
+        rule.runOnIdle { assertEquals("2\n1 2\n", clipboard.copied?.text) }
     }
 
     @Test
@@ -130,12 +130,12 @@ class ProblemScreenKeyboardTest {
         }
 
     private class FakeClipboard : ClipboardManager {
-        var text: AnnotatedString? = null
+        var copied: AnnotatedString? = null
 
-        override fun getText(): AnnotatedString? = text
+        override fun getText(): AnnotatedString? = copied
 
         override fun setText(annotatedString: AnnotatedString) {
-            text = annotatedString
+            copied = annotatedString
         }
     }
 }

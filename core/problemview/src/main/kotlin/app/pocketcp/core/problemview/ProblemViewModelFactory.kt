@@ -22,7 +22,10 @@ class ProblemViewModelFactory
         private val settings: SettingsRepository,
         @ApplicationContext private val context: Context,
     ) {
-        fun create(problem: ProblemId): ProblemViewModel = ProblemViewModel(problem, statements, settings, ::openInBrowser)
+        fun create(problem: ProblemId): ProblemViewModel {
+            val openUrl: (String) -> Unit = ::openInBrowser
+            return ProblemViewModel(problem, statements, settings, openUrl)
+        }
 
         /** Opens [url] in the system browser (047 keeps Codeforces links in the app). */
         @Suppress("SwallowedException")

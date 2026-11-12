@@ -2,7 +2,7 @@
 id: 046
 title: Problem view in core/problemview with EN/RU, text size, reading width and cache-first states
 milestone: M3
-status: todo
+status: done
 deps: [043, 044]
 touches: [core/problemview/, settings.gradle.kts+, core/datastore/src/main/kotlin/app/pocketcp/core/datastore/TextSizeScale.kt, core/datastore/src/test/kotlin/app/pocketcp/core/datastore/TextSizeScaleTest.kt, core/datastore/API.md, app/src/main/kotlin/app/pocketcp/shell/AppearanceMapping.kt, app/src/main/kotlin/app/pocketcp/shell/PocketCpApp.kt, app/src/test/kotlin/app/pocketcp/shell/ShellThemeTest.kt, gradle/libs.versions.toml, docs/decisions/0012-feature-view-models.md]
 spec: ["7.4 Problem View", "3. Performance Budgets", "14. Offline", "5. Design & Layout"]
@@ -56,4 +56,8 @@ After this task there is one problem view that any feature can embed, as a page 
 - Bookmarks, notes and personal tags (M10), the Home "Continue" card (M4), and sample "send to editor" (M5).
 
 ## Notes for next
-<!-- builder fills in -->
+- Embed with `viewModel(key = id.display) { factory.create(id) }` then `ProblemPane(vm, onBack)`; `onBack = null` in a detail pane (see `core/problemview/API.md`).
+- `ProblemViewModel.state` uses `SharingStarted.Eagerly`, so the cached statement is the first state; it observes the Room row while the VM lives.
+- No app-level `LocalStatementImageLoader` is provided yet: statement images use Coil's default loader until someone wires `ProvideStatementImageLoader` with the shared client at the shell root.
+- `ShellThemeTest` does not import `scale`: its only use was the moved test, and an unused import fails ktlint.
+- `problemView_readingMenu_phone_dark` uses `captureScreenRoboImage` in its own class, because `captureSingle` does not capture popup windows.
