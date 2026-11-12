@@ -2,14 +2,25 @@ package app.pocketcp.core.data
 
 import app.pocketcp.core.database.ContestEntity
 import app.pocketcp.core.database.ProblemEntity
+import app.pocketcp.core.database.StatementEntity
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.Statement
+import kotlinx.serialization.json.Json
 import java.time.Duration
 import java.time.Instant
+
+/**
+ * The version of the JSON in `StatementEntity.document` (ADR 0017). Bump it when stored statements must be
+ * refetched (e.g. the parser got better); rows of another version read as missing.
+ */
+internal const val STATEMENT_FORMAT_VERSION = 1
+
+private val statementJson = Json
 
 /** Stored to the second, as the judge publishes it. */
 internal fun Contest.toEntity(): ContestEntity =
@@ -53,3 +64,26 @@ internal fun ProblemEntity.toDomain(): Problem =
         tags = tags,
         solvedCount = solvedCount,
     )
+
+/** Keyed by the statement's own problem and language, stamped with the current format version. */
+internal fun Statement.toEntity(fetchedAtEpochMillis: Long): StatementEntity =
+    StatementEntity(
+        contestId = problem.contestId,
+        index = problem.index,
+        language = language.key,
+        document = statementJson.encodeToString(Statement.serializer(), this),
+        formatVersion = STATEMENT_FORMAT_VERSION,
+        fetchedAtEpochMillis = fetchedAtEpochMillis,
+    )
+
+/** The stored statement, or null when it was written in another format version or can't be decoded. */
+@Suppress("SwallowedException")
+internal fun StatementEntity.toDomain(): Statement? {
+    if (formatVersion != STATEMENT_FORMAT_VERSION) return null
+    return try {
+        statementJson.decodeFromString(Statement.serializer(), document)
+    } catch (corrupt: IllegalArgumentException) {
+        // SerializationException is an IllegalArgumentException: a corrupt row reads as missing and is refetched.
+        null
+    }
+}

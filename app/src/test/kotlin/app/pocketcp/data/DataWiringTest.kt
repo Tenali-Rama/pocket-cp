@@ -2,6 +2,7 @@ package app.pocketcp.data
 
 import app.pocketcp.core.data.ContestRepository
 import app.pocketcp.core.data.ProblemRepository
+import app.pocketcp.core.data.StatementRepository
 import app.pocketcp.core.model.JudgeId
 import app.pocketcp.core.model.JudgeSource
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -38,6 +39,10 @@ class DataWiringTest {
 
     @Inject lateinit var sameProblems: ProblemRepository
 
+    @Inject lateinit var statements: StatementRepository
+
+    @Inject lateinit var sameStatements: StatementRepository
+
     @Before
     fun inject() = hilt.inject()
 
@@ -46,5 +51,6 @@ class DataWiringTest {
         assertEquals(JudgeId("codeforces"), source.judge)
         assertSame(contests, sameContests)
         assertSame(problems, sameProblems)
+        assertSame(statements, sameStatements)
     }
 }

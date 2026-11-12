@@ -1,8 +1,9 @@
 # core/data API
 
-Cache-first repositories (stale-while-revalidate, ADR 0011) for contests and the problemset, emitting `Cached<T>` from the Room cache and refreshing it through `JudgeSource`.
+Cache-first repositories (stale-while-revalidate, ADR 0011) for contests, the problemset and statements, emitting `Cached<T>` from the Room cache and refreshing it through `JudgeSource`.
 
-Package `app.pocketcp.core.data`. Hilt: `DataModule` provides `ContestRepository` and `ProblemRepository` as singletons, on the app's `JudgeSource` and `core/database` DAOs.
+Package `app.pocketcp.core.data`. Hilt: `DataModule` provides `ContestRepository`, `ProblemRepository` and `StatementRepository` as singletons, on the app's `JudgeSource` and `core/database` DAOs.
+Every repository is an interface with an `internal` implementation: other modules' tests fake the interface.
 Depends on `core/network` for `NetworkMonitor` only.
 
 ## `Cached<out T>(data: T?, fetchedAt: Instant?, refreshing: Boolean, error: JudgeError?)`
@@ -27,6 +28,14 @@ Depends on `core/network` for `NetworkMonitor` only.
 - `fun problemset(): Flow<Cached<List<Problem>>>`: newest contest first, then by index.
 - `suspend fun refresh(force: Boolean = false)`
 - `MAX_AGE`: 1 hour.
+
+## `StatementRepository`
+An interface (implementation `internal`); features and `core/problemview` test against a fake of it. Each problem and language is its own dataset: one Room row, with its own `fetchedAt`, status and single refresh.
+- `fun statement(problem: ProblemId, language: StatementLanguage): Flow<Cached<Statement>>`. A row stored in another format version (`STATEMENT_FORMAT_VERSION`, now 1) or that can't be decoded counts as missing: `data = null`, and it is refetched.
+- `suspend fun refresh(problem, language, force: Boolean = false)`
+- `fun prefetch(problems: List<ProblemId>, language)`: returns at once. In the app-lifetime scope it fetches, one at a time and in order, the problems without a current-format row (stale rows are kept as they are). Stops at the first `JudgeError.Offline`, skips other failures (each shows as that statement's `error`), joins a refresh already running for a problem, and never throws.
+- `fun pageUrl(problem, language): String`: `JudgeSource.problemUrl`, for the WebView fallback.
+- `MAX_AGE`: 7 days.
 
 ## `CacheWarmer` (`@Singleton`, `@Inject`)
 - `fun start()`: watches `NetworkMonitor.isOnline` in its own app-lifetime scope. On the first `true` and on every

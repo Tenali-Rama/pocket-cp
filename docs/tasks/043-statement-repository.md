@@ -2,7 +2,7 @@
 id: 043
 title: StatementRepository with stale-while-revalidate and contest prefetch
 milestone: M3
-status: todo
+status: done
 deps: [041, 042]
 touches: [core/data/src/main/kotlin/app/pocketcp/core/data/StatementRepository.kt, core/data/src/main/kotlin/app/pocketcp/core/data/CachedResource.kt, core/data/src/main/kotlin/app/pocketcp/core/data/Mappers.kt, core/data/src/main/kotlin/app/pocketcp/core/data/DataModule.kt, core/data/src/test/kotlin/app/pocketcp/core/data/StatementRepositoryTest.kt, core/data/src/test/kotlin/app/pocketcp/core/data/MappersTest.kt, core/data/src/test/kotlin/app/pocketcp/core/data/TestHarness.kt, core/data/build.gradle.kts, core/data/API.md, core/data/CLAUDE.md, app/src/test/kotlin/app/pocketcp/data/DataWiringTest.kt, gradle/libs.versions.toml, docs/decisions/0011-stale-while-revalidate.md]
 spec: ["3. Performance Budgets", "14. Offline", "7.4 Problem View"]
@@ -36,4 +36,8 @@ After this task features get statements cache first: `StatementRepository.statem
 - Any UI.
 
 ## Notes for next
-<!-- builder fills in -->
+- `CachedResource` now serves keyed rows: `CachedDataset.cached()` is `Flow<T?>` (null = missing row) and `refreshForError` reports how a refresh ended; contest/problemset code is untouched.
+- One `CachedResource` per `(problem, language)`, created lazily in a `ConcurrentHashMap` and kept for the app's life (a few small objects per statement viewed).
+- A row of another `formatVersion`, or whose JSON no longer decodes, reads as missing (`data = null`, `fetchedAt = null`) and is refetched; bump `STATEMENT_FORMAT_VERSION` in `Mappers.kt` to invalidate the cache.
+- `prefetch` skips problems with a current-format row even when stale (per the criteria); internal `launchPrefetch` returns the job for tests.
+- Prefetch has no caller yet: the contest screens (046/049) call it when a contest is opened.

@@ -1,13 +1,26 @@
 package app.pocketcp.core.data
 
 import app.pocketcp.core.database.ContestEntity
+import app.pocketcp.core.database.StatementEntity
 import app.pocketcp.core.model.Contest
 import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.ContestPhase
+import app.pocketcp.core.model.Inline
+import app.pocketcp.core.model.MaterialKind
+import app.pocketcp.core.model.MaterialLink
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.Sample
+import app.pocketcp.core.model.SectionKind
+import app.pocketcp.core.model.Statement
+import app.pocketcp.core.model.StatementBlock
+import app.pocketcp.core.model.StatementLanguage
+import app.pocketcp.core.model.StatementSection
+import app.pocketcp.core.model.TableCell
+import app.pocketcp.core.model.TableRow
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.time.Duration
 import java.time.Instant
@@ -61,5 +74,91 @@ class MappersTest {
         val unrated = Problem(ProblemId(4, "A"), "Watermelon", null, emptyList(), null)
 
         listOf(rated, unrated).forEach { assertEquals(it, it.toEntity().toDomain()) }
+    }
+
+    @Test
+    fun `a statement with every block and inline type round-trips through the entity`() {
+        val entity = everyType.toEntity(fetchedAtEpochMillis = 1_700_000_000_000L)
+
+        assertEquals(StatementEntity(1900, "B1", "ru", entity.document, 1, 1_700_000_000_000L), entity)
+        assertEquals(everyType, entity.toDomain())
+    }
+
+    @Test
+    fun `a statement of another format version, or a corrupt one, reads as missing`() {
+        val entity = everyType.toEntity(fetchedAtEpochMillis = 0L)
+
+        assertNull(entity.copy(formatVersion = STATEMENT_FORMAT_VERSION + 1).toDomain())
+        assertNull(entity.copy(formatVersion = 0).toDomain())
+        assertNull(entity.copy(document = "{\"title\":").toDomain())
+        assertNull(entity.copy(document = "{}").toDomain())
+    }
+
+    private companion object {
+        /** Every block and inline type, nested where the model allows it, with null and set optionals. */
+        val everyType =
+            Statement(
+                problem = ProblemId(1900, "B1"),
+                language = StatementLanguage.Ru,
+                title = "B1. Пример",
+                timeLimitMillis = 2_000,
+                memoryLimitMegabytes = 256,
+                inputFile = null,
+                outputFile = "output.txt",
+                sections =
+                    listOf(
+                        StatementSection(
+                            SectionKind.Legend,
+                            title = null,
+                            blocks =
+                                listOf(
+                                    StatementBlock.Paragraph(
+                                        listOf(
+                                            Inline.Text("Given "),
+                                            Inline.Math("n \\le 10^5"),
+                                            Inline.Text(" numbers", bold = true, italic = true, monospace = true),
+                                            Inline.LineBreak,
+                                            Inline.Link("see here", "https://codeforces.com/blog/entry/1"),
+                                        ),
+                                    ),
+                                    StatementBlock.DisplayMath("\\sum_{i=1}^{n} a_i"),
+                                    StatementBlock.Image("https://espresso.codeforces.com/a.png", "a tree"),
+                                    StatementBlock.Image("https://espresso.codeforces.com/b.png", null),
+                                ),
+                        ),
+                        StatementSection(
+                            SectionKind.Note,
+                            title = "Note",
+                            blocks =
+                                listOf(
+                                    StatementBlock.Table(
+                                        listOf(
+                                            TableRow(listOf(TableCell(listOf(Inline.Text("n")), header = true))),
+                                            TableRow(listOf(TableCell(listOf(Inline.Math("1")), header = false))),
+                                        ),
+                                    ),
+                                    StatementBlock.ListBlock(
+                                        ordered = true,
+                                        items =
+                                            listOf(
+                                                listOf(StatementBlock.Paragraph(listOf(Inline.Text("first")))),
+                                                listOf(
+                                                    StatementBlock.ListBlock(
+                                                        ordered = false,
+                                                        items = listOf(listOf(StatementBlock.Preformatted(" a\n b"))),
+                                                    ),
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    ),
+                samples = listOf(Sample(input = "3\n1 2 3\n", output = "6\n")),
+                materials =
+                    listOf(
+                        MaterialLink("Tutorial", "https://codeforces.com/blog/entry/2", MaterialKind.Tutorial),
+                        MaterialLink("Announcement", "https://codeforces.com/blog/entry/3", MaterialKind.Announcement),
+                    ),
+            )
     }
 }
