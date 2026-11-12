@@ -37,6 +37,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 
 /** The screen's wiring to [ProblemsetActions], over `problemset.problems.json`. */
 @RunWith(AndroidJUnit4::class)
@@ -241,12 +242,15 @@ class ProblemsetScreenTest {
     }
 
     @Test
+    @Config(qualifiers = "w700dp-h840dp")
     fun medium_highlightsTheShownRow_withoutABackArrow() = besideTheList(WindowWidthClass.Medium)
 
     @Test
+    @Config(qualifiers = "w1280dp-h800dp")
     fun expanded_highlightsTheShownRow_withoutABackArrow() = besideTheList(WindowWidthClass.Expanded)
 
     @Test
+    @Config(qualifiers = "w700dp-h840dp")
     fun wide_withNoneOpened_showsTheFirstProblem() {
         show(WindowWidthClass.Medium)
         rule.onNodeWithTag("problem_2276F").assertIsSelected()
