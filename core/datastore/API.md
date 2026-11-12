@@ -24,6 +24,8 @@ Package `app.pocketcp.core.datastore`. Hilt: `DataStoreModule` provides `Setting
 | `statementTextSize` | `TextSizePreference` (`statement_text_size`): the statement's text size (spec §7.4) | `Default` |
 | `statementWidth` | `StatementWidthPreference` (`statement_width`): `Narrow` (`narrow`), `Comfortable` (`comfortable`), `Full` (`full`); how wide statement text may run (spec §7.4) | `Comfortable` |
 
+`TextSizePreference.scale: Float` (`TextSizeScale.kt`): the factor a text size multiplies text styles by, on top of the system font scale: `Small` 0.9, `Default` 1, `Large` 1.15, `Largest` 1.3. One mapping for the app's UI and code text (app shell) and the statement (core/problemview).
+
 The enums (`ThemePreference`, `TextSizePreference`, `DensityPreference`, `StatementWidthPreference`) implement `StoredPreference` (`key: String`); the key in brackets is what is stored. `StatementLanguage` (core/model) does not: it is stored by its own `key`.
 
 ## Installed modules

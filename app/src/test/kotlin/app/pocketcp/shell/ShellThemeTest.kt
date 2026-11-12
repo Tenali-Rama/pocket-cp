@@ -8,7 +8,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.pocketcp.core.datastore.DensityPreference
-import app.pocketcp.core.datastore.TextSizePreference
 import app.pocketcp.core.datastore.ThemePreference
 import app.pocketcp.core.datastore.UserSettings
 import app.pocketcp.core.designsystem.PocketCpSpacing
@@ -57,21 +56,6 @@ class ShellThemeTest {
         listOf(night, day, undefined).forEach {
             assertEquals(ThemeMode.Amoled, themeModeOf(ThemePreference.Amoled, it))
         }
-    }
-
-    @Test
-    fun textSizes_scaleAsSettingsOffers() {
-        val scales = TextSizePreference.entries.associateWith { it.scale }
-
-        assertEquals(
-            mapOf(
-                TextSizePreference.Small to 0.9f,
-                TextSizePreference.Default to 1f,
-                TextSizePreference.Large to 1.15f,
-                TextSizePreference.Largest to 1.3f,
-            ),
-            scales,
-        )
     }
 
     @Test

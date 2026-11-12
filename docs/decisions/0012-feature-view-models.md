@@ -7,3 +7,4 @@
   - The view model takes its dependencies as constructor parameters, so tests build it with fakes directly.
   - Screens are stateless (`state`, callbacks) under a thin route composable, so screenshots never need a view model.
 - **Consequences**: No Hilt view-model factory or extra library. A view model that needs `SavedStateHandle` reads it from `CreationExtras` in the initializer (`createSavedStateHandle()`). Switching to `@HiltViewModel` later is a per-feature change.
+- **Addendum (046)**: A view model shared by several features (the problem view in `core/problemview`) comes with an `@Inject` factory, e.g. `ProblemViewModelFactory.create(problem)`. Features inject the factory and call `viewModel(key = problem.display) { factory.create(problem) }`, so adding a dependency to that view model never edits a feature.

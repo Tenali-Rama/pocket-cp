@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import app.pocketcp.core.adaptive.ProvideWindowLayout
 import app.pocketcp.core.datastore.UserSettings
+import app.pocketcp.core.datastore.scale
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.navigation.FeatureEntry
 import app.pocketcp.core.navigation.withoutDisabled
