@@ -10,6 +10,7 @@ import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
 import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.model.StatementLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -79,6 +80,7 @@ class ContestDetailViewModelTest {
     private val contestRepository = FakeContestRepository(cached(contests))
     private val problemRepository = FakeProblemRepository(cached(problemset))
     private val settingsRepository = FakeSettingsRepository()
+    private val statementRepository = FakeStatementRepository()
 
     @Test
     fun header_upcoming_countsDownToItsStart() = assertTiming(upcoming, ContestTiming.StartsIn(upcoming.start!!))
@@ -239,6 +241,96 @@ class ContestDetailViewModelTest {
             assertEquals(listOf(false, false, true), problemRepository.refreshes)
         }
 
+    @Test
+    fun showingAContest_prefetchesItsStatements_inTheStatementLanguage_onceEach() =
+        runTest {
+            val russian = UserSettings(statementLanguage = StatementLanguage.Ru)
+            settingsRepository.stored.value = russian
+            val viewModel = newViewModel()
+            assertTrue(statementRepository.prefetches.isEmpty())
+
+            viewModel.showByDefault(finished.id)
+            viewModel.open(finished.id) // same contest: no second prefetch
+            settingsRepository.stored.value = russian.copy(hideProblemTags = true) // not the language: no prefetch
+            viewModel.open(running.id)
+            val contest3 = listOf("3A", "3B", "3B1", "3C")
+            assertEquals(
+                listOf(contest3 to StatementLanguage.Ru, listOf("2A") to StatementLanguage.Ru),
+                statementRepository.prefetches.map { (ids, language) -> ids.map { it.display } to language },
+            )
+        }
+
+    @Test
+    fun aShownContestGainingProblems_prefetchesAgain_butARefreshWithTheSameOnesDoesNot() =
+        runTest {
+            newViewModel().open(finished.id)
+            problemRepository.cached.value = cached(problemset, refreshing = true)
+            assertEquals(1, statementRepository.prefetches.size)
+
+            problemRepository.cached.value = cached(problemset + problem(3, "D"))
+            assertEquals(
+                listOf("3A", "3B", "3B1", "3C", "3D"),
+                statementRepository.prefetches
+                    .last()
+                    .first
+                    .map { it.display },
+            )
+            assertEquals(2, statementRepository.prefetches.size)
+        }
+
+    @Test
+    fun aContestWithoutProblems_prefetchesNoStatements() =
+        runTest {
+            val viewModel = newViewModel()
+            viewModel.open(upcoming.id)
+            problemRepository.cached.value = cached(null, refreshing = true)
+            viewModel.open(finished.id)
+            assertTrue(statementRepository.prefetches.isEmpty())
+        }
+
+    @Test
+    fun openProblem_opensItsContestToo_closeProblemKeepsTheContest_andBothSurviveProcessDeath() =
+        runTest {
+            val handle = SavedStateHandle()
+            val viewModel = newViewModel(handle)
+            viewModel.openProblem(ProblemId(3, "B"))
+            viewModel.state.test {
+                val opened = awaitUntil { it.status == DetailStatus.Loaded }
+                assertEquals(finished.id, opened.selected)
+                assertEquals(ProblemId(3, "B"), opened.problem)
+            }
+            val restored = SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) })
+            val viewModel2 = newViewModel(restored)
+            assertEquals(ProblemId(3, "B"), viewModel2.state.value.problem)
+
+            viewModel2.closeProblem()
+            viewModel2.state.test {
+                val closed = awaitUntil { it.problem == null && it.status == DetailStatus.Loaded }
+                assertEquals(finished.id, closed.selected)
+            }
+        }
+
+    @Test
+    fun openingAnotherContest_closesTheProblem_andClosingTheContestDoesToo() =
+        runTest {
+            val viewModel = newViewModel()
+            viewModel.state.test {
+                viewModel.openProblem(ProblemId(3, "B"))
+                viewModel.open(finished.id) // its own contest: the problem stays open
+                assertEquals(ProblemId(3, "B"), awaitUntil { it.status == DetailStatus.Loaded }.problem)
+
+                viewModel.open(running.id)
+                val other = awaitUntil { it.contest?.id == running.id }
+                assertNull(other.problem)
+
+                viewModel.openProblem(ProblemId(2, "A"))
+                awaitUntil { it.problem == ProblemId(2, "A") }
+                viewModel.close()
+                val closed = awaitUntil { it.selected == null }
+                assertNull(closed.problem)
+            }
+        }
+
     private fun assertTiming(
         contest: Contest,
         expected: ContestTiming,
@@ -260,6 +352,7 @@ class ContestDetailViewModelTest {
     ) = ContestDetailViewModel(
         contestRepository,
         problemRepository,
+        statementRepository,
         settingsRepository,
         handle,
         clock,

@@ -7,7 +7,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Records the app's Baseline Profile: launch, then a walk through every tab. CI's perf job runs it
+ * Records the app's Baseline Profile: launch, a walk through every tab, then a statement (2274A, opened from
+ * Problemset) flung down and up, the jank-prone native LaTeX path. CI's perf job runs it
  * (`:app:generateBaselineProfile`) and uploads the result as the `baseline-profile` artifact; the committed copy is
  * `app/src/main/baseline-prof.txt`. Never generate it locally (ADR 0013).
  */
@@ -22,5 +23,8 @@ class BaselineProfileGenerator {
             pressHome()
             startActivityAndWait()
             walkTabs()
+            openTab("problemset")
+            openProblem("2274A")
+            flingStatement()
         }
 }

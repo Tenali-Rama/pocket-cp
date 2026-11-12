@@ -59,4 +59,4 @@ class ContestsScreenshotTest : ScreenshotTest() {
 private fun Screen(
     state: ContestsUiState,
     detail: ContestDetailUiState = ContestDetailUiState(),
-) = ContestsScreen(state, detail, FixtureNow, NoActions, NoDetailActions)
+) = ContestsScreen(state, detail, FixtureNow, NoActions, NoDetailActions, TestProblemPane)

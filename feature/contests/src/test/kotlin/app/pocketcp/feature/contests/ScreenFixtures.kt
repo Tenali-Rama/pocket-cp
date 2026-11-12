@@ -12,6 +12,7 @@ import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
+import app.pocketcp.core.model.ProblemId
 import app.pocketcp.core.screenshot.ThemeWrapper
 import app.pocketcp.core.ui.LocalClock
 
@@ -38,6 +39,10 @@ internal object NoDetailActions : ContestDetailActions {
     override fun close() = Unit
 
     override fun retryProblems() = Unit
+
+    override fun openProblem(id: ProblemId) = Unit
+
+    override fun closeProblem() = Unit
 }
 
 /** The fixture list (`contest.list.json`) at its recording time, under [filter]. */
@@ -55,7 +60,7 @@ internal fun listState(
 
 /**
  * The detail of fixture contest [id], opened by the user when [opened] (else the wide-window default), with
- * [problems] as the cached problemset (`null`: not cached yet).
+ * [problems] as the cached problemset (`null`: not cached yet) and its [problem] index opened (`null`: none).
  */
 internal fun detailState(
     id: Int,
@@ -64,8 +69,14 @@ internal fun detailState(
     problemsRefreshing: Boolean = false,
     problemsError: JudgeError? = null,
     settings: UserSettings = UserSettings(),
+    problem: String? = null,
 ) = contestDetailUiState(
-    selection = DetailSelection(opened = ContestId(id).takeIf { opened }, shown = ContestId(id)),
+    selection =
+        DetailSelection(
+            opened = ContestId(id).takeIf { opened },
+            shown = ContestId(id),
+            problem = problem?.let { ProblemId(id, it) },
+        ),
     contests = Cached(FixtureContests, FixtureNow, refreshing = false, error = null),
     problemset = Cached(problems, problems?.let { FixtureNow }, problemsRefreshing, problemsError),
     settings = settings,

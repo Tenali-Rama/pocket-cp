@@ -59,7 +59,8 @@ internal fun ContestDetailPage(
 
 /**
  * The detail of [state]'s shown contest: a header (name, division, type, phase and a countdown to [now] or its
- * date and length) above its problems, or the state of either part while it is missing.
+ * date and length) above its problems, or the state of either part while it is missing. A tapped problem opens;
+ * the opened one is highlighted.
  */
 @Composable
 internal fun ContestDetailPane(
@@ -118,13 +119,12 @@ private fun LazyListScope.problems(
                 }
             }
             items(state.problems, key = { it.id.display }, contentType = { "problem" }) { problem ->
-                // Opening a problem is M3.
                 ProblemRow(
                     problem = problem,
                     hideTags = state.hideTags,
                     hideRating = state.hideRatings,
-                    highlighted = false,
-                    onClick = {},
+                    highlighted = problem.id == state.problem,
+                    onClick = { actions.openProblem(problem.id) },
                 )
             }
         }

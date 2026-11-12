@@ -9,8 +9,8 @@ plugins {
 }
 
 // The only place the app version lives. app/CLAUDE.md says when it changes.
-val appVersionName = "0.2.0"
-val appVersionCode = 3
+val appVersionName = "0.3.0"
+val appVersionCode = 4
 
 // The two JudgeSource bindings (ADR 0015): live Codeforces for release only; recorded API responses and pages as
 // assets, for debug and the benchmark / Baseline Profile build types.

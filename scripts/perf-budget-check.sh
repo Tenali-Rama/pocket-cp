@@ -20,6 +20,7 @@ metrics=(
   'startup_cold_median_ms|.[] | select(.name == "startupCold") | .metrics.timeToInitialDisplayMs.median'
   'startup_warm_median_ms|.[] | select(.name == "startupWarm") | .metrics.timeToInitialDisplayMs.median'
   'frame_duration_p90_ms|.[] | select(.name == "tabWalk") | .sampledMetrics.frameDurationCpuMs.P90'
+  'statement_frame_p90_ms|.[] | select(.name == "statementScroll") | .sampledMetrics.frameDurationCpuMs.P90'
   'memory_max_kb|[.[] | select(.name | startswith("startup")) | .metrics.memoryRssAnonMaxKb.median // empty] | max'
 )
 
