@@ -29,8 +29,8 @@ private object NoProblemActions : ProblemActions {
 }
 
 /**
- * The problem view as the screen's slot, on a short hand-made statement of [id] (titled after its fixture problem):
- * `core/problemview`'s own screenshots cover the real statements, this only shows where the pane sits.
+ * The problem view as the screen's slot, on a short hand-made statement of [id], titled after its fixture problem
+ * if it has one: `core/problemview`'s own screenshots cover the real statements, this only shows where the pane sits.
  */
 internal val TestProblemPane: ProblemPaneSlot = { id, onBack, modifier ->
     val state = ProblemUiState(id, ProblemStatus.Loaded, testStatement(id))
@@ -40,7 +40,7 @@ internal val TestProblemPane: ProblemPaneSlot = { id, onBack, modifier ->
 private fun paragraph(vararg inlines: Inline) = StatementBlock.Paragraph(inlines.toList())
 
 private fun testStatement(id: ProblemId): Statement {
-    val name = FixtureProblems.find { it.id == id }?.name ?: id.display
+    val name = FixtureProblems.find { it.id == id }?.name ?: "Maximum Subarray"
     return Statement(
         problem = id,
         language = StatementLanguage.En,
