@@ -220,20 +220,14 @@ private fun InlineText(
     style: TextStyle = statementStyle(PocketCpTheme.typography.body, textScale),
 ) {
     val annotated = annotatedText(inlines, onOpenLink)
+    val mathRenderer = LocalMathRenderer.current
     val inlineContent =
         inlines
             .mapIndexedNotNull { index, inline ->
                 if (inline is Inline.Math) {
                     "math_$index" to
-                        InlineTextContent(
-                            placeholder =
-                                androidx.compose.ui.text.Placeholder(
-                                    width = style.fontSize * 2f,
-                                    height = style.lineHeight,
-                                    placeholderVerticalAlign = androidx.compose.ui.text.PlaceholderVerticalAlign.Center,
-                                ),
-                        ) {
-                            LocalMathRenderer.current.Inline(inline.tex, textScale)
+                        InlineTextContent(mathRenderer.inlinePlaceholder(inline.tex, textScale)) {
+                            mathRenderer.Inline(inline.tex, textScale)
                         }
                 } else {
                     null

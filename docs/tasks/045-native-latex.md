@@ -2,9 +2,9 @@
 id: 045
 title: Native LaTeX typesetting for statement math
 milestone: M3
-status: todo
+status: done
 deps: [044]
-touches: [core/statement/src/main/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/screenshots/, core/statement/build.gradle.kts, core/statement/API.md, core/statement/CLAUDE.md, app/proguard-rules.pro, gradle/libs.versions.toml, config/perf-budgets.json, docs/decisions/]
+touches: [core/statement/src/main/kotlin/app/pocketcp/core/statement/math/, core/statement/src/main/kotlin/app/pocketcp/core/statement/StatementContent.kt, core/statement/src/test/kotlin/app/pocketcp/core/statement/StatementMathScreenshotTest.kt, core/statement/src/test/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/screenshots/, core/statement/build.gradle.kts, core/statement/API.md, core/statement/CLAUDE.md, app/proguard-rules.pro, gradle/libs.versions.toml, config/perf-budgets.json, docs/decisions/]
 spec: ["7.4 Problem View", "3. Performance Budgets"]
 ---
 
@@ -40,4 +40,8 @@ Spec §7.4: "LaTeX, so math is never broken". After this task, statement math (`
 - Any change outside `core/statement`'s math package, besides the module's build file, docs and R8 rules. Math in blogs or editorials (M9).
 
 ## Notes for next
-<!-- builder fills in -->
+- Inline math reserves its measured size: `inlinePlaceholder` returns a `TextCenter` placeholder whose formula baseline lands on the text baseline; placeholder sp convert linearly (`density * fontScale`), as `PlaceholderSpan` does.
+- Scripts use TeX-like shifts (`TexScripts.kt`): superscript +0.4 em, subscript -0.2 em (-0.25 em with a superscript), plus however far a taller or deeper base exceeds a plain letter. Fraction bars sit on the math axis.
+- `matrix` has no delimiters; `pmatrix`/`bmatrix`/`cases` carry theirs via `MatrixStyle`, and `cases` left-aligns. `\sqrt[n]` typesets its index (`TexRadicals.kt`); `\mathbf` is serif bold.
+- `NativeTexTypesetter` is an `LruCache` of `MATH_CACHE_ENTRIES` (256) formulas. Display style (bigger `\sum`, full-size fractions) is still text style.
+- APK delta is 0 bytes until an app module depends on `core/statement` (ADR 0020); re-measure when the Problem screen lands.
