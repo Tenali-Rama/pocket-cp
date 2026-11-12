@@ -40,6 +40,7 @@ import coil.fetch.DrawableResult
 import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.request.Options
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -121,7 +122,17 @@ private fun FakeImageProvider(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalStatementImageLoader provides imageLoader, content = content)
 }
 
-private fun fakeImageLoader(context: Context): ImageLoader = ImageLoader.Builder(context).components { add(FakeFetcher.Factory()) }.build()
+/**
+ * Loads on the main thread, so Robolectric's idle wait covers the whole request. On Coil's default IO dispatcher the
+ * capture raced the fetch and sometimes caught the loading placeholder (main run 41750884344).
+ */
+private fun fakeImageLoader(context: Context): ImageLoader =
+    ImageLoader
+        .Builder(context)
+        .components { add(FakeFetcher.Factory()) }
+        .dispatcher(Dispatchers.Main.immediate)
+        .interceptorDispatcher(Dispatchers.Main.immediate)
+        .build()
 
 private class FakeFetcher(
     private val data: String,
