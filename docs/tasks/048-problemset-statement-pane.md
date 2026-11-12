@@ -2,7 +2,7 @@
 id: 048
 title: Problemset opens statements, list | statement on wide windows
 milestone: M3
-status: todo
+status: done
 deps: [046]
 touches: [feature/problemset/, .maestro/problemset.yaml]
 spec: ["7.3 Problemset", "7.4 Problem View", "5. Design & Layout"]
@@ -42,4 +42,8 @@ Problem rows in the Problemset tab finally open something. After this task, a ta
 - Random pick opening the statement, bookmark filters, and any change to `core/problemview`.
 
 ## Notes for next
-<!-- builder fills in -->
+- Wide windows always show list column | statement (44 : 56). The list column has the compact controls (search, Filters/Random, sort chips) on medium and expanded, so the expanded search pane and side filter panel are gone and the filters are always the sheet (the "owner may change" default). "Select a problem" fills the detail pane whenever nothing can be shown (empty list, loading, error).
+- `ProblemsetScreen` takes the statement as a `problemPane` slot (`ProblemPaneSlot`): the app passes `ProblemPane` on `viewModel(key = display) { factory.create(id) }`, tests pass `TestProblemPane` (a hand-made statement without images).
+- The selection tests live in `ProblemsetViewModelSelectionTest`, because `ProblemsetViewModelTest` was at 395 lines.
+- This is the first screen that puts `core/statement` and Coil into the app, so the release APK grew ~260 KB and `release_apk_bytes` in `config/perf-budgets.json` was raised (PR #71 has the numbers). Re-base it at the M3 close.
+- Random still only highlights its row, so on wide windows the shown row and the picked row can both be highlighted until random opens the statement.
