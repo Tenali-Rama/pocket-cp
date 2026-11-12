@@ -13,6 +13,7 @@ private const val FRACTION_FONT_SCALE = 0.78f
 private const val FRACTION_PADDING_RATIO = 0.18f
 private const val FRACTION_GAP_RATIO = 0.16f
 private const val RULE_THICKNESS_RATIO = 0.06f
+
 // TeX centres a fraction bar on the math axis, about a quarter of an em above the baseline.
 private const val MATH_AXIS_RATIO = 0.25f
 private const val RADICAL_FONT_SCALE = 1.12f
