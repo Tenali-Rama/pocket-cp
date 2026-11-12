@@ -47,8 +47,14 @@ class LiveCanaryTest {
     @Test
     fun `stable problem statements parse in English and Russian`() =
         runBlocking {
-            live.statement(ProblemId(1, "A"), StatementLanguage.En)
-            live.statement(ProblemId(1, "A"), StatementLanguage.Ru)
+            for (language in listOf(StatementLanguage.En, StatementLanguage.Ru)) {
+                val problem = ProblemId(1, "A")
+                val statement = live.statement(problem, language)
+                assertTrue(
+                    CanaryReport.pageBroken(live.problemUrl(problem, language), "no samples"),
+                    statement.samples.isNotEmpty(),
+                )
+            }
         }
 
     companion object {
