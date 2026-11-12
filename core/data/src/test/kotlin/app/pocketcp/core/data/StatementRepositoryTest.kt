@@ -116,10 +116,12 @@ class StatementRepositoryTest {
     fun `a statement stored in another format version is treated as missing and refetched`() =
         runTest {
             database.statementDao().upsert(statementA.toEntity(currentTime).copy(formatVersion = 0))
-            source.onStatement = { _, _ -> statementA }
+            val response = CompletableDeferred<Statement>()
+            source.onStatement = { _, _ -> response.await() }
 
             statements().statement(a, en).test(timeout = FLOW_TIMEOUT) {
                 assertEquals(Cached<Statement>(null, null, refreshing = true, error = null), awaitItem())
+                response.complete(statementA)
                 awaitMatching { it.data == statementA && !it.refreshing }
             }
             assertEquals(1, source.statementCalls)
