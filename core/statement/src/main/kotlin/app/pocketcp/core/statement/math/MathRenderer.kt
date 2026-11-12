@@ -15,8 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.Placeholder
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.statement.statementStyle
 import kotlin.math.max
@@ -24,7 +26,14 @@ import kotlin.math.max
 /** A native renderer for the TeX subset used by Codeforces statements. */
 @Immutable
 interface MathRenderer {
-    /** Renders TeX inside a line of statement text. */
+    /** The room [Inline] needs in a line of statement text, aligned so its baseline is the text baseline. */
+    @Composable
+    fun inlinePlaceholder(
+        tex: String,
+        textScale: Float,
+    ): Placeholder
+
+    /** Renders TeX inside the line-of-text room that [inlinePlaceholder] reserved. */
     @Composable
     fun Inline(
         tex: String,
@@ -44,21 +53,16 @@ val LocalMathRenderer = staticCompositionLocalOf<MathRenderer> { NativeMathRende
 
 private object NativeMathRenderer : MathRenderer {
     @Composable
+    override fun inlinePlaceholder(
+        tex: String,
+        textScale: Float,
+    ): Placeholder = rememberInlineMath(tex, textScale).placeholder()
+
+    @Composable
     override fun Inline(
         tex: String,
         textScale: Float,
-    ) {
-        val result = rememberTypeset(tex, textScale)
-        when (result) {
-            is TexRenderResult.Ready ->
-                MathCanvas(
-                    result.layout,
-                    PocketCpTheme.colors.onSurface.toArgb(),
-                    Modifier.fillMaxWidth().semantics { contentDescription = tex },
-                )
-            is TexRenderResult.Fallback -> SourceFallback(tex, textScale, Modifier.fillMaxWidth())
-        }
-    }
+    ) = InlineMathContent(rememberInlineMath(tex, textScale), tex)
 
     @Composable
     override fun Display(
@@ -84,11 +88,11 @@ private object NativeMathRenderer : MathRenderer {
 }
 
 @Composable
-private fun rememberTypeset(
+internal fun rememberTypeset(
     tex: String,
     textScale: Float,
 ): TexRenderResult {
-    val density = androidx.compose.ui.platform.LocalDensity.current
+    val density = LocalDensity.current
     val fontSize = with(density) { statementStyle(PocketCpTheme.typography.body, textScale).fontSize.toPx() }
     val color = PocketCpTheme.colors.onSurface.toArgb()
     return NativeTexTypesetter.typeset(tex, fontSize, color)
@@ -100,7 +104,7 @@ private fun MathCanvas(
     color: Int,
     modifier: Modifier,
 ) {
-    val density = androidx.compose.ui.platform.LocalDensity.current
+    val density = LocalDensity.current
     val width = with(density) { max(layout.width, 1f).toDp() }
     val height = with(density) { max(layout.height, 1f).toDp() }
     Canvas(modifier.requiredSize(width, height)) {
@@ -112,13 +116,12 @@ private fun MathCanvas(
 private fun SourceFallback(
     tex: String,
     textScale: Float,
-    modifier: Modifier = Modifier,
 ) {
     Text(
         text = tex,
         style = statementStyle(PocketCpTheme.typography.code, textScale),
         color = PocketCpTheme.colors.onSurface,
         softWrap = false,
-        modifier = modifier.semantics { contentDescription = tex },
+        modifier = Modifier.semantics { contentDescription = tex },
     )
 }

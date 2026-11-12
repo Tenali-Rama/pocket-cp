@@ -4,7 +4,7 @@ title: Native LaTeX typesetting for statement math
 milestone: M3
 status: done
 deps: [044]
-touches: [core/statement/src/main/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/screenshots/, core/statement/build.gradle.kts, core/statement/API.md, core/statement/CLAUDE.md, app/proguard-rules.pro, gradle/libs.versions.toml, config/perf-budgets.json, docs/decisions/]
+touches: [core/statement/src/main/kotlin/app/pocketcp/core/statement/math/, core/statement/src/main/kotlin/app/pocketcp/core/statement/StatementContent.kt, core/statement/src/test/kotlin/app/pocketcp/core/statement/StatementMathScreenshotTest.kt, core/statement/src/test/kotlin/app/pocketcp/core/statement/math/, core/statement/src/test/screenshots/, core/statement/build.gradle.kts, core/statement/API.md, core/statement/CLAUDE.md, app/proguard-rules.pro, gradle/libs.versions.toml, config/perf-budgets.json, docs/decisions/]
 spec: ["7.4 Problem View", "3. Performance Budgets"]
 ---
 

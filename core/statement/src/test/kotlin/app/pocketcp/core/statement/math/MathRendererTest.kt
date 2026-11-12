@@ -3,6 +3,8 @@ package app.pocketcp.core.statement.math
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.pocketcp.core.designsystem.PocketCpTheme
 import app.pocketcp.core.screenshot.SCREENSHOT_SDK
@@ -63,6 +65,41 @@ class MathRendererTest {
         NativeTexTypesetter.typeset(formula, 28f, 0xFFFFFFFF.toInt())
 
         assertEquals(1, NativeTexTypesetter.typesetCountForTests())
+    }
+
+    @Test
+    fun inlineMetricsPutTheFormulaBaselineOnTheTextBaseline() {
+        val textCenter = 5f
+        val metrics = InlineMathMetrics.of(width = 40.2f, ascent = 30f, descent = 12f, textCenter = textCenter)
+
+        // TextCenter alignment puts the placeholder's centre `textCenter` above the text baseline.
+        val textBaselineFromTop = metrics.height / 2 + textCenter
+        assertEquals(textBaselineFromTop, metrics.baseline, 0.001f)
+        assertTrue("ascent fits above", metrics.baseline >= 30f)
+        assertTrue("descent fits below", metrics.height - metrics.baseline >= 12f)
+        assertEquals(41f, metrics.width, 0.001f)
+    }
+
+    @Test
+    fun inlinePlaceholderIsSizedFromTheTypesetFormula() {
+        val placeholders = mutableMapOf<String, Placeholder>()
+        val letter = "x"
+        val sum = "x^2 + y^2 + z^2"
+        val fraction = "\\frac{n}{2}"
+        rule.setContent {
+            PocketCpTheme {
+                listOf(letter, sum, fraction).forEach {
+                    placeholders[it] = LocalMathRenderer.current.inlinePlaceholder(it, 1f)
+                }
+            }
+        }
+        rule.waitForIdle()
+
+        val short = placeholders.getValue(letter)
+        assertTrue("wider formula, wider room", placeholders.getValue(sum).width.value > short.width.value * 3)
+        val fractionHeight = placeholders.getValue(fraction).height.value
+        assertTrue("fraction is taller than a letter", fractionHeight > short.height.value)
+        assertEquals(PlaceholderVerticalAlign.TextCenter, short.placeholderVerticalAlign)
     }
 
     @Test

@@ -106,7 +106,9 @@ private fun mathStatement() =
                             listOf(
                                 Inline.Text("For every "),
                                 Inline.Math("x^2 + y^2"),
-                                Inline.Text(" the following identity holds."),
+                                Inline.Text(" the following identity holds, and "),
+                                Inline.Math("\\frac{n}{2}"),
+                                Inline.Text(" sits on the same baseline as the words around it."),
                             ),
                         ),
                         StatementBlock.DisplayMath(
