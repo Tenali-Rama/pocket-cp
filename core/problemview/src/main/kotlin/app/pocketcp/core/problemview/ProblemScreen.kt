@@ -1,6 +1,7 @@
 package app.pocketcp.core.problemview
 
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,14 +67,24 @@ fun ProblemScreen(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
+    val webPage = state.webPage
+    if (webPage != null) {
+        // Composed in place of the statement, so the statement's listState (and scroll) survives the page.
+        WebPage(webPage, webPageTitle(state.statement, webPage), actions, modifier)
+        return
+    }
     val scope = rememberCoroutineScope()
     val loaded = state.status == ProblemStatus.Loaded
+    val materials = state.statement?.materials.orEmpty()
     Column(modifier.onPreviewKeyEvent { event -> loaded && scrollByPage(event, listState, scope) }) {
         PcpTopAppBar(title = title(state.problem, state.statement), onNavigateBack = onBack) {
             LanguageToggle(state.language, actions::setLanguage)
+            if (loaded && materials.isNotEmpty()) MaterialsMenu(materials, actions::openLink)
             ReadingMenu(state.textSize, state.width, actions)
         }
-        ProblemContent(state, actions, listState, Modifier.weight(1f).fillMaxWidth().testTag(PROBLEM_VIEW_TAG))
+        Box(Modifier.weight(1f).fillMaxWidth().testTag(PROBLEM_VIEW_TAG)) {
+            ProblemContent(state, actions, listState, Modifier.fillMaxSize())
+        }
     }
 }
 
@@ -105,9 +116,11 @@ private fun ProblemContent(
             )
         }
         state.status == ProblemStatus.Error ->
-            ErrorState(errorMessage(state.error), actions::retry, modifier.fillMaxSize())
+            ErrorState(errorMessage(state.error), actions::retry, modifier)
+        state.status == ProblemStatus.Unparsable && state.pageUrl != null ->
+            StatementFallback(state.pageUrl, actions::openLink, modifier)
         state.status == ProblemStatus.Unparsable ->
-            ErrorState(stringResource(R.string.problemview_unparsable), actions::retry, modifier.fillMaxSize())
+            ErrorState(stringResource(R.string.problemview_unparsable), actions::retry, modifier)
         else -> LoadingPlaceholder(modifier)
     }
 }

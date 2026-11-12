@@ -2,7 +2,7 @@
 id: 047
 title: Codeforces-only WebView as the per-page statement fallback, and contest materials links
 milestone: M3
-status: todo
+status: done
 deps: [046]
 touches: [core/webview/, settings.gradle.kts+, core/problemview/src/main/, core/problemview/src/test/, core/problemview/build.gradle.kts, core/problemview/API.md, core/problemview/CLAUDE.md, gradle/libs.versions.toml, docs/decisions/]
 spec: ["18. Known Risks", "16. Non-Functional", "7.4 Problem View", "2. Product Principles"]
@@ -43,4 +43,12 @@ Spec §18: when the parser can't read a page, that page falls back to the WebVie
 - A Maestro step for the fallback: it would load live Codeforces in CI.
 
 ## Notes for next
-<!-- builder fills in -->
+- `core/webview` is the only WebView (ADR 0021). M4 login / fallback browser reuse `CodeforcesWebView`; add any extra
+  host to `CodeforcesUrlPolicy` + its test, never in a feature. Only navigations are filtered, not subresources.
+- A disallowed navigation inside a frame is cancelled silently; only main-frame ones reach `onExternalLink`.
+- `ProblemActions.openLink`: Codeforces URL → `ProblemUiState.webPage` (page over the statement, `BackHandler` +
+  arrow close it); other `http(s)` → system browser; other schemes (`intent:`, `javascript:`) are dropped.
+- The materials menu (`problem_materials`) sits in the top bar only when the statement is loaded and has materials;
+  the inline materials list at the statement's end (core/statement) routes through the same `openLink`.
+- Popup screenshots (`problemView_materials_*`) use one test per device with Robolectric qualifiers, like the
+  reading menu; `captureMatrix` can't see popups.

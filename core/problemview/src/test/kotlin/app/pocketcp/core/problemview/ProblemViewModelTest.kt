@@ -179,9 +179,51 @@ class ProblemViewModelTest {
         }
 
     @Test
-    fun openLink_goesToTheBrowser() {
-        viewModel().openLink("https://codeforces.com/blog/entry/1")
+    fun openLink_onCodeforces_opensTheWebPage_andCloseWebPageClosesIt() {
+        val viewModel = viewModel()
 
-        assertEquals(listOf("https://codeforces.com/blog/entry/1"), opened)
+        viewModel.openLink("https://codeforces.com/blog/entry/1")
+        assertEquals("https://codeforces.com/blog/entry/1", viewModel.state.value.webPage)
+        viewModel.openLink("https://m1.codeforces.com/contest/2274/problem/B")
+        assertEquals("https://m1.codeforces.com/contest/2274/problem/B", viewModel.state.value.webPage)
+
+        viewModel.closeWebPage()
+        assertNull(viewModel.state.value.webPage)
+        assertEquals(emptyList<String>(), opened)
     }
+
+    @Test
+    fun openLink_offCodeforces_goesToTheBrowser_withoutAWebPage() {
+        val viewModel = viewModel()
+
+        viewModel.openLink("https://en.wikipedia.org/wiki/Graph")
+        viewModel.openLink("http://codeforces.com/blog/entry/1")
+
+        assertEquals(listOf("https://en.wikipedia.org/wiki/Graph", "http://codeforces.com/blog/entry/1"), opened)
+        assertNull(viewModel.state.value.webPage)
+    }
+
+    @Test
+    fun openLink_toNonWebSchemes_isDropped() {
+        val viewModel = viewModel()
+
+        viewModel.openLink("javascript:alert(1)")
+        viewModel.openLink("intent://codeforces.com#Intent;scheme=https;end")
+        viewModel.openLink("file:///sdcard/a.html")
+
+        assertEquals(emptyList<String>(), opened)
+        assertNull(viewModel.state.value.webPage)
+    }
+
+    @Test
+    fun unparsable_carriesThePageUrlOfTheShownLanguage() =
+        runTest {
+            settings.stored.value = UserSettings(statementLanguage = StatementLanguage.Ru)
+            val viewModel = viewModel()
+            statements.row(Paco, StatementLanguage.Ru).value = cached(null, error = JudgeError.Malformed())
+
+            val state = viewModel.state.value
+            assertEquals(ProblemStatus.Unparsable, state.status)
+            assertEquals(statements.pageUrl(Paco, StatementLanguage.Ru), state.pageUrl)
+        }
 }

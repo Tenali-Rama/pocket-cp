@@ -20,4 +20,8 @@
     <string name="problemview_error_rate_limited">Codeforces is limiting requests. Try again in a moment.</string>
     <string name="problemview_error_unavailable">Codeforces is unavailable right now.</string>
     <string name="problemview_unparsable">Can\'t show this statement natively</string>
+    <!-- Over the Codeforces page shown in a WebView when the parser can't read the statement. -->
+    <string name="problemview_fallback_notice">Shown from Codeforces</string>
+    <string name="problemview_materials">Contest materials</string>
+    <string name="problemview_web_page_title">Codeforces</string>
 </resources>

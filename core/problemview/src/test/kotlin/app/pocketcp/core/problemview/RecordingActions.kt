@@ -28,7 +28,12 @@ class RecordingActions : ProblemActions {
         calls += url
     }
 
+    override fun closeWebPage() {
+        calls += CLOSE_WEB_PAGE
+    }
+
     companion object {
         const val RETRY = "retry"
+        const val CLOSE_WEB_PAGE = "closeWebPage"
     }
 }
