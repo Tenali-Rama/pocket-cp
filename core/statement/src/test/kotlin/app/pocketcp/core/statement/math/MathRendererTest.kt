@@ -2,6 +2,7 @@ package app.pocketcp.core.statement.math
 
 import android.content.res.Configuration
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -124,7 +125,7 @@ class MathRendererTest {
         var formulaPx = 0f
         rule.setContent {
             val context = LocalContext.current
-            val config = Configuration(context.resources.configuration).apply { fontScale = 1.5f }
+            val config = Configuration(LocalConfiguration.current).apply { fontScale = 1.5f }
             // Density(context) follows the platform's nonlinear font scaling, as the app's density does.
             CompositionLocalProvider(LocalDensity provides Density(context.createConfigurationContext(config))) {
                 PocketCpTheme {
