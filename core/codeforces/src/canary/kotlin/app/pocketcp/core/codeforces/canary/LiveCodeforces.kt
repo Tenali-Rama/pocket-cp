@@ -61,12 +61,18 @@ class LiveCodeforces(
         CanaryReport.checkPage(url, response, selector)?.let { throw AssertionError(it) }
     }
 
+    /** The statement page that [statement] fetches, for check failure messages. */
+    fun problemUrl(
+        problem: ProblemId,
+        language: StatementLanguage,
+    ): String = pages.problemUrl(problem, language)
+
     /** Fetches and parses one statement, reporting parser failures in the canary's issue-friendly format. */
     suspend fun statement(
         problem: ProblemId,
         language: StatementLanguage,
     ): Statement {
-        val url = pages.problemUrl(problem, language)
+        val url = problemUrl(problem, language)
         val html = page(url)
         return try {
             CodeforcesStatementParser.parse(html, problem, language)
