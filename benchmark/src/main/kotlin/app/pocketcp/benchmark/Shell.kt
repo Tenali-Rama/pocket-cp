@@ -1,5 +1,6 @@
 package app.pocketcp.benchmark
 
+import android.os.SystemClock
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
@@ -13,6 +14,8 @@ internal const val PACKAGE_NAME = "app.pocketcp"
 private val TAB_ROUTES = listOf("contests", "problemset", "profile", "settings", "home")
 
 private const val TIMEOUT_MS = 10_000L
+
+private const val POLL_MS = 100L
 
 /** `core/problemview`'s statement content (`PROBLEM_VIEW_TAG`). */
 private const val PROBLEM_VIEW = "problem_view"
@@ -43,10 +46,26 @@ internal fun MacrobenchmarkScope.openTab(route: String) {
 internal fun MacrobenchmarkScope.openProblem(display: String) {
     val tag = "problem_$display"
     find(tag).click()
-    val selected = device.wait(Until.hasObject(By.res(tag).selected(true)), TIMEOUT_MS / 2) == true
-    check(selected || !device.hasObject(By.res(tag))) { "$tag did not open" }
+    check(awaitOpened(tag)) { "$tag did not open" }
     find(PROBLEM_VIEW)
     device.waitForIdle()
+}
+
+/**
+ * Whether row [tag] opened within [TIMEOUT_MS]: gone (a phone's page covers it) or marked selected. Compose reports
+ * `selected` on a row without the Tab role as accessibility `checked`, so both count.
+ */
+private fun MacrobenchmarkScope.awaitOpened(tag: String): Boolean {
+    val deadline = SystemClock.uptimeMillis() + TIMEOUT_MS
+    while (SystemClock.uptimeMillis() < deadline) {
+        val opened =
+            !device.hasObject(By.res(tag)) ||
+                device.hasObject(By.res(tag).checked(true)) ||
+                device.hasObject(By.res(tag).selected(true))
+        if (opened) return true
+        SystemClock.sleep(POLL_MS)
+    }
+    return false
 }
 
 /** Back from a phone's statement page to the Problemset list; a tablet already shows the list beside it. */
