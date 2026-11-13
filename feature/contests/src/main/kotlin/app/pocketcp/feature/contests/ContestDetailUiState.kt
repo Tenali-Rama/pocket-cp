@@ -8,6 +8,7 @@ import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.ContestPhase
 import app.pocketcp.core.model.JudgeError
 import app.pocketcp.core.model.Problem
+import app.pocketcp.core.model.ProblemId
 import java.time.Duration
 import java.time.Instant
 
@@ -73,6 +74,8 @@ enum class ProblemsStatus {
  * The contest detail. [selected] is the contest the user opened (compact width shows its page); [shown] is the one
  * displayed, which on wide windows falls back to the list's first contest. [contest] is as of the state's now
  * (an upcoming contest whose start passed is running). [problemsError] is the problemset's last refresh failure.
+ * [problem] is the opened problem of [selected], whose statement is shown (a page on compact width, beside the
+ * detail on wider windows).
  */
 @Immutable
 data class ContestDetailUiState(
@@ -86,12 +89,17 @@ data class ContestDetailUiState(
     val problemsError: JudgeError? = null,
     val hideTags: Boolean = false,
     val hideRatings: Boolean = false,
+    val problem: ProblemId? = null,
 )
 
-/** The contest the user [opened] (or `null`), and the one [shown]: [opened], or else the wide-window default. */
+/**
+ * The contest the user [opened] (or `null`), the one [shown]: [opened], or else the wide-window default, and the
+ * opened contest's opened [problem].
+ */
 internal data class DetailSelection(
     val opened: ContestId?,
     val shown: ContestId?,
+    val problem: ProblemId? = null,
 )
 
 /**
@@ -109,6 +117,7 @@ internal fun contestDetailUiState(
         ContestDetailUiState(
             selected = selection.opened,
             shown = selection.shown,
+            problem = selection.problem,
             hideTags = settings.hideProblemTags,
             hideRatings = settings.hideProblemRatings,
         )

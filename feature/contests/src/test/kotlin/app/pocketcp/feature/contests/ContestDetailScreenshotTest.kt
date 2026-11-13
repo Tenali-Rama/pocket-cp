@@ -13,7 +13,8 @@ import org.junit.Test
  * page; wider: list | detail with its row highlighted). Phone dark variants: `contestDetail_upcoming` (2278: its
  * countdown and the not-yet-added message), `contestDetail_empty` (2272: finished, no problems),
  * `contestDetail_loading` (no problemset cached yet), `contestDetail_error` (no problemset, offline) and
- * `contestDetail_font150`.
+ * `contestDetail_font150`. `contestProblem_<device>_<theme>` and `contestProblem_font150_phone_dark`: its problem
+ * 2274A opened (phone: the statement page with a back arrow; wider: contest detail | statement, the list hidden).
  */
 class ContestDetailScreenshotTest : ScreenshotTest() {
     @Test
@@ -44,6 +45,19 @@ class ContestDetailScreenshotTest : ScreenshotTest() {
             Screen(detailState(WITH_PROBLEMS_ID))
         }
 
+    @Test
+    fun contestProblem() {
+        captureMatrix("contestProblem", themeWrapper = PocketCpThemeWrapper) {
+            Screen(detailState(WITH_PROBLEMS_ID, problem = "A"))
+        }
+    }
+
+    @Test
+    fun contestProblemLargeFont() =
+        captureSingle("contestProblem_font150", ScreenshotConfig(fontScale = 1.5f), PocketCpThemeWrapper) {
+            Screen(detailState(WITH_PROBLEMS_ID, problem = "A"))
+        }
+
     private fun phoneDark(
         name: String,
         detail: () -> ContestDetailUiState,
@@ -52,5 +66,5 @@ class ContestDetailScreenshotTest : ScreenshotTest() {
 
 @Composable
 private fun Screen(detail: ContestDetailUiState) {
-    ContestsScreen(listState(), detail, FixtureNow, NoActions, NoDetailActions)
+    ContestsScreen(listState(), detail, FixtureNow, NoActions, NoDetailActions, TestProblemPane)
 }

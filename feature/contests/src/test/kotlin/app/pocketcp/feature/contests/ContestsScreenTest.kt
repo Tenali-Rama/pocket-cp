@@ -32,6 +32,8 @@ import app.pocketcp.core.model.ContestDivision
 import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.ContestKind
 import app.pocketcp.core.model.JudgeError
+import app.pocketcp.core.model.ProblemId
+import app.pocketcp.core.problemview.PROBLEM_VIEW_TAG
 import app.pocketcp.core.ui.LocalClock
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -80,6 +82,14 @@ class ContestsScreenTest {
 
             override fun retryProblems() {
                 calls += "retry problems"
+            }
+
+            override fun openProblem(id: ProblemId) {
+                calls += "open problem ${id.display}"
+            }
+
+            override fun closeProblem() {
+                calls += "close problem"
             }
         }
 
@@ -183,6 +193,37 @@ class ContestsScreenTest {
         assertEquals(listOf("retry problems"), calls)
     }
 
+    @Test
+    fun problemRow_opensItsProblem() {
+        show(WindowWidthClass.Compact, detail = detailState(WITH_PROBLEMS_ID))
+        rule.onNodeWithTag("problem_${WITH_PROBLEMS_ID}A").performScrollTo().performClick()
+        assertEquals(listOf("open problem ${WITH_PROBLEMS_ID}A"), calls)
+    }
+
+    @Test
+    fun compactProblem_isAPage_whoseBackArrowAndBackCloseTheProblemOnly() {
+        show(WindowWidthClass.Compact, detail = detailState(WITH_PROBLEMS_ID, problem = "A"))
+        rule.onNodeWithTag(PROBLEM_VIEW_TAG).assertExists()
+        rule.onNodeWithTag(CONTEST_DETAIL_TAG).assertDoesNotExist()
+        rule.onNodeWithContentDescription("Navigate back").performClick()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        assertEquals(listOf("close problem", "close problem"), calls)
+    }
+
+    @Test
+    @Config(qualifiers = "w1280dp-h800dp")
+    fun wideProblem_isBesideTheContest_withoutTheList_andBackClosesIt() {
+        show(WindowWidthClass.Expanded, detail = detailState(WITH_PROBLEMS_ID, problem = "A"))
+        rule.onNodeWithTag(PROBLEM_VIEW_TAG).assertExists()
+        rule.onNodeWithTag(CONTEST_DETAIL_TAG).assertExists()
+        rule.onNodeWithTag("problem_${WITH_PROBLEMS_ID}A").assertIsSelected()
+        rule.onNodeWithTag("contest_$WITH_PROBLEMS_ID").assertDoesNotExist()
+        // Only the contest's page has a back arrow; the statement beside it has none.
+        rule.onNodeWithContentDescription("Navigate back").performClick()
+        rule.runOnUiThread { rule.activity.onBackPressedDispatcher.onBackPressed() }
+        assertEquals(listOf("close problem", "close problem"), calls)
+    }
+
     private fun show(
         width: WindowWidthClass,
         data: List<Contest>? = FixtureContests,
@@ -196,7 +237,7 @@ class ContestsScreenTest {
         rule.setContent {
             PocketCpTheme(ThemeMode.Dark) {
                 CompositionLocalProvider(LocalWindowLayout provides layout, LocalClock provides FixtureClock) {
-                    ContestsScreen(state, detail, FixtureNow, actions, detailActions)
+                    ContestsScreen(state, detail, FixtureNow, actions, detailActions, TestProblemPane)
                 }
             }
         }

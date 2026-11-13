@@ -1,6 +1,7 @@
 # Contests from the debug fixtures (ADR 0015, `testdata/codeforces/api/contest.list.json`): the upcoming
 # Div. 3 round 2278 counts down, and the Div. 2 chip hides it. Selects by test tag; the row's text is matched
-# as a regex, since a contest row merges its name, phase and time into one node. Then contest 2274 opens.
+# as a regex, since a contest row merges its name, phase and time into one node. Then contest 2274 opens, and
+# its problem 2274A.
 appId: app.pocketcp
 name: Contests list and filters
 ---
@@ -32,6 +33,17 @@ name: Contests list and filters
 - assertVisible:
     id: problem_2274A
 - takeScreenshot: contest_detail
+
+# Its problem opens the statement (a page on a phone; beside the contest, list hidden, on a tablet), and Back
+# returns to the contest on both.
+- tapOn:
+    id: problem_2274A
+- assertVisible:
+    id: problem_view
+- takeScreenshot: contest_problem
+- back
+- assertVisible:
+    id: contest_detail
 - runFlow:
     when:
       visible:

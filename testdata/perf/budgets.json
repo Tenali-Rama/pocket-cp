@@ -3,5 +3,6 @@
   "startup_cold_median_ms": 1000,
   "startup_warm_median_ms": 250,
   "frame_duration_p90_ms": 16,
+  "statement_frame_p90_ms": 16,
   "memory_max_kb": 60000
 }

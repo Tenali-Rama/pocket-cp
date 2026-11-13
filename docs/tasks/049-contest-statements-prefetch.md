@@ -2,7 +2,7 @@
 id: 049
 title: Contest problems open statements, contest statement prefetch, statement scroll benchmark, and release 0.3.0
 milestone: M3
-status: todo
+status: done
 deps: [038, 043, 045, 046, 047, 048]
 touches: [feature/contests/, .maestro/contests.yaml, app/build.gradle.kts, benchmark/src/main/kotlin/app/pocketcp/benchmark/StatementBenchmark.kt, benchmark/src/main/kotlin/app/pocketcp/benchmark/BaselineProfileGenerator.kt, benchmark/src/main/kotlin/app/pocketcp/benchmark/Shell.kt, benchmark/CLAUDE.md, scripts/perf-budget-check.sh, scripts/test-perf-budget-check.sh, testdata/perf/, config/perf-budgets.json, app/src/main/baseline-prof.txt, docs/decisions/0013-perf-budgets-on-ci-emulator.md]
 spec: ["7.2 Contests", "7.4 Problem View", "3. Performance Budgets", "14. Offline"]
@@ -45,4 +45,8 @@ A contest's problems now open their statements inside the Contests tab. Showing 
 - Editing `.github/workflows/`: the `perf` job already runs every test in `:benchmark`.
 
 ## Notes for next
-<!-- builder fills in -->
+- The opened problem is `KEY_PROBLEM` (its index) beside `KEY_SELECTED`; `openProblem` opens its contest first, so no state ever pairs an index with another contest.
+- Prefetch is keyed by (contest, problem ids, statement language): a language switch prefetches the other language too (default chosen; the criterion names only contest and problem set). The repository skips cached rows, so repeats are cheap.
+- Wide windows with a problem open: the contest page keeps its "Contest" top bar with a back arrow that closes the problem (the list is hidden, so the arrow is the visible way back on ChromeOS/DeX).
+- `StatementBenchmark` runs on the perf job's tablet emulator, so Problemset already shows a statement beside the list; `backToProblemList` only presses Back on phones.
+- `ContestDetailViewModel` has 7 constructor parameters: `@Suppress("LongParameterList")` with a reason.

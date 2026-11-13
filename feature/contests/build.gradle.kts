@@ -13,6 +13,8 @@ dependencies {
     implementation(project(":core:designsystem"))
     // Also brings navigation-compose, whose `api` includes lifecycle-viewmodel-compose (`viewModel { }`).
     implementation(project(":core:navigation"))
+    // A contest's problems open here: `ProblemViewModelFactory` and `ProblemPane`.
+    implementation(project(":core:problemview"))
     implementation(project(":core:ui"))
 
     testImplementation(libs.kotlinx.coroutines.test)

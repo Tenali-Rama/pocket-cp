@@ -105,6 +105,39 @@
       "warmupIterations": 0,
       "repeatIterations": 3,
       "thermalThrottleSleepSeconds": 0
+    },
+    {
+      "name": "statementScroll",
+      "params": {},
+      "className": "app.pocketcp.benchmark.StatementBenchmark",
+      "totalRunTimeNs": 38234567890,
+      "metrics": {
+        "frameCount": {
+          "minimum": 96.0,
+          "maximum": 104.0,
+          "median": 99.0,
+          "runs": [96.0, 99.0, 104.0]
+        }
+      },
+      "sampledMetrics": {
+        "frameDurationCpuMs": {
+          "P50": 7.4,
+          "P90": 12.36,
+          "P95": 16.9,
+          "P99": 25.3,
+          "runs": [[7.1, 7.4, 12.36], [7.6, 16.9, 25.3]]
+        },
+        "frameOverrunMs": {
+          "P50": -7.5,
+          "P90": -1.2,
+          "P95": 2.4,
+          "P99": 10.6,
+          "runs": [[-7.5, -1.2], [2.4, 10.6]]
+        }
+      },
+      "warmupIterations": 0,
+      "repeatIterations": 3,
+      "thermalThrottleSleepSeconds": 0
     }
   ]
 }

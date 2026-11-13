@@ -35,6 +35,7 @@ import app.pocketcp.core.designsystem.component.PcpSecondaryButton
 import app.pocketcp.core.designsystem.component.PcpTopAppBar
 import app.pocketcp.core.model.ContestId
 import app.pocketcp.core.model.JudgeError
+import app.pocketcp.core.model.ProblemId
 import app.pocketcp.core.ui.ContestRow
 import app.pocketcp.core.ui.RefreshErrorBanner
 import java.time.Instant
@@ -44,12 +45,24 @@ private const val FILTER_PANE_WEIGHT = 1f
 private const val LIST_PANE_WEIGHT = 2f
 private const val DETAIL_PANE_WEIGHT = 2f
 
+/** Shares of the width with a problem open on wide windows: contest 44 : statement 56, as in the Problemset. */
+private const val CONTEST_BESIDE_STATEMENT_WEIGHT = 0.44f
+private const val STATEMENT_PANE_WEIGHT = 0.56f
+
+/**
+ * The problem view for an id: `ProblemPane` on its own view model in the app, a fixed state in screenshots. The
+ * `onBack` argument shows a back arrow (the compact page); `null` beside the contest.
+ */
+internal typealias ProblemPaneSlot = @Composable (id: ProblemId, onBack: (() -> Unit)?, modifier: Modifier) -> Unit
+
 /**
  * Contests: a title bar with a refresh button, the filter chips and the list area for [state]'s status, plus the
  * [detail] of a contest. Compact width shows the opened contest as a page instead (back arrow and Back close it);
  * medium width shows chips above the list | detail; expanded shows filter pane | list | detail, with the shown
- * contest's row highlighted. Without a shown contest, wide windows show filter pane | list. [now] (from
- * `rememberNow()`) drives every countdown. Stateless, so screenshots pass a fixed state and time.
+ * contest's row highlighted. Without a shown contest, wide windows show filter pane | list. An opened problem
+ * ([ContestDetailUiState.problem], from [problemPane]) is a page on compact width and contest detail | statement
+ * on wider windows, the list hidden; Back closes it. [now] (from `rememberNow()`) drives every countdown.
+ * Stateless, so screenshots pass a fixed state and time.
  */
 @Composable
 internal fun ContestsScreen(
@@ -58,10 +71,16 @@ internal fun ContestsScreen(
     now: Instant,
     actions: ContestsActions,
     detailActions: ContestDetailActions,
+    problemPane: ProblemPaneSlot,
     modifier: Modifier = Modifier,
 ) {
     val screen = modifier.fillMaxSize().background(PocketCpTheme.colors.background)
     val width = LocalWindowLayout.current.widthClass
+    val problem = detail.problem
+    if (problem != null) {
+        OpenedProblem(problem, detail, now, detailActions, problemPane, screen)
+        return
+    }
     if (width == WindowWidthClass.Compact && detail.selected != null) {
         BackHandler(onBack = detailActions::close)
         ContestDetailPage(detail, now, detailActions, onNavigateBack = detailActions::close, modifier = screen)
@@ -84,6 +103,37 @@ internal fun ContestsScreen(
         } else {
             WidePanes(state, detail, now, actions, detailActions, Modifier.weight(1f))
         }
+    }
+}
+
+/**
+ * [problem] opened: its page with a back arrow on compact width; on wider windows the contest's page, whose back
+ * arrow closes the problem, beside the statement. Back closes the problem.
+ */
+@Composable
+private fun OpenedProblem(
+    problem: ProblemId,
+    detail: ContestDetailUiState,
+    now: Instant,
+    detailActions: ContestDetailActions,
+    problemPane: ProblemPaneSlot,
+    modifier: Modifier = Modifier,
+) {
+    BackHandler(onBack = detailActions::closeProblem)
+    if (LocalWindowLayout.current.widthClass == WindowWidthClass.Compact) {
+        problemPane(problem, detailActions::closeProblem, modifier)
+        return
+    }
+    Row(modifier) {
+        ContestDetailPage(
+            state = detail,
+            now = now,
+            actions = detailActions,
+            onNavigateBack = detailActions::closeProblem,
+            modifier = Modifier.weight(CONTEST_BESIDE_STATEMENT_WEIGHT).fillMaxHeight(),
+        )
+        PaneDivider()
+        problemPane(problem, null, Modifier.weight(STATEMENT_PANE_WEIGHT).fillMaxHeight())
     }
 }
 
