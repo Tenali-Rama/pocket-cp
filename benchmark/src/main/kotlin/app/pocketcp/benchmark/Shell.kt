@@ -36,9 +36,15 @@ internal fun MacrobenchmarkScope.openTab(route: String) {
     device.waitForIdle()
 }
 
-/** Taps Problemset's `problem_<display>` row and waits for the statement: a page on phones, beside the list else. */
+/**
+ * Taps Problemset's `problem_<display>` row and waits for its statement: a page on phones (the row is gone), beside
+ * the list on tablets (the row is selected; another problem's statement was already shown there).
+ */
 internal fun MacrobenchmarkScope.openProblem(display: String) {
-    find("problem_$display").click()
+    val tag = "problem_$display"
+    find(tag).click()
+    val selected = device.wait(Until.hasObject(By.res(tag).selected(true)), TIMEOUT_MS / 2) == true
+    check(selected || !device.hasObject(By.res(tag))) { "$tag did not open" }
     find(PROBLEM_VIEW)
     device.waitForIdle()
 }
@@ -49,15 +55,19 @@ internal fun MacrobenchmarkScope.backToProblemList(display: String) {
     find("problem_$display")
 }
 
-/** Flings the open statement down [downs] times, then up once. */
+/**
+ * Flings the open statement down [downs] times, then up once. Finds it again for each fling: a recomposition can
+ * replace its node, and a held [UiObject2] then goes stale.
+ */
 internal fun MacrobenchmarkScope.flingStatement(downs: Int = 3) {
+    repeat(downs) { flingStatementOnce(Direction.DOWN) }
+    flingStatementOnce(Direction.UP)
+}
+
+private fun MacrobenchmarkScope.flingStatementOnce(direction: Direction) {
     val statement = find(PROBLEM_VIEW)
     statement.setGestureMargin(device.displayWidth / GESTURE_MARGIN_DIVISOR)
-    repeat(downs) {
-        statement.fling(Direction.DOWN)
-        device.waitForIdle()
-    }
-    statement.fling(Direction.UP)
+    statement.fling(direction)
     device.waitForIdle()
 }
 
